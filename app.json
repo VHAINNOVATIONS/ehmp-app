@@ -1,0 +1,10 @@
+{
+  "title": "eHMP",
+  "artifact-name": "eHMP",
+  "description": "",
+  "hybrid": false,
+  "resourceDirectoryPath": "http://54.196.168.222:8888/resourcedirectory",
+  "adk-version": "1.0.0",
+  "numMovesBeforeSaveUDSConfig": 6,
+  "saveUDSConfigTimeout": 10000
+}

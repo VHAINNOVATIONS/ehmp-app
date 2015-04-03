@@ -1,0 +1,41 @@
+<!-- <div id="search-text-group" class="input-group">
+    <input type="text" id="searchtext" class="form-control" placeholder="Search Record" list="suggestList" autocomplete="off" focus="true" tabindex="0" />
+    <div class="input-group-btn">
+        <button id="submit" class="text-search-accessible btn btn-primary" title="Submit Search" tabindex="0">
+            <i class="fa fa-search" alt="Submit Search"></i>
+        </button>
+    </div>
+</div>
+<div id="suggestListDiv" class="col-sm-12-offset-0">
+    <span class="dropdown">
+        <div id="suggestSpinner" class="dropdown-menu" tabindex="-1">
+            <i class="fa fa-spinner fa-spin"></i>
+        </div>
+    </span>
+    <span id="suggestArea" class="dropdown">
+        <ul id="suggestList" class="dropdown-menu" role="menu" data-toggle="dropdown">
+
+        </ul>
+    </span>
+</div> -->
+
+<li id="suggestPanel" class="dropdown">
+    <div id="search-text-group" class="input-group">
+        <input type="text" id="searchtext" class="form-control" placeholder="Search Record" list="suggestList" autocomplete="off" focus="true" tabindex="0" title="Enter text to search." />
+        <div class="input-group-btn">
+            <button id="submit" class="text-search-accessible btn btn-primary" title="Submit Search" tabindex="0">
+                <i class="fa fa-search" alt="Submit Search"></i>
+            </button>
+        </div>
+    </div>
+    <div id="suggestListDiv" class="dropdown-menu" role="menu">
+        <span>
+            <div id="suggestSpinner" tabindex="-1">
+                <i class="fa fa-spinner fa-spin"></i>
+            </div>
+        </span>
+        <span id="suggestArea">
+            <ul id="suggestList"></ul>
+        </span>
+    </div>
+</li>

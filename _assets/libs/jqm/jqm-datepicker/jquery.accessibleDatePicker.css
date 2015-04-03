@@ -1,0 +1,140 @@
+.datetime-picker * {
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+
+.datetime-picker {
+    background: #333;
+    border-color: #111;
+    text-align: center;
+}
+
+.datetime-picker h1 {
+    color: #EEE;
+    display: none;
+    text-shadow: #000 0 1px 1px;
+    text-transform: uppercase;
+}
+
+.datetime-picker .day button:before {
+    content: attr(data-day);
+}
+
+.datetime-picker .columns {
+    background-color: rgba(255, 255, 255, 1);
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 45px 50px -20px rgba(51, 51, 51, .66), inset 0 -45px 50px -20px rgb(51, 51, 51);
+    margin: 5px 5px 0;
+    text-align:left;
+}
+
+/*.datetime-picker .columns:before {
+    background: #36F;
+    color: transparent;
+    text-shadow: 0 0 none;
+    line-height: 2.4em;
+    position: absolute;
+    opacity: .5;
+    top: 5em;
+    display: block;
+    content: ".";
+    left: 0;
+    right: 0;
+}*/
+
+.datetime-picker .row-highlight {
+    background: #36F;
+    color: transparent;
+    text-shadow: 0 0 none;
+    height: 2.4em;
+    position: absolute;
+    opacity: .5;
+    top: 5em;
+    display: block;
+    left: 0;
+    right: 0;
+}
+
+
+.datetime-picker ul::-webkit-scrollbar {
+    width: 0 !important
+}
+
+.datetime-picker ul.hidden {
+    display: none;
+}
+ 
+/* IE and Firefox do not include padding-bottom on scrollables */
+/* workaround via pseudo-element :after */
+.datetime-picker ul {
+    float: left;
+    display: block;
+    margin: 0;
+    /* padding: 4em 0; */
+    padding: 4em 0 0 0;
+    height: 10em;
+    width: 70px;
+    border-left: 2px solid #333;
+    border-right: 2px solid #333;
+    overflow-y: auto;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+    background-color: rgba(256, 256, 256, 0);
+    font-size: 20px;
+    list-style: none;
+}
+.datetime-picker ul:after {
+    content: "";
+    display: block;
+    height: 4em;
+    width: 100%;
+}
+
+.datetime-picker li {
+    list-style: none;
+    width: 100%;
+    background-color: rgba(256, 256, 256, 0);
+}
+
+.datetime-picker button {
+    clear: both;
+    border: 0 none;
+    -box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    color: #333;
+    cursor: pointer;
+    display: block;
+    font-size: inherit;
+    font-weight: bold;
+    line-height: 2em;
+    margin: 0;
+    text-decoration: none;
+}
+
+.datetime-picker li button {
+    background-color: transparent;
+    padding: 0;
+    width: 100%;
+}
+
+.datetime-picker li button:disabled {
+    color: #AAA;
+    cursor: default;
+}
+
+
+.datetime-picker .month button {
+    text-transform: uppercase;
+}
+
+/* jQM-styled Set button */
+.datetime-picker > div.ui-btn {
+    margin: 10px 5px;
+}
+
+.datetime-picker > div.ui-btn,
+.datetime-picker > button {
+    text-transform: uppercase;
+}

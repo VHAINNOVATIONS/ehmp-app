@@ -1,0 +1,19 @@
+.ui-accessible-autocomplete-wrapper.ui-scrollable-wrapper {
+  position: relative;
+}
+.ui-accessible-autocomplete-wrapper .ui-scrollable {
+  position: absolute;
+  margin: 16px 0 15px 0;
+  /* adjust accordingly for box-shadow */
+  /* padding: 0 -1px -2px -1px; */
+  width: 100%;
+  overflow-y: auto;
+  z-index: 3;
+}
+.ui-scrollable > .ui-accessible-autocomplete-inset,
+.ui-scrollable > .ui-accessible-autocomplete {
+  /* adjust accordingly for box-shadow */
+  /* margin: 0 1px 2px 1px; */
+  margin: 0;
+  border: none;
+}

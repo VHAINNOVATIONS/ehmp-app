@@ -1,0 +1,30 @@
+{{#if syncStatus}}
+<span tabindex="0" class="patient-status-icon" id="refresh-patient-data">
+    <i class="fa fa-refresh"></i>
+    <span>
+        Refresh Data
+    </span>
+</span>
+
+{{#each syncStatus}} {{#if completed}} {{#compare completed true}}
+<span tabindex="0" class="patient-status-icon" type="button" data-toggle="tooltip" data-html="true" data-placement="top" data-original-title="Status as of <br/> {{timeStamp}}">
+    <i class="text-success fa fa-circle"></i> {{title}}
+    <span class="sr-only">
+        synced as of {{timeStamp}}.
+    </span>
+</span>
+{{/compare}} {{#compare completed 'error'}}
+<span tabindex="0" class="bg-danger patient-status-icon" data-toggle="tooltip" data-placement="top" data-original-title="Sync Error">
+    <i class="fa fa-exclamation-triangle"></i> {{title}}
+    <span class="sr-only">sync error.</span>
+</span>
+{{/compare}} {{else}}
+<span tabindex="0" class="patient-status-icon loading-muted">
+    <i class="fa fa-circle"></i> {{title}}
+    <span class="sr-only">sync pending.</span>
+</span>
+{{/if}} {{/each}}
+<span tabindex="0" class="patient-status-icon" id="open-sync-modal" type="button" data-toggle="modal" data-target="#mainModal">
+    <i class="fa fa-calendar"></i>
+</span>
+{{/if}}

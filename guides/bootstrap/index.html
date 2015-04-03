@@ -1,0 +1,263 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="description" content="css style guide">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Bootstrap Style Guide</title>
+        
+        <link href="../../_assets/libs/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="../../_assets/libs/bootstrap/3.2.0/css/bootstrap-theme.min.css" rel="stylesheet" media="screen"><!--Bootstrap Scripts-->
+        <script src="../../_assets/libs/jquery/jquery-1.9.1.js"></script>
+        <script src="../../_assets/libs/bootstrap/3.2.0/js/bootstrap.min.js"></script><!-- Browser validation must happen first -->
+  
+        <link href="../../_assets/css/main.css" rel="stylesheet">
+        <link href="../../_assets/css/adk.css" rel="stylesheet">
+    </head>
+
+  <body role="document">
+    <header id="header" class="header">
+      <nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">eHMP Style Guide Documentation</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <form class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">Grid</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Components <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#">Typography</a></li>
+            <li><a href="#">Buttons</a></li>
+            <li><a href="#">Tables</a></li>
+          </ul>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Applets <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#">Allergies</a></li>
+            <li><a href="#">Medications Review</a></li>
+            <li><a href="#">Immunization</a></li>
+            <li><a href="#">Task Board</a></li>
+            <li><a href="#">Clinician Reminder</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+    </header><!-- /header -->
+    <div class="container" role="main">
+      <div class="page-header">
+        <h1 class="light-title">eHMP Style Guide Documentation</h1>
+      </div>
+      <!-- Grids -->
+      <div class="page-header">
+        <h1>Grids</h1>
+      </div>
+      <div class="row">
+        <p>
+          <div class="col-sm-2 show-grid">2</div>
+          <div class="col-sm-2 show-grid">2</div>
+          <div class="col-sm-2 show-grid">2</div>
+          <div class="col-sm-2 show-grid">2</div>
+          <div class="col-sm-2 show-grid">2</div>
+          <div class="col-sm-2 show-grid">2</div>
+        </p>
+      </div>
+      <div class="row">
+        <p>
+          <div class="col-sm-4 show-grid">4</div>
+          <div class="col-sm-2 show-grid">2</div>
+          <div class="col-sm-2 show-grid">2</div>
+          <div class="col-sm-2 show-grid">2</div>
+          <div class="col-sm-2 show-grid">2</div>
+        </p>
+      </div>
+      <div class="row">
+        <p>
+          <div class="col-sm-6 show-grid">6</div>
+          <div class="col-sm-2 show-grid">2</div>
+          <div class="col-sm-2 show-grid">2</div>
+          <div class="col-sm-2 show-grid">2</div>
+        </p>
+      </div>
+      <div class="row">
+        <p>
+          <div class="col-sm-8 show-grid">8</div>
+          <div class="col-sm-2 show-grid">2</div>
+          <div class="col-sm-2 show-grid">2</div>
+        </p>
+      </div>
+      <div class="row">
+        <p>
+          <div class="col-sm-10 show-grid">10</div>
+          <div class="col-sm-2 show-grid">2</div>
+        </p>
+      </div>
+      <div class="row">
+        <p>
+          <div class="col-sm-4 show-grid">4</div>
+          <div class="col-sm-4 show-grid">4</div>
+          <div class="col-sm-4 show-grid">4</div>
+        </p>
+      </div>
+      <div class="row">
+        <p>
+          <div class="col-sm-6 show-grid">6</div>
+          <div class="col-sm-6 show-grid">6</div>
+        </p>
+      </div>
+      <div class="row">
+        <p>
+          <div class="col-sm-12 show-grid">12</div>
+        </p>
+      </div>
+
+      <!-- Typography -->
+      <div class="page-header">
+        <h1>Typography</h1>
+      </div>
+      <div>
+        <h2 class="light-title">Font Stacks</h2>
+        <p>"HelveticaNeue", "Helvetica", Arial, sans-serif;</p>
+        <p>Georgia, Times, "Times New Roman", serif;</p>
+      </div>
+      <div>
+        <h2 class="light-title">Variations</h2>
+        <h1>Heading 1</h1>
+        <h2>Heading 2</h2>
+        <h3>Heading 3</h3>
+        <h4>Heading 4</h4>
+        <h5>Heading 5</h5>
+        <h6>Heading 6</h6>
+        <p>Paragraph Text</p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="page-header">
+        <h1>Buttons</h1>
+      </div>
+      <h2 class="light-title">Large</h2>
+      <button class="btn btn-lg btn-default" type="button">Default</button>
+      <button class="btn btn-lg btn-primary" type="button">Primary</button>
+      <button class="btn btn-lg btn-success" type="button">Success</button>
+      <button class="btn btn-lg btn-info" type="button">Info</button>
+      <button class="btn btn-lg btn-warning" type="button">Warning</button>
+      <button class="btn btn-lg btn-danger" type="button">Danger</button>
+      <button class="btn btn-lg btn-link" type="button">Link</button>
+      <h2 class="light-title">Normal</h2>
+      <button class="btn btn-default" type="button">Default</button>
+      <button class="btn btn-primary" type="button">Primary</button>
+      <button class="btn btn-success" type="button">Success</button>
+      <button class="btn btn-info" type="button">Info</button>
+      <button class="btn btn-warning" type="button">Warning</button>
+      <button class="btn btn-danger" type="button">Danger</button>
+      <button class="btn btn-link" type="button">Link</button>
+      <h2 class="light-title">Small</h2>
+      <button class="btn btn-sm btn-default" type="button">Default</button>
+      <button class="btn btn-sm btn-primary" type="button">Primary</button>
+      <button class="btn btn-sm btn-success" type="button">Success</button>
+      <button class="btn btn-sm btn-info" type="button">Info</button>
+      <button class="btn btn-sm btn-warning" type="button">Warning</button>
+      <button class="btn btn-sm btn-danger" type="button">Danger</button>
+      <button class="btn btn-sm btn-link" type="button">Link</button>
+      <h2 class="light-title">Extra Small</h2>
+      <button class="btn btn-xs btn-default" type="button">Default</button>
+      <button class="btn btn-xs btn-primary" type="button">Primary</button>
+      <button class="btn btn-xs btn-success" type="button">Success</button>
+      <button class="btn btn-xs btn-info" type="button">Info</button>
+      <button class="btn btn-xs btn-warning" type="button">Warning</button>
+      <button class="btn btn-xs btn-danger" type="button">Danger</button>
+      <button class="btn btn-xs btn-link" type="button">Link</button>
+
+      <!-- Tables -->
+      <div class="page-header">
+        <h1>Tables</h1>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Username</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Mark</td>
+                <td>Otto</td>
+                <td>@mdo</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Jacob</td>
+                <td>Thornton</td>
+                <td>@fat</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Larry</td>
+                <td>the Bird</td>
+                <td>@twitter</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-md-6">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Username</th>
+            </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Mark</td>
+                <td>Otto</td>
+                <td>@mdo</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Jacob</td>
+                <td>Thornton</td>
+                <td>@fat</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Larry</td>
+                <td>the Bird</td>
+                <td>@twitter</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

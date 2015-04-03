@@ -1,0 +1,31 @@
+{
+  "name": "backgrid-moment-cell",
+  "main": [
+    "backgrid-moment-cell.js",
+    "backgrid-moment-cell.css"
+  ],
+  "version": "0.3.5",
+  "description": "Backgrid.js datetime cell type formatted via moment.js.",
+  "homepage": "https://github.com/wyuenho/backgrid-moment-cell",
+  "authors": [
+    "Jimmy Yuen Ho Wong <wyuenho@gmail.com>"
+  ],
+  "keywords": [
+    "backbone",
+    "backgrid",
+    "moment"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "backgrid": "~0.3.0",
+    "moment": "~2.5.0",
+    "underscore": "~1.5.2"
+  }
+}

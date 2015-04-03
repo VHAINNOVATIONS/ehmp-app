@@ -1,0 +1,86 @@
+<div class="panel" id="panel--{{elKind}}" style="margin-bottom:auto;">
+<div id="panel--{{elKind}}--head"
+     class=" panel-heading noPadding collapsed"
+     data-parrent="#panel-encGist"
+     {{!--data-target="#subpanel--{{elKind}}"--}}
+     {{!--href="#subpanel--{{elKind}}"--}}
+
+     {{#unless empty}}
+        data-toggle="collapse"
+         {{/unless}}>
+    <div id="{{elKind}}" class="row noMargin equalHeights selectable encGist "> {{!-- {{#unless empty}} selectable {{/unless}}--}}
+    <div class="col-sm-5 text left-side info-display border-vertical {{#unless empty}} quickDraw {{/unless}}"> {{!--6--}}
+        {{#unless empty}}<span id="caret" arrowPosition="right" class="right-caret"></span>{{/unless}}
+        {{#if empty}}<span id="caret"  arrowPosition="none" class="empty-caret"></span>{{/if}}        
+        {{kind}}        
+        </div>
+        <div class="col-sm-9 {{#unless empty}} quickDraw {{/unless}} row equalHeights right-side info-display has-popover" id="button_{{elKind}}" {{!--9--}}
+                        {{#unless empty}}
+                        data-toggle="popover" 
+                        title="Recent {{kind}}"
+                        data-content="
+                            <table id='encounters_tooltip_{{elKind}}' class='table table-condensed'>
+                            <thead>
+                                <tr class='row'>
+                                    <th>Date</th><th>Service</th><th>CLN/WARD</th>                   
+                                </tr>
+                            </thead>
+                              <tbody>
+                       {{#if admission}}   
+                         {{#if recent}}
+                            {{#each recent}}
+                                <tr class='row'>
+                                    <td>{{showDate}}</td>
+                                    <td>{{service}}</td>
+                                    <td>{{facilityName}}</td>
+                                </tr>
+                            {{/each}}
+                        {{/if}}
+                      {{/if}}
+                       {{#if visit}}   
+                         {{#if recent}}
+                            {{#each recent}}
+                                <tr class='row'>
+                                    <td>{{showDate}}</td>
+                                    <td>{{stopCodeName}}</td>
+                                    <td>{{facilityName}}</td>
+                                </tr>
+                            {{/each}}
+                        {{/if}}
+                      {{/if}}      
+                    {{#if appointment}}   
+                         {{#if recent}}
+                            {{#each recent}}
+                                <tr class='row'>
+                                    <td>{{showDate}}</td>
+                                    <td>{{stopCodeName}}</td>
+                                    <td>{{facilityName}}</td>
+                                </tr>
+                            {{/each}}
+                        {{/if}}
+                      {{/if}}  
+                    {{#if procedure}}   
+                         {{#if recent}}
+                            {{#each recent}}
+                                <tr class='row'>
+                                    <td>{{showDate}}</td>
+                                    <td>{{service}}</td>
+                                    <td>{{facilityName}}</td>
+                                </tr>
+                            {{/each}}
+                        {{/if}}
+                      {{/if}}        
+                             </tbody>
+                            </table>"
+                {{/unless}}>
+            <div class="col-sm-2 text noPadding text-center">{{count}}</div>   {{!--2--}}
+            <div class="col-sm-5"><div id='encounter-chart-container-{{elKind}}' class="gChartMinEnc"></div></div> {{!--6--}}
+            <div class="col-sm-2  text  noPadding text-center">{{timeSinceLast}}</div>
+        </div>               
+  </div>
+</div>
+    <div id="subpanel--{{elKind}}" class="panel-collapse gistSubList  collapse " data-toggle="false" role="tabpanel">
+    </div>
+</div>    
+        {{!--<div class="col-sm-6 text border-vertical">{{kind}}&nbsp;<span class="label label-default">{{count}}</span></div>    border-vertical--}}
+

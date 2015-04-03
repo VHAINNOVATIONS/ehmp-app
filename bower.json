@@ -1,0 +1,47 @@
+{
+  "name": "ADK",
+  "version": "0.0.0",
+  "authors": [
+    "Alexander Luong <alexander.luong@asmr.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "backbone-sessionStorage": "git://gist.github.com/3875274.git",
+    "typeahead": "git://github.com/twitter/typeahead.js.git",
+    "lodash": "1.3.1",
+    "marionette": "2.4.1",
+    "jquery": "1.9.1",
+    "backbone.paginator": "2.0.0",
+    "jasmine": "1.3.1",
+    "async": "0.2.9",
+    "moment": "2.7.0",
+    "fastclick": "0.6.11",
+    "placeholders": "3.0.2",
+    "backgrid": "0.3.5",
+    "gridster": "git://github.com/Hokua/gridster.js.git#v0.5.8",
+    "backgrid-filter": "~0.3.5",
+    "backgrid-moment-cell": "~0.3.5",
+    "bootstrap": "3.2.0",
+    "bootstrap-timepicker": "~0.2.6",
+    "bootstrap-datepicker": "~1.3.1",
+    "font-awesome": "~4.2.0",
+    "backbone": "1.0.0",
+    "backbone-sorted-collection": "0.3.8",
+    "backbone.radio": "0.6.0",
+    "crossfilter": "~1.3.11",
+    "highstock-release": "~2.0.4"
+  },
+  "resolutions": {
+    "backbone": "1.0.0",
+    "jquery": "1.9.1",
+    "moment": "2.7.0",
+    "bootstrap": "3.2.0"
+  }
+}

@@ -1,0 +1,35 @@
+<span class="sr-only">{{description}}</span>
+<svg {{#if id}}id="{{id}}"{{/if}} class="gistTrendGraph" width="{{width}}" height="{{height}}">
+	<pattern id="textureHashed" class="textureHashed" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+		<rect x="0" y="0" width="4" height="4" />
+		<path d="M -1 1 l 2 -2 M 0 4 l 4 -4 M 3 5 l 2 -2" />
+	</pattern>
+{{#each ranges}}
+	<g class="range{{@index}}" {{#if this.low}}data-low="{{this.low}}" {{else}}{{#ifExp this.low '===' 0}}data-low="{{this.low}}" {{/ifExp}}{{/if}}{{#if this.high}}data-high="{{this.high}}" {{else}}{{#ifExp this.high '===' 0}}data-high="{{this.high}}" {{/ifExp}}{{/if}}>
+		<rect class="{{this.rangeClass}}" x="{{this.x}}" y="{{this.y}}" width="{{this.width}}" height="{{this.height}}" />
+	</g>
+{{/each}}
+	<g class="border0">
+		<rect class="outterBorder" x="{{border.x}}" y="{{border.y}}" height="{{border.height}}" width="{{border.width}}" />
+	</g>
+{{#if currentValue}}{{#if previousValue}}
+	<path class="trendLine" d="M {{previousValue.x}} {{previousValue.y}} l {{exp currentValue.x '-' previousValue.x}} {{exp currentValue.y '-' previousValue.y}}" fill="none" />
+{{/if}}{{/if}}
+{{#if currentValue}}
+	{{#if currentValue.isCritical}}
+	<g class="{{currentValue.class}}" data-value="{{currentValue.value}}" >
+		<polygon points="{{currentValue.x}},{{exp currentValue.y '-' currentValue.a}} {{exp currentValue.x '-' currentValue.b}},{{currentValue.y}} {{currentValue.x}},{{exp currentValue.y '+' currentValue.a}} {{exp currentValue.x '+' currentValue.b}},{{currentValue.y}}" />
+		<rect class="{{currentValue.class}}" x="{{exp currentValue.x '-' currentValue.b2}}" y="{{exp currentValue.y '-' currentValue.a2}}" width="{{exp currentValue.b2 '*' 2}}" height="{{exp currentValue.a2 '*' 2}}" />
+	</g>
+	{{else}}
+	<g class="{{currentValue.class}}" data-value="{{currentValue.value}}" >
+		<polygon points="{{currentValue.x}},{{exp currentValue.y '-' currentValue.a}} {{exp currentValue.x '-' currentValue.b}},{{currentValue.y}} {{currentValue.x}},{{exp currentValue.y '+' currentValue.a}} {{exp currentValue.x '+' currentValue.b}},{{currentValue.y}}" />
+	</g>
+    {{/if}}
+{{/if}}
+{{#if previousValue}}
+	<g class="previousValue" data-value="{{previousValue.value}}" >
+		<circle cx="{{previousValue.x}}" cy="{{previousValue.y}}" r="{{previousValue.r}}" />
+	</g>
+{{/if}}
+</svg>

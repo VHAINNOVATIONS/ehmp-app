@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Backgrid.js Extensions",
+    "groups": [
+      {
+        "name": "MomentCell",
+        "classes": [
+          "Backgrid.Extension.MomentFormatter",
+          "Backgrid.Extension.MomentCell"
+        ]
+      }
+    ]
+  }
+]

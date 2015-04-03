@@ -1,0 +1,63 @@
+<table id='{{uid}}' class='table table-condensed'>
+    <thead>
+        <tr class='row'>
+            <th>Name</th>
+            <th>Value</th>
+            <th>Ref. Range</th>
+            <th>Observed</th>
+        </tr>
+    </thead>
+    <tbody><tr class='row'>
+        {{#if vitalsTypeName}}
+            <td>{{vitalsTypeName}}</td>
+            {{else}}
+                {{#if typeName}}
+                <td>{{typeName}}</td>
+                {{else}}
+                <td>{{displayName}}</td>
+                {{/if}}
+        {{/if}}
+        {{#if resultUnitsMetricResultUnits}}
+            <td>{{resultUnitsMetricResultUnits}}</td>
+            {{else}}
+            <td>N/A</td>
+            {{/if}}
+        {{#ifExp this.low '===' 0}}
+            <td>{{low}} {{units}} {{#if high}} - {{high}} {{units}} {{/if}}</td>
+            {{else}}
+            {{#if low}}
+                <td>{{low}}{{units}} {{#if high}} - {{high}}{{units}} {{/if}}</td>
+                {{else}}
+                <td>N/A</td>
+            {{/if}}
+        {{/ifExp}}
+        {{#if observedFormatted}}
+            <td>{{observedFormatted}}</td>
+            {{else}}
+            <td>N/A</td>
+        {{/if}}
+    </tr>
+    {{#if isWT}}
+    <tr class='row'>
+        {{#if bmiTypeName}}
+            <td>{{bmiTypeName}}</td>
+            {{else}}
+            <td>{{bmiDisplayName}}</td>
+        {{/if}}
+        <td>
+        {{bmiValue}} {{bmiUnits}} {{#if bmiMetricUnits}} / {{bmiMetricUnits}} {{/if}}
+        </td>
+        {{#if bmiReferenceRange}}
+            <td>{{bmiReferenceRange}}</td>
+            {{else}}
+            <td>N/A</td>
+            {{/if}}
+        {{#if bmiObservedFormatted}}
+            <td>{{bmiObservedFormatted}}</td>
+            {{else}}
+            <td>N/A</td>
+        {{/if}}
+    </tr>
+    {{/if}}
+    </tbody>
+</table>

@@ -1,0 +1,39 @@
+<div id='event_{{id}}' class="row equalHeights noMargin gistItemInner">
+    <div tabindex="0" class='col-sm-6  quickDraw selectable border-vertical info-display noPadding'>
+        <div class="row equalHeights noMargin">
+            <div id='event_name_{{id}}' class="col-sm-8 problem-name">{{groupName}}
+                {{#if allGroupedComments}}
+                <sup><span id='comment_{{id}}' class="fa fa-comment"></span> </sup>
+                {{else}}
+                <sup><span id='transparent_{{id}}' class="fa fa-transparent-comment"></span></sup>
+                {{/if}}
+            </div>
+            <div id='acuity_{{id}}' class="eventsAcuity col-sm-4">{{acuityName}}</div>
+        </div>
+    </div>
+    <div class="col-sm-6 quickDraw selectable noPadding" id='quickDraw_{{id}}' data-toggle="popover" title="{{groupName}} {{acuityName}}" data-content="<table id='tooltip_{{id}}' class='table table-condensed' tabindex='0'>
+    <thead>
+        <tr class='row'>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Location</th>
+        </tr>
+    </thead>
+    <tbody>
+    {{#if allGroupedEncounters}}{{#each allGroupedEncounters}}
+    <tr class='row'>
+        <td>{{dateTime}}</td>
+        <td>{{problemText}}</td>
+        <td>{{stopCodeName}}</td>
+    </tr>
+    {{/each}}{{/if}}
+    </tbody>
+</table>" tabindex="0">
+        <div class="row noMargin equalHeights">
+            <div id="quickLook_{{id}}" class="quickviewOverlay right-side"></div>
+            <div id='encounter_count_{{id}}' class="eventsCount col-sm-2 counter2 text-center">{{encounterCount}}</div>
+            <div id="chartArea" class="col-sm-8 chart text-center" ><div class="gChartMin" id='graph_{{id}}'></div></div>
+            <div id='time_since_{{id}}' class="eventsTimeSince col-sm-2 counter2 text-center">{{timeSince}}</div>
+        </div>
+    </div>
+</div>
