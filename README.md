@@ -30,4 +30,4 @@ Directory Structure
 License
 =========
 
-The libraries included in this repo are licensed for redistribution. The included HighCharts libraries is not free, but is redistributed under the terms of its [non-commercial license](http://shop.highsoft.com/faq/non-commercial#non-commercial-redistribution).
+The libraries included in this repo are licensed for redistribution. The included HighCharts libraries are not free, but is redistributed under the terms of its [non-commercial license](http://shop.highsoft.com/faq/non-commercial#non-commercial-redistribution).
