@@ -1,0 +1,1 @@
+define(["handlebars","moment"],function(t,r){"use strict";var n={formatRelativeTime:function(t){if(t){var n=r(t,"YYYYMMDDHHmmss").calendar(),e=n.match(/AM|PM$/);if(e&&1===e.length){var m=n.substring(n.length-8).trim();m=r(m,"h:mm a").format("HH:mm"),n=n.substring(0,n.length-8)+" "+m}return n}return""}};return n});

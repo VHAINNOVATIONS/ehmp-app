@@ -11,11 +11,13 @@
     </ul>
 
     {{#hasPermission 'add-patient-med'}}
-    <ul class="nav nav-pills" id="medAdd">
-        <li id="med-add-btn" role="presentation">
-            <a class="toggleViewBtn" id='add-non-va-med-btn' href="#" role="button">Add Non-VA Med</a>
-        </li>
-    </ul>
+        {{#if inVista}}
+        <ul class="nav nav-pills" id="medAdd">
+            <li id="med-add-btn" role="presentation">
+                <a class="toggleViewBtn" id='add-non-va-med-btn' href="#" role="button">Add Non-VA Med</a>
+            </li>
+        </ul>
+        {{/if}}
     {{/hasPermission}}
 </div>
 

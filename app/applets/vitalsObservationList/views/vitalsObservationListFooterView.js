@@ -1,16 +1,1 @@
-var dependencies = [
-    'underscore',
-    'main/ADK',
-    'hbs!app/applets/vitalsObservationList/templates/vitalsObservationListFooterTemplate'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(_, ADK, vitalsObservationListFooterTemplate) {
-
-    var vitalsObservationListFooterView = Backbone.Marionette.ItemView.extend({
-        'template': vitalsObservationListFooterTemplate
-    });
-
-    return vitalsObservationListFooterView;
-}
+define(["underscore","hbs!app/applets/vitalsObservationList/templates/vitalsObservationListFooterTemplate"],function(e,t){var a=Backbone.Marionette.ItemView.extend({template:t});return a});

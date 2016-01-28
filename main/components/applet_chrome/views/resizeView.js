@@ -1,13 +1,11 @@
-var dependencies = [
+define('main/components/applet_chrome/views/resizeView', [
+    'backbone',
+    'marionette',
     'jquery',
     'underscore',
     'hbs!main/components/applet_chrome/templates/maximizeTemplate',
-    'hbs!main/components/applet_chrome/templates/minimizeTemplate',
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, _, maximizeTemplate, minimizeTemplate) {
+    'hbs!main/components/applet_chrome/templates/minimizeTemplate'
+], function(Backbone, Marionette, $, _, maximizeTemplate, minimizeTemplate) {
     'use strict';
     var ResizeView = Backbone.Marionette.ItemView.extend({
         tagName: 'span',
@@ -22,4 +20,4 @@ function onResolveDependencies($, _, maximizeTemplate, minimizeTemplate) {
         }
     });
     return ResizeView;
-}
+});

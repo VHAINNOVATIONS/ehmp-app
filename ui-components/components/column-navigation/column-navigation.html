@@ -1,0 +1,498 @@
+<h3>Column Navigation</h3>
+<div class="description">
+    <p><strong><i class="fa fa-leanpub"></i> Description:</strong> The column navigation is a navigation menu that renders in columns, whenever you click on a selecttion it either performs an action or expands a new column with children elements.</p>
+    <p><strong><i class="fa fa-wheelchair"></i> 508 Guidelines:</strong> Just tab through the menu as regular buttons or use your arrow keys to navigate trhought the menu.</p>
+</div>
+<div class="nav-list" role="application" title="This is a column navigation. Press enter to start browsing the options. Use your arrow keys to navigate through them and press enter, spacebar or the right arrow to make a selection. To exit navigation press The escape key."></div>
+</div>
+<div role="tabpanel" class="tabpanel">
+    <ul role="tablist" class="nav nav-tabs">
+        <li role="presentation" class="active"><a href="#columnNavigationHtml" aria-controls="columnNavigationHtml" role="tab" data-toggle="tab">HTML code</a></li>
+        <li role="presentation"><a href="#columnNavigationJs" aria-controls="columnNavigationJs" role="tab" data-toggle="tab">JavaScript Code</a></li>
+    </ul>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="columnNavigationHtml">
+            <pre>
+&lt;div class=&quot;nav-list&quot; role=&quot;application&quot; title=&quot;This is a column navigation. Press enter to start browsing the options. Use your arrow keys to navigate through them and press enter, spacebar or the right arrow to make a selection. To exit navigation press The escape key.&quot;&gt;&lt;/div&gt;
+            </pre>
+            <a onclick="copyToClipboard('external-link-copy')" role="button" tabindex="0" class="btn btn-default" data-trigger="focus" data-toggle="popover" data-placement="top" data-content="Copied" data-template='<div class="popover popover-sm" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'>Copy</a>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="columnNavigationJs">
+            <pre>
+&lt;div class=&quot;nav-list&quot; role=&quot;application&quot; title=&quot;This is a column navigation. Press enter to start browsing the options. Use your arrow keys to navigate through them and press enter, spacebar or the right arrow to make a selection. To exit navigation press The escape key.&quot;&gt;&lt;/div&gt;&lt;script type=&quot;text/javascript&quot;&gt;
+$.makeId = function() {
+    var
+        text = &quot;&quot;,
+        possible = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&quot;;
+
+    for (var i = 0; i &lt; 5; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+};
+$.fn.navlist = function(a) {
+    var
+        args = $.extend({
+            items: [], // an object that contains the items of the nav.
+            growFunction: function() {}, // gets triggered when the nav expands to a new column
+            shrinkFunction: function() {}, // gets triggered when the nav shrinks to the previous column,
+            width: null,
+            height: null
+        }, a),
+        deployEventListener = function(f) {
+            // we bind this only once to the document to prevent multiple binding of the same event over and over.
+            // We re-bind only if necessary within the same function
+            // we also provide a namespace with the id of the list to overwrite the same eventlisterner if fired more than once
+            // just once--V
+            $(document).one(&#39;keydown.navlist&#39;, function(e) {
+                var el;
+                switch (e.which) {
+                    case 37: // left
+                        var theUl = f.parent().prev();
+                        removeHigherLevels(theUl);
+                        el = theUl.find(&#39;.selected&#39;);
+                        clearSelected(el);
+                        break;
+                    case 38: // up
+                        el = f.prev().not(&#39;.nav-list-heading&#39;);
+                        break;
+                    case 13:
+                    case 32:
+                    case 39: // right
+                        f.trigger(&#39;click&#39;);
+                        el = f.parent().next().children(&#39;li.nav-list-action:first&#39;);
+                        break;
+                    case 40: // down
+                        el = f.next();
+                        break;
+                    case 27: //esc
+                        el = f.parent().parent();
+                        el.find(&#39;li&#39;).removeAttr(&#39;tabindex&#39;);
+                        break;
+                    default:
+                        return; // exit this handler for other keys
+                }
+                if (el.length) {
+                    el.focus();
+                } else {
+                    deployEventListener(f);
+                }
+                e.preventDefault(); // prevent the default action (scroll / move caret)
+
+            });
+        },
+        removeEventListener = function() {
+            $(document).off(&#39;keydown.navlist&#39;);
+        },
+        removeHigherLevels = function(myUl) {
+            // get the index of my ul and remove thos that are after it
+            var ulIndex = myUl.index();
+            myUl.parent().children(&#39;:gt(&#39; + ulIndex + &#39;)&#39;).remove();
+            if (typeof(args.shrinkFunction) == &#39;function&#39;) args.shrinkFunction();
+        },
+        clearSelected = function(b) {
+            b.parent().find(&#39;.selected&#39;).removeClass(&#39;selected&#39;);
+        },
+        openList = function(b) {
+            b.addClass(&#39;selected&#39;);
+            var bid = b.attr(&#39;id&#39;);
+            var myUl = b.closest(&#39;ul&#39;);
+            removeHigherLevels(myUl);
+            if ($(&#39;#navlist-&#39; + bid).length === 0) {
+                var nuUl = genItemsHtml(b.data(&#39;children&#39;), bid);
+                myUl.after(nuUl);
+            }
+        },
+        createButton = function(ob, ind, heading) {
+            var buttonLabel = (heading ? &#39;&lt;p class=&quot;sr-only&quot;&gt;&#39; + heading + &#39;&lt;/p&gt;&#39; : &#39;&#39;) + ob.label;
+            var button = $(document.createElement(&#39;li&#39;)).attr({
+                &#39;class&#39;: &#39;nav-list-action&#39;,
+                &#39;data-item-id&#39;: ind,
+                &#39;id&#39;: $.makeId(),
+                &#39;tabindex&#39;:&#39;-1&#39;
+            }).html(buttonLabel).focus(function() {
+                deployEventListener($(this));
+            }).blur(function() {
+                removeEventListener();
+            });
+            if (typeof(ob.childList) != &#39;undefined&#39;) {
+                button.addClass(&#39;has-children&#39;).data(&#39;children&#39;, ob.childList).click(function() {
+                    clearSelected($(this));
+                    openList($(this));
+                    if (typeof(args.growFunction) == &#39;function&#39;) args.growFunction();
+                }).html(buttonLabel + &#39;&lt;span class=&quot;sr-only&quot;&gt; Press enter, spacebar, or the right arrow key to expand the sub menu.&lt;/span&gt;&#39;);
+            } else {
+                button.click(function() {
+                    var t = $(this);
+                    var ul = t.closest(&#39;ul&#39;);
+                    clearSelected($(this));
+                    removeHigherLevels(ul);
+                    if ((typeof(ob.action) == &#39;function&#39;) &amp;&amp; (ob.action)) {
+                        ob.action();
+                    }
+                });
+            }
+            return button;
+        },
+        genItemsHtml = function(itemsObj, parentId) {
+            var ul = $(document.createElement(&#39;ul&#39;)).attr(&#39;id&#39;, &#39;navlist-&#39; + parentId).addClass(&#39;list-block pull-left&#39;);
+            var heading = (((typeof(itemsObj.heading) !== &#39;undefined&#39;) &amp;&amp; itemsObj.heading) ? itemsObj.heading : null);
+            if (args.width) {
+                ul.width(args.width);
+            }
+            if (heading) ul.append(&#39;&lt;li aria-hidden=&quot;true&quot; class=&quot;nav-list-heading&quot;&gt;&#39; + itemsObj.heading + &#39;&lt;/li&gt;&#39;);
+            for (var i = 0; i &lt; itemsObj.items.length; i++) {
+                var li = createButton(itemsObj.items[i], i, heading);
+                ul.append(li);
+            }
+            return ul;
+        };
+    return this.each(function() {
+        var t = $(this);
+        if (args.height) t.height(args.height);
+
+        var enterNavEl = function() {
+            $(document).one(&#39;keydown.activateColumnNav&#39;, function(e) {
+                switch (e.which) {
+                    case 39: //right
+                    case 40: // down
+                        t.next().focus();
+                        break;
+                    case 37:
+                    case 38:
+                        t.prev().focus();
+                        break;
+                    case 13:
+                        // make elements navigable
+                        t.find(&#39;li.nav-list-action&#39;).attr(&#39;tabindex&#39;, &#39;0&#39;);
+                        t.find(&#39;.nav-list-action:first&#39;).focus();
+                        break;
+                    default:
+                        //re-add event listnener
+                        enterNavEl();
+                        return;
+                }
+                e.preventDefault(); // prevent the default action (scroll / move caret)
+            });
+        };
+        var escaper = &#39;&lt;span tabindex=&quot;-1&quot;&gt;&lt;/span&gt;&#39;;
+        t.attr({
+            &#39;tabindex&#39;:&#39;0&#39;
+        }).focus(function() {
+            enterNavEl();
+        }).blur(function() {
+            $(document).off(&#39;keypress.activateColumnNav&#39;);
+        }).append(genItemsHtml(args.items, $.makeId())).after(escaper).before(escaper);
+    });
+};
+$(document).ready(function() {
+
+    var list = {
+        &#39;heading&#39;: &#39;Column 1&#39;,
+        &#39;items&#39;: [{
+            &#39;label&#39;: &#39;one&#39;,
+            &#39;childList&#39;: {
+                &#39;heading&#39;: &#39;one children&#39;,
+                &#39;items&#39;: [{
+                    &#39;label&#39;: &#39;one.one&#39;
+                }, {
+                    &#39;label&#39;: &#39;one.two&#39;,
+                    &#39;childList&#39;: {
+                        &#39;heading&#39;: &#39;one.two children&#39;,
+                        &#39;items&#39;: [{
+                            &#39;label&#39;: &#39;one.two.one&#39;
+                        }, {
+                            &#39;label&#39;: &#39;one.two.two&#39;
+                        }, {
+                            &#39;label&#39;: &#39;one.two.three&#39;
+                        }, {
+                            &#39;label&#39;: &#39;one.two.four&#39;
+                        }, {
+                            &#39;label&#39;: &#39;one.two.five (click me)&#39;,
+                            &#39;action&#39;: function() {
+                                alert(&#39;You clicked on one.two.five&#39;);
+                            }
+                        }]
+                    }
+                }, {
+                    &#39;label&#39;: &#39;one.three&#39;
+                }, {
+                    &#39;label&#39;: &#39;one.four&#39;
+                }]
+            }
+        }, {
+            &#39;label&#39;: &#39;two&#39;
+        }, {
+            &#39;label&#39;: &#39;three&#39;,
+            &#39;childList&#39;: {
+                &#39;heading&#39;: &#39;three children&#39;,
+                &#39;items&#39;: [{
+                    &#39;label&#39;: &#39;three.one&#39;
+                }, {
+                    &#39;label&#39;: &#39;three.two&#39;
+                }, {
+                    &#39;label&#39;: &#39;three.three&#39;
+                }, {
+                    &#39;label&#39;: &#39;three.four&#39;
+                }]
+            }
+        }, {
+            &#39;label&#39;: &#39;four (clickable)&#39;,
+            &#39;action&#39;: function() {
+                alert(&#39;Thanks for clicking!&#39;);
+            }
+        }]
+    };
+    $(&#39;.nav-list&#39;).navlist({
+        items: list,
+        growFunction: function() {
+            console.log(&#39;growing&#39;);
+        },
+        shrinkFunction: function() {
+            console.log(&#39;shrinking&#39;);
+        },
+        width: &#39;170px&#39;,
+        height: &#39;200px&#39;
+    });
+});
+&lt;/script&gt;
+            </pre>
+            <a onclick="copyToClipboard('external-link-js-copy')" role="button" tabindex="0" class="btn btn-default" data-trigger="focus" data-toggle="popover" data-placement="top" data-content="Copied" data-template='<div class="popover popover-sm" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'>Copy</a>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+$.makeId = function() {
+    var
+        text = "",
+        possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 5; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+};
+$.fn.navlist = function(a) {
+    var
+        args = $.extend({
+            items: [], // an object that contains the items of the nav.
+            growFunction: function() {}, // gets triggered when the nav expands to a new column
+            shrinkFunction: function() {}, // gets triggered when the nav shrinks to the previous column,
+            width: null,
+            height: null
+        }, a),
+        deployEventListener = function(f) {
+            // we bind this only once to the document to prevent multiple binding of the same event over and over.
+            // We re-bind only if necessary within the same function
+            // we also provide a namespace with the id of the list to overwrite the same eventlisterner if fired more than once
+            // just once--V
+            $(document).one('keydown.navlist', function(e) {
+                var el;
+                switch (e.which) {
+                    case 37: // left
+                        var theUl = f.parent().prev();
+                        removeHigherLevels(theUl);
+                        el = theUl.find('.selected');
+                        clearSelected(el);
+                        break;
+                    case 38: // up
+                        el = f.prev().not('.nav-list-heading');
+                        break;
+                    case 13:
+                    case 32:
+                    case 39: // right
+                        f.trigger('click');
+                        el = f.parent().next().children('li.nav-list-action:first');
+                        break;
+                    case 40: // down
+                        el = f.next();
+                        break;
+                    case 27: //esc
+                        el = f.parent().parent();
+                        el.find('li').removeAttr('tabindex');
+                        break;
+                    default:
+                        return; // exit this handler for other keys
+                }
+                if (el.length) {
+                    el.focus();
+                } else {
+                    deployEventListener(f);
+                }
+                e.preventDefault(); // prevent the default action (scroll / move caret)
+
+            });
+        },
+        removeEventListener = function() {
+            $(document).off('keydown.navlist');
+        },
+        removeHigherLevels = function(myUl) {
+            // get the index of my ul and remove thos that are after it
+            var ulIndex = myUl.index();
+            myUl.parent().children(':gt(' + ulIndex + ')').remove();
+            if (typeof(args.shrinkFunction) == 'function') args.shrinkFunction();
+        },
+        clearSelected = function(b) {
+            b.parent().find('.selected').removeClass('selected');
+        },
+        openList = function(b) {
+            b.addClass('selected');
+            var bid = b.attr('id');
+            var myUl = b.closest('ul');
+            removeHigherLevels(myUl);
+            if ($('#navlist-' + bid).length === 0) {
+                var nuUl = genItemsHtml(b.data('children'), bid);
+                myUl.after(nuUl);
+            }
+        },
+        createButton = function(ob, ind, heading) {
+            var buttonLabel = (heading ? '<p class="sr-only">' + heading + '</p>' : '') + ob.label;
+            var button = $(document.createElement('li')).attr({
+                'class': 'nav-list-action',
+                'data-item-id': ind,
+                'id': $.makeId(),
+                'tabindex': '-1'
+            }).html(buttonLabel).focus(function() {
+                deployEventListener($(this));
+            }).blur(function() {
+                removeEventListener();
+            });
+            if (typeof(ob.childList) != 'undefined') {
+                button.addClass('has-children').data('children', ob.childList).click(function() {
+                    clearSelected($(this));
+                    openList($(this));
+                    if (typeof(args.growFunction) == 'function') args.growFunction();
+                }).html(buttonLabel + '<span class="sr-only"> Press enter, spacebar, or the right arrow key to expand the sub menu.</span>');
+            } else {
+                button.click(function() {
+                    var t = $(this);
+                    var ul = t.closest('ul');
+                    clearSelected($(this));
+                    removeHigherLevels(ul);
+                    if ((typeof(ob.action) == 'function') && (ob.action)) {
+                        ob.action();
+                    }
+                });
+            }
+            return button;
+        },
+        genItemsHtml = function(itemsObj, parentId) {
+            var ul = $(document.createElement('ul')).attr('id', 'navlist-' + parentId).addClass('list-block pull-left');
+            var heading = (((typeof(itemsObj.heading) !== 'undefined') && itemsObj.heading) ? itemsObj.heading : null);
+            if (args.width) {
+                ul.width(args.width);
+            }
+            if (heading) ul.append('<li aria-hidden="true" class="nav-list-heading">' + itemsObj.heading + '</li>');
+            for (var i = 0; i < itemsObj.items.length; i++) {
+                var li = createButton(itemsObj.items[i], i, heading);
+                ul.append(li);
+            }
+            return ul;
+        };
+    return this.each(function() {
+        var t = $(this);
+        if (args.height) t.height(args.height);
+
+        var enterNavEl = function() {
+            $(document).one('keydown.activateColumnNav', function(e) {
+                switch (e.which) {
+                    case 39: //right
+                    case 40: // down
+                        t.next().focus();
+                        break;
+                    case 37:
+                    case 38:
+                        t.prev().focus();
+                        break;
+                    case 13:
+                        // make elements navigable
+                        t.find('li.nav-list-action').attr('tabindex', '0');
+                        t.find('.nav-list-action:first').focus();
+                        break;
+                    default:
+                        //re-add event listnener
+                        enterNavEl();
+                        return;
+                }
+                e.preventDefault(); // prevent the default action (scroll / move caret)
+            });
+        };
+        var escaper = '<span tabindex="-1"></span>';
+        t.attr({
+            'tabindex': '0'
+        }).focus(function() {
+            enterNavEl();
+        }).blur(function() {
+            $(document).off('keypress.activateColumnNav');
+        }).append(genItemsHtml(args.items, $.makeId())).after(escaper).before(escaper);
+    });
+};
+$(document).ready(function() {
+
+    var list = {
+        'heading': 'Column 1',
+        'items': [{
+            'label': 'one',
+            'childList': {
+                'heading': 'one children',
+                'items': [{
+                    'label': 'one.one'
+                }, {
+                    'label': 'one.two',
+                    'childList': {
+                        'heading': 'one.two children',
+                        'items': [{
+                            'label': 'one.two.one'
+                        }, {
+                            'label': 'one.two.two'
+                        }, {
+                            'label': 'one.two.three'
+                        }, {
+                            'label': 'one.two.four'
+                        }, {
+                            'label': 'one.two.five'
+                        }]
+                    }
+                }, {
+                    'label': 'one.three'
+                }, {
+                    'label': 'one.four'
+                }]
+            }
+        }, {
+            'label': 'two'
+        }, {
+            'label': 'three',
+            'childList': {
+                'heading': 'three children',
+                'items': [{
+                    'label': 'three.one'
+                }, {
+                    'label': 'three.two'
+                }, {
+                    'label': 'three.three'
+                }, {
+                    'label': 'three.four'
+                }]
+            }
+        }, {
+            'label': 'four (clickable)',
+            'action': function() {
+                alert('Thanks for clicking!');
+            }
+        }]
+    };
+
+    $('.nav-list').navlist({
+        items: list,
+        growFunction: function() {
+            console.log('growing');
+        },
+        shrinkFunction: function() {
+            console.log('shrinking');
+        },
+        width: '170px',
+        height: '200px'
+    });
+});
+</script>

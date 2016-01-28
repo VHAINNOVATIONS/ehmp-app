@@ -1,18 +1,20 @@
 <div class="row">
-    <div class="col-md-12"><h4 style="margin-top: 0px">{{summary}}</h4></div>
+    <div class="col-md-12"><h4 style="margin-top: 0px">{{summary}} </h4></div>
 </div>
 <div class="row">
     <div class="col-md-9"><h5>Symptoms: {{reaction}}</h5> </div>
     {{#if acuityName}}
     {{#if severe}}
-    <div class="col-md-3 "><button type="button" class="btn btn-danger">{{acuityName}}</button></div>
+    <div class="col-md-3 " id="allergy_severity"><span class="label label-danger">{{acuityName}}</span></div>
     {{else}}
     {{#if moderate}}
-    <div class="col-md-3 "><button type="button" class="btn btn-warning">{{acuityName}}</button></div>
+    <div class="col-md-3 " id="allergy_severity"><span class="label label-warning">{{acuityName}}</span></div>
     {{else}}
-    <div class="col-md-3 "><button type="button" class="btn btn-info">{{acuityName}}</button></div>
+    <div class="col-md-3 " id="allergy_severity"><span class="label label-info">{{acuityName}}</span></div>
     {{/if}}
     {{/if}}
+    {{else}}
+        <div class="col-md-3 " id="allergy_severity">Severity Not Noted</div>
     {{/if}}
 </div>
 &nbsp;
@@ -23,7 +25,7 @@
 
 <div class="row">
     <div class="col-md-4 text-right text-muted">Nature of Reaction:</div>
-    <div id="natureofreaction" class="col-md-8 text-left">{{#compare kind 'Allergy/Adverse Reaction'}}Adverse Reaction{{/compare}}</div>
+    <div id="natureofreaction" class="col-md-8 text-left">{{mechanism}}</div>
 </div>
 <div class="row">
     <div class="col-md-4 text-right text-muted">Entered By:</div>
@@ -62,7 +64,7 @@
   <div class="col-md-12">
     {{#comments}}
     <div class="row">
-      <div class="col-md-9 col-md-offset-2">{{comment}}<br/></div>
+      <div id="modal-allergycomment" class="col-md-9 col-md-offset-2">{{comment}}<br/></div>
     </div>
     &nbsp;
     {{/comments}}

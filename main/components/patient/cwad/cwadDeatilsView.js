@@ -1,18 +1,15 @@
-var dependencies = [
+define([
     "backbone",
     "marionette",
     "underscore",
-    "main/ADK",
+    "handlebars",
+    "main/Utils",
+    "api/ResourceService",
     "hbs!main/components/patient/cwad/templates/cwadDetailContainer",
     "hbs!main/components/patient/cwad/templates/allergiesDetails",
     "hbs!main/components/patient/cwad/templates/directiveDetails",
     "hbs!main/components/patient/cwad/templates/patientFlagsDetails"
-];
-
-define(dependencies, onResolveDependencies);
-
-
-function onResolveDependencies(Backbone, Marionette, _, ADK, cwadDetailContainer, AllergiesDetailsTemplate, DirectiveDetails, PatientFlagsDetails) {
+], function(Backbone, Marionette, _, Handlebars, Utils, ResourceService, cwadDetailContainer, AllergiesDetailsTemplate, DirectiveDetails, PatientFlagsDetails) {
 
     var cwadDeatil = Backbone.Marionette.ItemView.extend({
         className: "row-layout cwad-detail",
@@ -33,7 +30,7 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, cwadDetailContainer
         tagName: "p"
     });
     var ErrorView = Backbone.Marionette.ItemView.extend({
-        template: _.template('<p class="error-message padding" role="alert" tabindex="0">Error: <%= errorCode %> </p>'),
+        template: Handlebars.compile('<p class="error-message padding" role="alert" tabindex="0">Error: {{errorCode}} </p>'),
         initialize: function(options) {
             this.model.set('errorCode', options.errorCode);
         },
@@ -43,6 +40,7 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, cwadDetailContainer
     var TitleModel = Backbone.Model.extend({
         defaults: {
             'title': '',
+            'description': ''
         }
     });
 
@@ -55,15 +53,17 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, cwadDetailContainer
             'click .close': 'closeDetail'
         },
         initialize: function(options) {
-            this.model = new TitleModel();
-            this.model.set('title', options.cwadIdentifier);
-            this.deatilView = new cwadDeatilsView(options);
+            this.model = new TitleModel({
+                title: options.cwadIdentifier,
+                description: options.cwadDescription
+            });
+            this.detailView = new cwadDetailsView(options);
         },
         modelEvents: {
             "change": "render"
         },
         onRender: function() {
-            this.cwadDetails.show(this.deatilView);
+            this.cwadDetails.show(this.detailView);
         },
         closeDetail: function(event) {
             this.$el.parent().addClass('hidden');
@@ -71,7 +71,7 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, cwadDetailContainer
         }
     });
 
-    var cwadDeatilsView = Backbone.Marionette.CollectionView.extend({
+    var cwadDetailsView = Backbone.Marionette.CollectionView.extend({
         childView: cwadDeatil,
         tagName: "div",
         emptyView: LoadingView,
@@ -91,7 +91,7 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, cwadDetailContainer
                     filterString = 'ilike(kind,"%Warning%")';
                     this.childViewOptions.template = DirectiveDetails;
                 } else if (options.cwadIdentifier === 'allergies') {
-                    filterString = 'ilike(kind,"%Allergy%")';
+                    filterString = 'ilike(kind,"%Allergy%"),not(exists(removed),eq(removed,"false"))';
                     this.childViewOptions.template = AllergiesDetailsTemplate;
                 } else if (options.cwadIdentifier === 'directives') {
                     filterString = 'ilike(kind,"%Directive%")';
@@ -109,9 +109,9 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, cwadDetailContainer
                 };
                 var self = this;
                 fetchOptions.onSuccess = function(collection, resp) {
-                     _.each(collection.models, function(model) {
+                    _.each(collection.models, function(model) {
                         if (model.get("observations") !== undefined) {
-                            model.set("observedDate", ADK.utils.formatDate(model.get("observations")[0].date));
+                            model.set("observedDate", Utils.formatDate(model.get("observations")[0].date));
                             model.set("severity", model.get("observations")[0].severity);
                         }
                     });
@@ -125,7 +125,7 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, cwadDetailContainer
                     self.render();
 
                 };
-                this.collection = ADK.PatientRecordService.fetchCollection(fetchOptions);
+                this.collection = ResourceService.patientRecordService.fetchCollection(fetchOptions);
             } else {
                 this.childViewOptions.template = PatientFlagsDetails;
                 this.collection = new Backbone.Collection(options.patientModel.get('patientRecordFlag'));
@@ -134,4 +134,4 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, cwadDetailContainer
     });
 
     return cwadContainerView;
-}
+});

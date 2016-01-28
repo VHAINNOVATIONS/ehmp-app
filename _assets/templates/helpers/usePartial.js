@@ -1,5 +1,5 @@
 /*jslint node: true, nomen: true, unparam: true */
-/*global moment, jquery, $, _, define, Marionette, jqm, describe, it, expect, beforeEach, spyOn */
+/*global moment, jquery, $, _, define, Marionette, describe, it, expect, beforeEach, spyOn */
 
 /* combining Stack Overflow answers from Darshan Sawardekar and nikoshr
  * to use partial templates given in the content (instead of the options);

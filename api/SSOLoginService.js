@@ -1,14 +1,10 @@
-var dependencies = [
+define([
     'backbone',
     'api/SessionStorage',
     'moment',
     'api/Messaging',
     'api/ResourceService'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, SessionStorage, moment, Messaging, ResourceService) {
+], function(Backbone, SessionStorage, moment, Messaging, ResourceService) {
     //'use strict';
 
     //in minutes
@@ -56,7 +52,11 @@ function onResolveDependencies(Backbone, SessionStorage, moment, Messaging, Reso
                     site: SessionStorage.getModel('SSO').get('CPRSHostIP')
                 }),
                 success: function (response, xhr) {
-                    userSession = new Backbone.Model(xhr);
+                    if (xhr.data) {
+                        userSession = new Backbone.Model(xhr.data);
+                    } else {
+                        userSession = new Backbone.Model(xhr);
+                    }
                     userSession.set('expires', moment.utc().add(logofftime, 'minutes'));
                     userSession.set('status', SSOLoginService.STATUS.LOGGEDIN);
                     SSOLoginService.setUserSession(userSession);
@@ -86,4 +86,4 @@ function onResolveDependencies(Backbone, SessionStorage, moment, Messaging, Reso
     };
 
     return SSOLoginService;
-}
+});

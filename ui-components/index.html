@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>eHMP Bootstrap UI Library</title>
+        <link rel="stylesheet" href="../_assets/css/vendor.css" />
+        <link rel="stylesheet" href="../_assets/css/adk.css" />
+        <link rel="stylesheet" href="../app/css/applets.css" />
+        <link rel="stylesheet" href="css/main-styles.css" />
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,300,600,700" type="text/css" rel="stylesheet">
+        <script src="js/jquery-1.11.2.min.js"></script>
+        <!--<script src="../_assets/libs/bower/highcharts/highcharts.js"></script>-->
+    </head>
+    
+    <body class="library">
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#ui-navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">eHMP UI Bootstrap Library (v2.0)</a>
+                </div>
+        
+                <div class="collapse navbar-collapse" id="ui-navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                    	<li><a href="views.html">Views</a>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Documentation <span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                            	<li><a href="color-palette.html">Color Palette</a></li>
+                                <li><a href="#">Style Guide</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav><!--end navigation-->
+        
+        <div class="container">
+        	<h1>eHMP UI Bootstrap Library (v2.0)</h1>
+            
+            <p>The eHMP UI Bootstrap Library is a 508 compliant library that documents how the components in VistaCore should behave and how it should appear.
+            This library is the standardization and guideline that must be followed throughout the lifecycle of this project.</p>
+        </div>
+        
+        
+        <div id="template"></div>
+        
+        <script>
+            $(document).ready(function(){
+                var hash = self.location.hash.replace('#','');
+                if(hash){
+                    $('h2[aria-controls="'+hash+'"]').trigger('click');
+                }
+                    $('[data-toggle="collapse"]').click(function(){
+                        self.location.hash = $(this).attr('aria-controls');
+                    });
+            });
+        
+            $("#template").load("template.html");
+        </script>
+        
+        <script src="js/bootstrap.min.js"></script>
+    </body>
+</html>

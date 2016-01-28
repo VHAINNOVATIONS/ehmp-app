@@ -1,52 +1,76 @@
+$rowHeight: 23px;
+$defaultRowHeight: 13px;
+$defaultLineHeight: 13px; /* would prefer EM or REM, but messes up 23px tile height */
+$defaultRowPadding: 5px 0;
+$defaultChartHeight: 23px; /* with negative margins; so we can have the mid-height vertical separator */
+$rowBorderBottom: #f0f0f0;
+$rowBorderTop: #e5e5e5;
+$rowBackgroundColor: #fff;
+$rowEmptyRowColor: gray; /* Why the named color.  should be hex */
+
 [data-appletid="encounters"] {
-#Age-header{
-    padding-left: 14px;
-}
-#Event-header{
-    padding-left: 26px;
-}
-.col-sm-5.text.left-side.info-display.border-vertical{
-    width:50.2%;
-}
-span.header-hover:hover{
+    div#graph-header:hover {
+      background: none;
+    }
+    /* min width for col-2-sm, with 3 characters (it bumps out) */
+
+    .row.equalHeights .col-sm-2.text {
+        min-width: 3em;
+    }
+    /*
+   .col-sm-5.text.left-side.info-display.border-vertical {
+       width: 50.2%;
+   }
+   */
+    span.header-hover:hover {
         cursor: pointer;
     }
-    .has-popover{
+    .has-popover {
         z-index: 100;
-    }    
-    .has-popover:hover{
-        color: #206473;
+    }
+    .has-popover:hover {
+        color: $primary-light;
     }
     .popover-custom {
         max-width: 100%;
         width: auto;
-    } 
-    .popover-title {
-    color: white;
-    background-color: blue;
-    padding: 5px,5px;
-    font-size: 12px;
-}
-div.encGistItem {
-    border-bottom: 2px solid #f3f3f3;
-    border-radius: 0;
-    border-top: 1px solid #e5e5e5;
-    color: #666;
-    display: block;
-    height: auto;
-    margin-left: 0;
-    position: relative !important;
-    width: 100%;
-
-}
-    .encPanel{
-    margin-bottom: auto;
     }
-div.encGistItem:first-child {
-    border-top: medium none;
-}
-    .encGistList .encGistItem:nth-child(even){
-        background-color: #f2f8fe;
+    .popover-title {
+        color: white;
+        background-color: blue;
+        padding: 5px, 5px;
+        font-size: 12px;
+    }
+    div.encGistItem {
+        border-bottom: 1px solid $grey-lighter;
+        border-top: 1px solid $grey-light;
+        *//*
+        border-radius: 0;
+        color: #666;
+        display: block;
+        height: auto;
+        margin-left: 0;
+        position: relative !important;
+        width: 100%;
+        .panel-heading {
+            padding-top: 0px;
+            padding-bottom: 0px;
+        }
+        .panel {
+            box-shadow: none;
+            webkit-box-shadow: none;
+            moz-box-shadow: none;
+        }
+
+    }
+    .encPanel {
+        margin-bottom: auto;
+    }
+    div.encGistItem:first-child {
+        border-top: medium none;
+    }
+    .encGistList .encGistItem:nth-child(even) {
+        background-color: $primary-lightester;
     }
     .encGistList .encGistItem:hover {
         color: #000000;
@@ -63,57 +87,127 @@ div.encGistItem:first-child {
         .text {
             top: 0;
         }
-        .chart{
+        .chart {
             top: 0;
-        }        
-    } 
-    .gistItem .gistSubItem:nth-child(even){
-        background-color: #f2f8fe;
+        }
+    }
+    .gistItem .gistSubItem:nth-child(even) {
+        background-color: $primary-lightester;
     }
     .gistItem .gistSubItem:hover {
         /*color: #000000;
         background-color: #F0F0F0;
         */
-    }    
-.encGistList {
-    clear: both;
-    padding: 0;
-}
-.panel-collapse.collapse.in {
-    background-image: linear-gradient(to bottom, #afb5b7 0%, #cfd8dc 10px, #cfd8dc 100%);
-    padding: 6px; /*10px*/
-}    
-   .gistSubList {
-    background-color: #fff;
-    padding: 0;
-    }    
+    }
+    .encGistList {
+        clear: both;
+        padding: 0;
+    }
+
+
+    /*  ------------------------------------------------------------------------ */
+    /*  --  Subpanel                                                          -- */
+    /*  ------------------------------------------------------------------------ */
+    .panel-collapse {
+        background-image: linear-gradient(to bottom, #afb5b7 0%, #cfd8dc 10px, #cfd8dc 100%);
+
+        &.gistSubList {
+            padding: 0 6px 6px 6px;
+        }
+
+        &.collapse.in {
+
+            .header-bar {
+                box-shadow: 0 0 0 0 #999;
+                border-bottom: 1px solid #dedede;
+                margin-bottom: 2px;
+            }
+
+            *[class*="col-"] {
+                vertical-align: middle;
+
+                *[class*="col-"] {
+                    padding-top: 0;
+                    padding-bottom: 0;
+                }
+            }
+
+            /* nested rows cause problems in subpanel */
+            .row.equalHeights {
+                & > *[class*="col-"] {
+                    /* have to inherit; otherwise padding gets dropping in double; increasing size to 33 */
+                    .row.equalHeights {
+                        height: inherit;
+                        line-height: inherit;
+                        min-height: inherit;
+
+                        & > *[class*="col-"] {
+                            padding-top: 0;
+                            padding-bottom: 0;
+                        }
+                    }
+                }
+            }
+
+            /* for some reason the charts in the subpanel go bonkers when set to 100% */
+            .gChartMin {
+                width: 120px;
+            }
+
+        }
+    }
+    /* the wrapper around the content, includes header */
+    .gistSubList {
+        background-color: #efefef;
+        padding: 0;
+    }
+
+
+    /* Header */
+    .header-bar {
+        box-shadow: 0px 0px 4px 0px #999999;
+        height: 20px;
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 10px;
+        padding-top: 2px;
+    }
+
+    /* item listing in gist.  think of as clickable row? */
+    div.gistItem {
+        border-bottom: 1px solid $grey-lighter;
+        border-top: 1px solid #e5e5e5;
+
+        /* blue outline of toolbar on selected item */
+        &.toolbarActive {
+            border: 2px solid $white;
+        }
+        /* subpanel */
+        & .panel {
+            border: 0 none;
+            border-radius: 0;
+            margin-bottom: 0 !important;
+        }
+    }
+
+
     .clearBoth {
         clear: both;
     }
     .emptyGistList {
-        font-style: italic; 
-        color: gray; 
-        min-height: 40px; 
+        font-style: italic;
+        color: gray;
+        min-height: 40px;
         padding: 10px;
     }
     .changecolor + .tooltip > .tooltip-inner {
-    border: 2px solid #CCCCCC;
-    text-align:left;
-    max-width: 650px;
-        .row{
-            background-color: #000; 
-            color: #fff; 
+        border: 2px solid $grey;
+        text-align: left;
+        max-width: 650px;
+        .row {
+            background-color: #000;
+            color: #fff;
         }
-    }   
-    .header-bar {
-    color: #206473;
-    background-color: white;
-    box-shadow: 0px 0px 4px 0px #999999;
-    height: 20px;
-    margin-bottom: 5px;
-    font-weight: bold;
-    font-size: 10px;
-    padding-top: 2px;
     }
     .gistSubList .header-bar {
         padding-top: 0;
@@ -121,74 +215,58 @@ div.encGistItem:first-child {
     .subheader-bar {
         background-color: #fff;
         border-bottom: 1px solid #e5e5e5;
-        color: #206473;
+        color: $primary-light;
         font-size: 10px;
         font-weight: 700;
         height: 20px;
         margin-top: 0;
         padding: 3px 0;
-    }    
-    .header{
-    margin-top: 3px;
-    white-space: nowrap;
     }
-    .headerDirectionalIndicator{
-    padding-left:0;
+    .header {
+        margin-top: 3px;
+        white-space: nowrap;
     }
-    .warning{
-    color: #CC0000;
-    font-weight: bold;
+    .headerDirectionalIndicator {
+        padding-left: 0;
     }
-    .col-condensed{
-    padding-left: 2px;
-    padding-right: 2px;
+    .warning {
+        color: #CC0000;
+        font-weight: bold;
     }
-.gChartMinEnc {
-    height: 30px; /*41*/
-    width: 100%;
-    min-width: 60px;
-    max-width: 115px; /*180*/
-    overflow:hidden;
-    background-color: #f2f2f2;
-}
-
-.gsubChartMine {
-    height: 25px;
-    width: 125px;
-    overflow:hidden;
-    background-color: #f3f3f3;
-}    
-    .noPadding{
-        padding-left:0 !important;
-        padding-right:0 !important;
+    .col-condensed {
+        padding-left: 2px;
+        padding-right: 2px;
     }
-    .noMargin{
-        margin-left:0 !important;
-        margin-right:0 !important;
-    }
-    .row.equalHeights {
-        display: table;
+    /* This is for the inline sparkline chart */
+    /* Style guide dictates a height of 23px */
+    .gChartMinEnc {
+        background-color: #f2f2f2;
+        height: $defaultRowHeight + 10px;
+        min-width: 60px;
+        max-width: 115px; /*180*/
+        overflow: hidden;
+        width: 115px;
+        /*
         width: 100%;
+        */
     }
 
-.row.equalHeights > [class*="col-"] { //class^="col-"
-        display: table-cell;
-        float: none;
-        vertical-align: middle;
-    }   
-    
-.panel-heading {
-    border-bottom: 1px solid #e5e5e5;
-    padding: 0;
-}  
-    
-    .gistItem .panel {
-        border: 0 none;
-        border-radius: 0;
-        margin-bottom: 0 !important;
+    .gsubChartMine {
+        background-color: $grey-lighter;
+        height: $defaultRowHeight + 10px;
+        overflow: hidden;
+        width: 125px;
+    }
+    .noPadding {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .noMargin {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
     }
     .changecolor:hover {
-        background-color: #f2f8fe;
+        background-color: $primary-lightest;
     }
 
     div.gistSubItem .chart, div.gistSubItem .text {
@@ -204,97 +282,130 @@ div.encGistItem:first-child {
         padding-bottom: 3px;
         padding-top: 3px;
     }
-    #Age-header.pull-right{
-        float:none !important;
-    } 
-    .gChartMin {
-        height: 35px;
-        width: 100%;
-        min-width: 80px;
-        max-width: 125px;
-        background-color: #f3f3f3;        
-    }    
-    .gistItemInner {
-        border-bottom: 1px solid #e5e5e5;
+    #Age-header.pull-right {
+        float: none !important;
     }
-    .problem-name {
-        padding-top: 3px;
-        padding-bottom: 3px;
-    }    
-.caret {
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 4px solid #000000;
-    display: inline-block;
-    height: 0;
-    opacity: 0.3;
-    margin-right: 3px;
-    width: 0;
-}
+    .gistItemInner {
+        border-bottom: 1px solid $grey-light;
+    }
+    .caret {
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 4px solid #000000;
+        display: inline-block;
+        height: 0;
+        opacity: 0.3;
+        margin-right: 3px;
+        width: 0;
+    }
+    .right-caret {
+        border-bottom: 4px solid transparent;
+        border-top: 4px solid transparent;
+        border-left: 4px solid #000000;
+        display: inline-block;
+        height: 0;
+        opacity: 0.3;
+        margin-right: 3px;
+        width: 0;
+    }
+    .empty-caret {
+        border-bottom: 4px solid transparent;
+        border-top: 4px solid transparent;
+        border-left: 4px solid #000000;
+        display: inline-block;
+        height: 0;
+        opacity: 0;
+        margin-right: 3px;
+        width: 0;
+    }
 
-.right-caret {
-    border-bottom: 4px solid transparent;
-    border-top: 4px solid transparent;
-    border-left: 4px solid #000000;
-    display: inline-block;
-    height: 0;
-    opacity: 0.3;
-   margin-right: 3px;
-    width: 0;
-}
-.empty-caret {
-    border-bottom: 4px solid transparent;
-    border-top: 4px solid transparent;
-    border-left: 4px solid #000000;
-    display: inline-block;
-    height: 0;
-    opacity: 0;
-   margin-right: 3px;
-    width: 0;
-}    
-    
     .gistSubList > div > div {
         background-color: #fff;
+        box-shadow: 0 -0px 3px 0 rgba(0,0,0,.4);
+        -webkit-box-shadow: 0 -0px 3px 0 rgba(0,0,0,.4);
+        -moz-box-shadow: 0 -0px 3px 0 rgba(0,0,0,.4);
     }
-    
-    div.gistItem {
-        border-bottom: 2px solid #f3f3f3;
-        border-top: 1px solid #e5e5e5;
-    }
+
     .border-vertical {
         border-right: 1px solid #e5e5e5;
-    }
-    .quickDraw:last-child .counter2 {
-        padding-left: 0;
-        padding-right: 0;
     }
     .gistSubList .header-bar span {
         padding-left: 0;
         padding-right: 0;
     }
-    .gistSubList .header-bar span:first-child{
+    .gistSubList .header-bar span:first-child {
         padding-left: 10px;
     }
     .encGistList .panel {
         border: none;
     }
     .quickDraw:hover {
-        background-color:#f2f7fc;
+        background-color: #f2f7fc;
     }
     .quickDraw:focus {
-        outline:0;
+        outline: 0;
     }
     .quickviewOverlay {
         bottom: 0;
         color: #fff;
         display: block;
         left: 0;
-        line-height: 40px;
+        line-height: 13px;
         position: absolute;
         right: 0;
         text-align: center;
         top: 0;
         z-index: 100;
-    }    
-   
+    }
+    .breakwords {
+        word-break: break-word;
+    }
+}
+.modal-body {
+    .no-padding {
+        padding: 0px;
+    }
+    .control {
+        .visible-inline{
+            display: inline;
+        }
+    }
+}
+/* Temp - remove when adk encounter styles are updated. */
+.popover-content {
+    .multiselectSideBySide-control{
+        margin: 10px;
+        .mssbs > div{
+            padding: 0;
+        }
+    }
+}
+
+.radio-control {
+    clear: both;
+    .faux-label {
+        float: left;
+        margin: 0;
+    }
+    .radio {
+        float: right;
+        margin: 0;
+    }
+}
+
+.workflow-container {
+    .modal-body {
+        select {
+            height: auto;
+        }
+    }
+    .encounter-form-modal {
+        .scroll-enter-form {
+            overflow: hidden;
+            padding-bottom: 150px;
+        }
+        .mssbs .list-group .list-group-item {
+            height: auto;
+        }
+    }
 }

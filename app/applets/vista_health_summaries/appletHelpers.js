@@ -1,0 +1,1 @@
+define(["backbone","underscore"],function(e,n){"use strict";var r={parseReportDetailResponse:function(e){return e},getModalTitle:function(e){return e.facilityMoniker+" - "+e.hsReport}};return r});

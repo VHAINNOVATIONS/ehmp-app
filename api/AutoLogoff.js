@@ -1,16 +1,11 @@
-var dependencies = [
+define([
     'underscore',
     'jquery',
     'api/Navigation',
     'api/UserService',
     'api/Messaging',
-    'main/components/views/popupView',
-    'app/screens/ScreensManifest'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(_, $, Navigation, UserService, Messaging, popupView, ScreensManifest) {
+    'main/components/views/popupView'
+], function(_, $, Navigation, UserService, Messaging, popupView) {
 
     /**
      * AutoLogoff intends to ensure the user has a resonably up to date token
@@ -36,6 +31,8 @@ function onResolveDependencies(_, $, Navigation, UserService, Messaging, popupVi
 
         // set a default of 15 seconds to refresh the token
         _this.tokenInterval = 15000;
+
+        var REFRESH_EVENTS = 'mouseup.autologoff mousedown.autologoff mousemove.autologoff keyup.autologoff keydown.autologoff';
 
         /**
          * Do the refreshing of token expiration on the server
@@ -64,8 +61,8 @@ function onResolveDependencies(_, $, Navigation, UserService, Messaging, popupVi
         var envokePopupModal = function(popup) {
             if (_.isObject(popup)) {
                 refreshAllowed = false;
-                popupView.setModel(popup, false);
-                popupView.show();
+                popupView.setModel(popup);
+                stopRefreshEvents();
             }
         };
         /**
@@ -77,14 +74,22 @@ function onResolveDependencies(_, $, Navigation, UserService, Messaging, popupVi
                 refreshAllowed = false;
                 popupView.logout(popup);
             }
-
         };
 
         /**
          * Stops all refresh events on the document
          */
         var stopRefreshEvents = function() {
-            $(document).off('mouseup.autologoff mousedown.autologoff mousemove.autologoff keyup.autologoff keydown.autologoff');
+            $(document).off(REFRESH_EVENTS);
+        };
+
+        /**
+         * Start all refresh events on the document
+         */
+        var startRefreshEvents = function() {
+            $(document).on(REFRESH_EVENTS, function(e) {
+                refreshAllowed = true;
+            });
         };
 
         /**
@@ -166,9 +171,7 @@ function onResolveDependencies(_, $, Navigation, UserService, Messaging, popupVi
             if (!timersStarted) {
                 //set up the event listners for a user's interactions
                 stopRefreshEvents();
-                $(document).on('mouseup.autologoff mousedown.autologoff mousemove.autologoff keyup.autologoff keydown.autologoff', function(e) {
-                    refreshAllowed = true;
-                });
+                startRefreshEvents();
 
                 //kickoff the LogoffTimer
                 resetLogoffTimer();
@@ -187,8 +190,6 @@ function onResolveDependencies(_, $, Navigation, UserService, Messaging, popupVi
             clearTokenTimer();
             //remove the event listeners
             stopRefreshEvents();
-            //sliently reset the model for the popupView
-            popupView.setModel(popupView.getDefaultModel(), true);
             //timers stopped
             timersStarted = false;
         };
@@ -197,18 +198,17 @@ function onResolveDependencies(_, $, Navigation, UserService, Messaging, popupVi
         Messaging.on('user:sessionStart user:sessionCheck', function() {
             if (UserService.getStatus() === UserService.STATUS.LOGGEDIN) {
                 startTimers();
+                refreshAllowed = true;
             }
         });
-        Messaging.on('user:sessionEnd', stopTimers);
+        Messaging.on('app:logout', stopTimers);
         Messaging.on('autologoff:continue', function() {
             refreshAllowed = true;
             refreshToken();
             resetLogoffTimer();
             stopRefreshEvents();
             //set up the event listners for a user's interactions
-            $(document).on('mouseup.autologoff mousedown.autologoff mousemove.autologoff keyup.autologoff keydown.autologoff', function(e) {
-                refreshAllowed = true;
-            });
+            startRefreshEvents();
         });
 
         return _this;
@@ -219,4 +219,4 @@ function onResolveDependencies(_, $, Navigation, UserService, Messaging, popupVi
 
 
     return autologoff;
-}
+});

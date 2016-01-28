@@ -1,41 +1,50 @@
-'use strict';
-var dependencies = [
+define([
     'backbone',
-    'main/ADK',
     'jquery',
     'underscore',
+    'handlebars',
     'gridster',
-    'api/UserDefinedScreens'
-];
+    'api/Messaging',
+    'api/UserDefinedScreens',
+    'main/api/WorkspaceFilters',
+    'api/ResourceService',
+    'api/SessionStorage',
+    'main/components/views/appletViews/TileSortManager'
+], function(Backbone, $, _, Handlebars, Gridster, Messaging, UserDefinedScreens, WorkspaceFilters, ResourceService, SessionStorage, TileSortManager) {
+    'use strict';
 
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, ADK, $, _, Gridster, UserDefinedScreens) {
-
-    function saveGridsterAppletsConfig() {
+    function saveGridsterAppletsConfig(callback) {
         var $gridsterEl = $(".gridster");
-        var screen = ADK.ADKApp.currentScreen.id;
+        if ($('#gridster2').length)
+            $gridsterEl = $('#gridster2');
+        var screen = Messaging.request('get:current:screen').id;
         var appletsConfig = UserDefinedScreens.serializeGridsterScreen($gridsterEl, screen);
-        UserDefinedScreens.saveGridsterConfig(appletsConfig, screen);
+        if (callback)
+            UserDefinedScreens.saveGridsterConfig(appletsConfig, screen, callback);
+        else
+            UserDefinedScreens.saveGridsterConfig(appletsConfig, screen);
     }
-    function getViewTypeDisplay(type){
+
+
+    function getViewTypeDisplay(type) {
         //'trend' views were originally called 'gist' view.
         //The name displayed in the UI was changed to 'trend' on 2/25/2015
         //However, currently (as of 2/25/2015) all other references are still to the 'gist' view
-        if(type === "gist"){
+        if (type === "gist") {
             return "trend";
         } else {
             return type;
         }
     }
-    function removeNonStandardViews(collection){
-    	var filteredCollection = collection;
-    	_.each(filteredCollection.models, function (model){
-    		if(model.get('type') !== 'gist' && model.get('type') !== 'trend'  && model.get('type') !== 'summary'  && model.get('type') !== 'expanded' ){
-    			filteredCollection.remove(model);
-    		}
-    	});
-    	return filteredCollection;
+
+    function removeNonStandardViews(collection) {
+        var filteredCollection = collection;
+        _.each(filteredCollection.models, function(model) {
+            if (model.get('type') !== 'gist' && model.get('type') !== 'trend' && model.get('type') !== 'summary' && model.get('type') !== 'expanded') {
+                filteredCollection.remove(model);
+            }
+        });
+        return filteredCollection;
     }
 
     var NoSwitchView = Backbone.Marionette.ItemView;
@@ -43,39 +52,44 @@ function onResolveDependencies(Backbone, ADK, $, _, Gridster, UserDefinedScreens
     var SingleViewType = Backbone.Marionette.ItemView.extend({
         tagName: 'li',
         className: 'viewType-optionsBox col-xs-3',
-        initialize: function(){
+        initialize: function() {
             var displayType = getViewTypeDisplay(this.model.get('type'));
-            this.template = _.template('<div class="options-box <%= type %>" data-viewtype="<%= type %>"></div><div class="formatButtonText">' + displayType + ' View</div>');
+            this.template = Handlebars.compile('<div id="view-option" class="options-box {{type}}" tabindex="0" data-viewtype="{{type}}"></div><div class="formatButtonText">' + displayType + ' View</div>');
+
             var offset = this.model.get('paddingOffset');
-            if(offset!==0 && !_.isUndefined(offset)){
+            if (offset !== 0 && !_.isUndefined(offset)) {
                 this.$el.addClass("col-xs-offset-" + offset);
             }
         }
     });
     var OptionsSelectionView = Backbone.Marionette.CollectionView.extend({
         initialize: function(options) {
+            this.appletController = options.appletController;
+
             this.displayRegion = options.region;
-            if (options.appletChrome){this.appletChrome = options.appletChrome;}
+            if (options.appletChrome) {
+                this.appletChrome = options.appletChrome;
+            }
             this.containerRegion = this.options.containerRegion || this.displayRegion;
             this.appletConfig = options.appletConfig;
             this.appletId = options.appletId;
+            this.workspaceId = Messaging.request('get:current:screen').config.id;
             this.onChangeView = options.onChangeView;
             if (options.switchOnClick === undefined) {
                 this.switchOnClick = true;
             } else {
                 this.switchOnClick = options.switchOnClick;
             }
-
             if (options.appletTitle !== undefined) {
                 this.appletTitle = options.appletTitle;
             }
 
-            this.collection = new Backbone.Collection(ADK.Messaging.getChannel(this.appletId).request('viewTypes'));
+            this.collection = new Backbone.Collection(Messaging.getChannel(this.appletId).request('viewTypes'));
             this.collection = removeNonStandardViews(this.collection);
             this.collection.comparator = function(model) {
                 var type = model.get('type');
                 var orderNum;
-                switch (type.toLowerCase()){
+                switch (type.toLowerCase()) {
                     case 'gist':
                         orderNum = 1;
                         break;
@@ -95,7 +109,7 @@ function onResolveDependencies(Backbone, ADK, $, _, Gridster, UserDefinedScreens
             };
             this.collection.sort();
 
-            switch(this.collection.length){
+            switch (this.collection.length) {
                 case 1:
                     this.collection.models[0].set('paddingOffset', 3);
                     break;
@@ -107,91 +121,115 @@ function onResolveDependencies(Backbone, ADK, $, _, Gridster, UserDefinedScreens
             }
         },
         events: {
-            'click .viewType-optionsBox': 'changeView'
+            'click .viewType-optionsBox': 'changeView',
+            'click .remove-applet-option-box': 'removeApplet'
+        },
+        removeApplet: function() {
+            var self = this;
+            var gridster = this.returnGridster();
+
+            this.$el.parent().html('');
+
+            var removeAllGraphs = function() {
+
+                //if no stacked graph for this applet, do nothing
+                if (!UserDefinedScreens.hasStackedGraphForApplet(self.workspaceId, self.appletConfig.instanceId))
+                    return;
+                var fetchOptions = {
+                    resourceTitle: 'user-defined-stack-all',
+                    fetchType: 'DELETE',
+                    criteria: {
+                        id: self.workspaceId,
+                        instanceId: self.appletConfig.instanceId
+                    }
+                };
+                ResourceService.fetchCollection(fetchOptions);
+                ADK.UserDefinedScreens.removeAllStackedGraphFromSession(self.workspaceId, self.appletConfig.instanceId);
+            };
+
+            //remove region from gridster
+            if (gridster !== null && gridster !== undefined) { //this if is just for the screens that aren't gridster
+                gridster.remove_widget($(this.containerRegion.el), function() {
+                    saveGridsterAppletsConfig(function() {
+                        //Remove persisted graphed items from JDS for stack graph applet
+                        if (self.appletConfig.id === 'stackedGraph') {
+                            removeAllGraphs();
+                        } else {
+                            var instanceId = self.appletConfig.instanceId + '_' + self.appletId;
+                            TileSortManager.removeSort(instanceId, function() {
+                                WorkspaceFilters.removeAllFiltersFromApplet(self.workspaceId, self.appletConfig.instanceId);
+                            });
+                        }
+                    });
+                });
+            }
+            if (this.onChangeView) {
+                this.onChangeView();
+            }
+
+
+            SessionStorage.clearAppletStorageModel(this.appletConfig.instanceId);
+            SessionStorage.clearAppletStorageModel(this.appletConfig.id);
+
+
+        },
+        returnGridster: function() {
+            if (this.switchOnClick) {
+                return $('.gridster').data('gridster');
+            }
+            return $('#gridster2 ul').gridster().data('gridster');
         },
         changeView: function(e) {
-            var gridster;
+            var gridster = this.returnGridster();
             var self = this;
-            if (this.switchOnClick) {
-                gridster = $('.gridster').gridster().data('gridster');
-            } else {
-                gridster = $('#gridster2 ul').gridster().data('gridster');
-            }
             var viewType = $(e.currentTarget).find(".options-box").attr('data-viewtype');
-            if (viewType === 'removeApplet') {
-                $('.options-list').html('');
-                //remove region from gridster
-                if (gridster !== null && gridster !== undefined) { //this if is just for the screens that aren't gridster
-                    gridster.remove_widget($(this.containerRegion.el), saveGridsterAppletsConfig);
-                }
+            var model = this.collection.find(function(model) {
+                return model.get('type') == viewType;
+            });
+            if (this.switchOnClick) {
+                this.appletController.changeView(viewType);
+                $(this.displayRegion.el).attr('data-view-type', viewType);
+            } else {
+                var displayType = getViewTypeDisplay(model.get('type'));
+                var appletHtml = '<div class="edit-applet fa fa-cog"></div><br><div class="formatButtonText"><p class="applet-title">' + this.appletTitle + '</p>' + displayType + '</div>';
+                appletHtml += '<span class="gs-resize-handle gs-resize-handle-both"></span><span class="gs-resize-handle gs-resize-handle-both"></span>';
+                NoSwitchView = NoSwitchView.extend({
+                    template: _.template(appletHtml)
+                });
+                this.displayRegion.show(new NoSwitchView());
+                this.displayRegion.$el.removeClass('bringToFront');
+            }
+            var callback = function() {
                 if (self.onChangeView) {
                     self.onChangeView();
                 }
                 saveGridsterAppletsConfig();
-
-            } else {
-                var model = this.collection.find(function(model) {
-                    return model.get('type') == viewType;
-                });
-                var AppletViewObject = model.get('view');
-
-                if (this.switchOnClick) {
-                    AppletViewObject = AppletViewObject.extend({
-                        attributes: {
-                            'data-appletid': this.appletConfig.id,
-                            'data-instanceId': this.appletConfig.instanceId
-                        }
-                    });
-
-                    this.appletConfig.region = this.displayRegion;
-                    var newOptions = {
-                        region: this.displayRegion,
-                        appletConfig: this.appletConfig
-                    };
-                    this.displayRegion.show(new AppletViewObject(newOptions), {
-                        preventDestroy: true
-                    });
-                    $(this.displayRegion.el).attr('data-view-type', viewType);
-
-                } else {
-                    var displayType = getViewTypeDisplay(model.get('type'));
-                    var appletHtml = '<div class="edit-applet fa fa-cog"></div><br><div class="formatButtonText"><p class="applet-title">' + this.appletTitle + '</p>' + displayType + '</div>';
-                    appletHtml += '<span class="gs-resize-handle gs-resize-handle-both"></span><span class="gs-resize-handle gs-resize-handle-both"></span>';
-                    NoSwitchView = NoSwitchView.extend({
-                        template: _.template(appletHtml)
-                    });
-                    this.displayRegion.show(new NoSwitchView());
-                    this.displayRegion.$el.removeClass('bringToFront');
-
-                }
-
-                var callback = function() {
-                    if (self.onChangeView) {
-                        self.onChangeView();
-                    }
-                    saveGridsterAppletsConfig();
-                };
-
-                if (this.appletChrome){
-                    this.appletChrome.closeSwitchboard();
-                }
-
-                if (viewType === "summary") {
-                    gridster.resize_widget($(this.containerRegion.el), 4, 4, callback);
-                    $(this.displayRegion.el).attr('data-view-type', 'summary');
-                } else if (viewType === "expanded") {
-                    gridster.resize_widget($(this.containerRegion.el), 8, 6, callback);
-                    $(this.displayRegion.el).attr('data-view-type', 'expanded');
-                } else if (viewType === "gist") {
-                    gridster.resize_widget($(this.containerRegion.el), 4, 3, callback);
-                    $(this.displayRegion.el).attr('data-view-type', 'gist');
-                }
-
-
+            };
+            $(this.containerRegion.el).attr('data-view-type', viewType);
+            var regularMaxSize = [8, 12];
+            if (viewType === "summary") {
+                gridster.resize_widget($(this.containerRegion.el), 4, 4, callback);
+                gridster.set_widget_max_size($(this.containerRegion.el), regularMaxSize);
+            } else if (viewType === "expanded") {
+                var expandedMaxSize = [12, 12];
+                gridster.resize_widget($(this.containerRegion.el), 8, 6, callback);
+                gridster.set_widget_max_size($(this.containerRegion.el), expandedMaxSize);
+            } else if (viewType === "gist") {
+                gridster.resize_widget($(this.containerRegion.el), 4, 3, callback);
+                gridster.set_widget_max_size($(this.containerRegion.el), regularMaxSize);
             }
         },
+        addLi: function(collectionView, buffer, options) {
+            collectionView.$el.append(buffer).append('<li class="col-xs-' + options.width + ' ' + options.divClass + '-box"><div tabstop="0" tabindex="0" role="button" class="options-box ' + options.divClass + '" data-viewtype="' + options.dataViewType + '"><i class="' + options.iconClass + '"></i><span class="sr-only">' + options.buttonText + '</span></div><div class="formatButtonText">' + options.buttonText + '</div></li>');
+        },
         attachBuffer: function(collectionView, buffer) {
-            collectionView.$el.append(buffer).append('<li class="viewType-optionsBox col-xs-3"><div class="options-box remove-applet-option" data-viewtype="removeApplet"><i class="fa fa-trash-o"></i></div><div class="formatButtonText">Remove</div></li>');
+            this.addLi(collectionView, buffer, {
+                width: 2,
+                divClass: 'remove-applet-option',
+                dataViewType: 'removeApplet',
+                iconClass: 'fa fa-trash-o',
+                buttonText: 'Remove'
+            });
         },
         tagName: 'ul',
         className: 'options-panel col-xs-12',
@@ -199,9 +237,9 @@ function onResolveDependencies(Backbone, ADK, $, _, Gridster, UserDefinedScreens
         childView: SingleViewType
     });
 
-    ADK.Messaging.reply('switchboard : display', function(options) {
+    Messaging.reply('switchboard : display', function(options) {
         return new OptionsSelectionView(options);
     });
     return OptionsSelectionView;
 
-}
+});

@@ -1,0 +1,10 @@
+
+<h5>Preview Order</h5>
+<p>
+{{outpatientMed}}<br>
+{{#if dosage}}Take {{dosage}}{{/if}} {{route}} {{schedule}} {{#if prn}}PRN{{/if}}<br>
+{{#if daySupply}}Day Supply: {{daySupply}}{{/if}}&nbsp;&nbsp;&nbsp;&nbsp;{{#if quantity}}Quantity: {{quantity}}{{/if}}&nbsp;&nbsp;&nbsp;&nbsp;{{#if refill}} Refill: {{refill}}{{/if}}<br>
+{{#if pickUp}}Pick Up: {{pickUp}}{{/if}}&nbsp;&nbsp;&nbsp;&nbsp;{{#if priority}}Priority: {{priority}}{{/if}}<br>
+{{#if comments}}Comments: {{comments}}{{/if}}<br>
+{{#if patientInstructionsCheckbox}}Patient Instructions: {{patientInstructionsText}}{{/if}} 
+</p>

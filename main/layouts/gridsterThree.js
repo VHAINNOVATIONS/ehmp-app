@@ -1,17 +1,9 @@
-var dependencies = [
+define([
     "backbone",
     "marionette",
     "underscore",
     "hbs!main/layouts/templates/gridsterThree"
-];
-
-define(dependencies, onResolveDependencies);
-
-// todo: CSS needs a lot of work to display the applet height correctly
-// todo: decide how we want to size them and add responsiveness
-// todo: refreshing page disables drag and drop functionality until resize or reroute (maximize applet)
-
-function onResolveDependencies(Backbone, Marionette, _, Template) {
+], function(Backbone, Marionette, _, Template) {
     layoutView = Backbone.Marionette.LayoutView.extend({
         template: Template,
         regions: {
@@ -62,4 +54,4 @@ function onResolveDependencies(Backbone, Marionette, _, Template) {
     });
 
     return layoutView;
-}
+});

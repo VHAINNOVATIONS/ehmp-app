@@ -3,18 +3,22 @@ span.header-hover:hover, #lab-results-summary-expand:hover, #lab-results-summary
 }
 
 label.color-DOD {
-	background-color: #A56900;
+    background-color: #A56900;
 }
 label.color-500, label.color-nonDOD {
-	background-color: #397BB3;
+    background-color: #397BB3;
 }
 
 h3 small{
-	color:#ffffff;
+    color:#ffffff;
 }
 
 .js-backgrid .backgrid-paginator ul {
-	padding: 0;
+    padding: 0;
+}
+
+.js-has-panel {
+    cursor:pointer;
 }
 
 #date-range-filter {
@@ -27,11 +31,11 @@ h3 small{
     margin: 6px 4px;
 }
 #date-range-filter .active-range {
-    background: #357ebd;
+    background: $primary;
     color: white;
 }
 #date-range-filter .daterange:not(.active-range):hover {
-    background: #357ebd;
+    background: $primary;
     color: white;
 }
 
@@ -44,8 +48,6 @@ h3 small{
     overflow:hidden;
 }
 .header-bar {
-    color: #206473;
-    background-color: white;
     box-shadow: 0px 0px 4px 0px #999999;
     height: 20px;
     margin-bottom: 5px;
@@ -56,108 +58,33 @@ h3 small{
     margin-top: 3px;
 }
 .descriptionClass{
-    padding-left:2px;
+    padding-left:12px;
 }
 .resultClass {
-    padding-left:20px;
+    padding-left:10px;
+    margin-right:10px;
+}
+.smallergreyText {
+    color:#999999;
 }
 [data-appletid="lab_results_grid"] {
- div.gistItem {
-    color: #666666;
-    height: 20px;
-    padding:0px 1px 0px 1px;
-     .graph-container {
-                z-index:2;
-                height:20px;
-                overflow:hidden;
-                text-align:right;
-                padding-right:5px;
-            }
-    span {
-            line-height:20px;
-            white-space:nowrap;
+    div.gistItem {
+        border-bottom: 1px solid $grey-lighter;
+        .graph-container {
+            z-index:2;
+            height:21px;
+            overflow:hidden;
+            text-align:right;
+            padding-right:0px;
+            position:absolute;
+            top: 50%;
+            margin-top: -11px;
         }
-     }
-    .gistList .gistItem:nth-child(2n){
-        background-color: #f2f8fe;
-    }
-    .gistList .gistItem:hover {
-        color: #000000;
-        background-color: #F0F0F0;
-    }
-    .gistList .gistItem:focus {
-        outline-width: 3px;
-        outline-offset:-3px
-    }
-    .labsResult {
-        text-align:right;
-        padding-right:2px;
-    }
-      .labsUnits {
-        text-align:left;
-        padding-left:2px;
-    }
-    .gistTrendGraph {
-        background-color: transparent;
-        display: inline;
-        margin-left: -2px;
-        +span+.gistTrendGraph {
-            margin-left: 1px;
+        .noTopBottomFixedHeight{
+            height: 21px !important;
+            padding-bottom: 0 !important;
+            padding-top: 0 !important;
         }
-        .outterBorder {
-            stroke: #bbbbbb;
-            fill: transparent;
-        }
-        .criticalRange {
-            stroke: #f2f2f2;
-            fill: #f2f2f2;
-        }
-        .abnormalRange {
-            stroke: #f2f2f2;
-            fill: #f2f2f2;
-        }
-        .normalRange {
-            stroke: #ffffff;
-            fill: #ffffff;
-        }
-        .trendLine {
-            stroke: #000000;
-        }
-        .previousValue {
-            stroke: #000000;
-            fill: #000000;
-        }
-        .criticalValue {
-            stroke: #cc0000;
-            fill: #cc0000;
-        }
-        .abnormalValue {
-            stroke: #ff9900;
-            fill: #ff9900;
-        }
-        .normalValue {
-            stroke: #0099ff;
-            fill: #0099ff;
-        }
-        .textureHashed {
-            path {
-                stroke: #bbbbbb;
-                stroke-width: 1;
-                fill: none;
-            }
-            rect {
-                @extend .abnormalRange;
-            }
-        }
-        .hashedRange {
-            fill: url(#textureHashed);
-        }
-    }
-    .emptyGistList {
-        font-style: italic; 
-        color: gray; 
-        min-height: 40px; 
-        padding: 10px;
     }
 }
 .popover table > caption {
@@ -176,4 +103,17 @@ h3 small{
 
 #data-grid-lab_results_grid-modalView .handlebars-cell label{
     cursor:default !important;
+}
+
+
+.noPadding {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+.noMargin {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+.border-vertical {
+    border-right: 1px solid #e5e5e5;
 }

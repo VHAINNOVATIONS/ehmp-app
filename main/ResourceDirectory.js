@@ -1,10 +1,6 @@
-var dependencies = [
+define([
     "backbone"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone) {
+], function(Backbone) {
     'use strict';
 
     var Resource = Backbone.Model.extend({
@@ -22,7 +18,7 @@ function onResolveDependencies(Backbone) {
     var ResourceDirectoryCollection = Backbone.Collection.extend({
         model: Resource,
         parse: function(response) {
-            return response.link;
+            return response.data.link;
         }
     });
 
@@ -44,4 +40,4 @@ function onResolveDependencies(Backbone) {
     })();
 
     return ResourceDirectory;
-}
+});

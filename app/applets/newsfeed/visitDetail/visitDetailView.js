@@ -1,13 +1,1 @@
-var dependencies = [
-    "backbone",
-    "main/ADK",
-    "hbs!app/applets/newsfeed/visitDetail/visitDetailTemplate",
-];
-'use strict';
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, ADK, visitDetailTemplate) {
-    return Backbone.Marionette.ItemView.extend({
-        template: visitDetailTemplate
-    });
-}
+define(["backbone","hbs!app/applets/newsfeed/visitDetail/visitDetailTemplate"],function(e,t){return e.Marionette.ItemView.extend({template:t})});

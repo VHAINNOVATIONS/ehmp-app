@@ -1,17 +1,1 @@
-var dependencies = [
-    "backbone",
-    "marionette",
-    "hbs!app/applets/patient_search/templates/common/blankTemplate"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, blankTemplate) {
-
-    var BlankView = Backbone.Marionette.ItemView.extend({
-        template: blankTemplate
-    });
-
-    return BlankView;
-
-}
+define(["backbone","marionette","hbs!app/applets/patient_search/templates/common/blankTemplate"],function(e,t,a){var n=e.Marionette.ItemView.extend({template:a});return n});

@@ -1,12 +1,18 @@
 /*jslint node: true, nomen: true, unparam: true */
-/*global jquery, $, _, define, Marionette, jqm, describe, it, expect, beforeEach, spyOn */
+/*global jquery, $, _, define, Marionette, describe, it, expect, beforeEach, spyOn */
 
 'use strict';
-var dependencies = [
-    'handlebars',
-    'hbs!_assets/templates/sparkline'
-];
-define(dependencies, function(Handlebars, sparklineTemplate) {
+define(['handlebars', 'hbs!_assets/templates/sparkline'], function(Handlebars, sparklineTemplate) {
+
+
+    var resizeHandler = setInterval(function() {
+        _.each($('svg.gistTrendGraph'), function(item) {
+            if (item && item.parentNode && item.clientWidth != item.parentNode.clientWidth) {
+                item.setAttribute('width', 1);
+                item.setAttribute('width', item.parentNode.clientWidth);
+            }
+        });
+    }, 100);
 
     function calculateStarPoints(centerX, centerY, arms, outerRadius, innerRadius) {
         var results = "";
@@ -183,8 +189,8 @@ define(dependencies, function(Handlebars, sparklineTemplate) {
             // TODO: verify the calculation of low & high limits
             lowLimit = mean - mean * standardDeviation;
             highLimit = mean + mean * standardDeviation;
-            tw = w - 2 * b;
-            x0 = b;
+            // tw = w - 2 * b;
+            // x0 = b;
         }
         if (hasCritical && lowLimit) {
             ranges.push({
@@ -487,8 +493,10 @@ define(dependencies, function(Handlebars, sparklineTemplate) {
             id: id,
             width: w,
             height: h,
+            paddingTop: 0,
+            paddingLeft: b,
             border: {
-                x: (hasCritical && sd ? b : 0),
+                x: 0,
                 y: 0,
                 width: w - (hasCritical && sd ? 2 * b : 0),
                 height: h

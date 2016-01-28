@@ -1,0 +1,1 @@
+define(["backbone","marionette","underscore","hbs!app/applets/documents/detail/addendaTemplate"],function(e,t,a,n){"use strict";var d=e.Marionette.ItemView.extend({template:n});return d});

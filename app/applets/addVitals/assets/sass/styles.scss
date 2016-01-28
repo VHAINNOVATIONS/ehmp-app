@@ -1,9 +1,7 @@
 .add-vitals-styles {
 
   #vitals-tbl-container .btn-primary{
-    color: #00FFFF;
-    background-color: #688790;
-    border-color: #3D5157
+    color: $white;
 }
 #vitals-tbl-container .btn-default:focus {
   color: white;
@@ -61,7 +59,7 @@ textarea {
   }
 
 /** keep this for layout **/
-.btn-xs,
+.btn-sm,
 .btn-group-xs > .btn {
   padding: 1px 5px;
   font-size: 12px;

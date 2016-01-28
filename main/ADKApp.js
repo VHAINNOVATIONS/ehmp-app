@@ -1,29 +1,29 @@
-'use strict';
-var dependencies = [
+define([
     'backbone',
     'marionette',
     'underscore',
     'jquery',
     'main/Session',
-    'main/ADK',
     'main/ScreenDisplay',
-    'app/screens/ScreensManifest',
+    'main/ScreenBuilder',
+    'api/Messaging',
     "api/SessionStorage",
     "api/UserDefinedScreens",
-    'main/ScreenBuilder'
-];
+    "api/ResourceService",
+    "api/UserService",
+    "api/Navigation"
+], function(Backbone, Marionette, _, $, Session, ScreenDisplay, ScreenBuilder, Messaging, SessionStorage, UserDefinedScreens, ResourceService, UserService, Navigation) {
+    'use strict';
 
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, _, $, Session, ADK, ScreenDisplay, ScreensManifest, SessionStorage, UserDefinedScreens, ScreenBuilder) {
-
+    var ScreensManifest = Messaging.request('ScreensManifest');
     var ADKApp = new Backbone.Marionette.Application();
+    ADKApp.initAllRoutersPromise = new $.Deferred();
     ADKApp.session = Session;
-    ADK.ADKApp = ADKApp;
+    ADKApp.predefinedDefaultScreen = ScreensManifest.predefinedDefaultScreen;
+    ADKApp.userSelectedDefaultScreen = ADKApp.predefinedDefaultScreen;
 
     ADKApp.on('start', function() {
         // save the original defaultscreen in case it gets changed
-        ScreensManifest.predefinedDefaultScreen = ScreensManifest.defaultScreen;
 
         ADKApp.initAllRoutersPromise.done(function() {
             if (Backbone.history) {
@@ -31,83 +31,102 @@ function onResolveDependencies(Backbone, Marionette, _, $, Session, ADK, ScreenD
             }
         });
     });
-
-    ADKApp.commands.setHandler('screen:navigate', function(screenName, routeOptions) {
+    Messaging.on('app:logged-in', function(patient) {
+        ScreenBuilder.buildAll(ADKApp);
+    });
+    ADKApp.commands.setHandler('screen:navigate', function(screenName, routeOptions, extraScreenDisplayOptions) {
         ADKApp.router.navigate(screenName);
-        ADKApp.execute('screen:display', screenName, routeOptions);
+        ADKApp.execute('screen:display', screenName, routeOptions, extraScreenDisplayOptions);
     });
-
-    ADKApp.commands.setHandler('screen:display', function(screenName, routeOptions) {
-        if (!screenName) {
-            var screenIdPromise = UserDefinedScreens.getDefaultScreenIdFromScreenConfig();
-            screenIdPromise.done(function(screenIdFromConfig) {
-                screenName = screenIdFromConfig;
-                // if not logged in don't call navigate, we don't want to see the cover-sheet route.
-                if (ADK.UserService.checkUserSession()) {
-                    ADK.Navigation.navigate(screenName);
+    var hasPermission = function(screenModule) {
+        if (!_.isUndefined(screenModule.config) && !_.isUndefined(screenModule.config.hasPermission)) {
+            if (_.isFunction(screenModule.config.hasPermission)) {
+                var permission = screenModule.config.hasPermission();
+                if (!_.isBoolean(permission)) {
+                    return false;
                 }
-            });
+                return permission;
+            } else {
+                return false;
+            }
         }
-        if (_.isUndefined(ADKApp[screenName])) {
-            ADKApp.initAllRoutersPromise = new $.Deferred();
-            ADKApp.resourceDirectoryLoaded.done(function() {
-                var promise = ScreenBuilder.initAllRouters(ADKApp);
-                promise.done(function() {
-                    ScreenBuilder.buildAll(ADKApp);
-                    ADKApp.initAllRoutersPromise.resolve();
-                });
-            });
-        }
+        return true;
+    };
+    ADKApp.commands.setHandler('screen:display', function(screenName, routeOptions, extraScreenDisplayOptions) {
         console.log('Command display:screen received, screenName:', screenName);
-        if ($('#mainModal').hasClass('in') || $('#mainOverlay').hasClass('in') || $('.modal-backdrop').hasClass('in')) {
-            ADK.hideModal();
-            ADK.hideFullscreenOverlay();
+        var lastWorkspace = SessionStorage.getModel('lastWorkspace').attributes.workspace;
+
+        if (_.isUndefined(screenName)) {
+            screenName = lastWorkspace || ADKApp.userSelectedDefaultScreen || ScreensManifest.predefinedDefaultScreen;
         }
 
-        if (!ADK.UserService.checkUserSession()) {
-            if (screenName !== ScreensManifest.ssoLogonScreen) {
-                screenName = ScreensManifest.logonScreen;
+        var loggedIn = UserService.checkUserSession();
+        if (!loggedIn && screenName !== ScreensManifest.ssoLogonScreen) {
+            if (_.isUndefined(ScreensManifest.logonScreen)) {
+                console.warn('logonScreen is undefined - unable to navigate.  Update ScreensManifest with logonScreen.');
+                return;
             }
-            if (!screenName) {
-                console.log('logonScreen is undefined.  Update ScreensManifest with logonScreen.');
-            }
-        } else {
-            ADKApp.initAllRoutersPromise.done(function() {
-                ADKApp[screenName].buildPromise.done(function() {
-                    if ($.isEmptyObject(ADK.PatientRecordService.getCurrentPatient().attributes) && (ADKApp[screenName].config.patientRequired === true)) {
-                        screenName = ScreensManifest.patientSearchScreen;
-                        ADKApp.router.navigate(screenName);
-                        screenModule = ADKApp[screenName];
-                        console.log('No Patient Selected: rerouting to patient-search-screen');
-                    }
-                });
-            });
-
+            screenName = ScreensManifest.logonScreen;
         }
+
+        //TODO Find a more elegant approach that utilizes the code already
+        _.each([ADKApp.modalRegion, ADKApp.workflowRegion, ADKApp.alertRegion], function(region) {
+            if (region.hasView()) {
+                region.currentView.$el.modal('hide');
+            }
+        });
+        if ($('.modal-backdrop').hasClass('in')) {
+            $('#mainModal').trigger('close.bs.modal');
+        }
+
         var screenModule = ADKApp[screenName];
-        ScreenDisplay.createScreen(screenModule, screenName, routeOptions, ADKApp);
+        if (_.isUndefined(screenModule)) {
+            console.warn('Screen module is undefined for screen ' + screenName + '. Redirecting to default screen');
+            screenName = ADKApp.userSelectedDefaultScreen || ScreensManifest.predefinedDefaultScreen;
+            screenModule = ADKApp[screenName];
+        }
+
+
+        if (screenName && screenModule) {
+            screenModule.buildPromise.done(function() {
+                if (hasPermission(screenModule) === false) {
+                    console.warn('User does not have permission to access screen ' + screenName + '. Redirecting to default screen');
+                    screenName = ADKApp.userSelectedDefaultScreen || ScreensManifest.predefinedDefaultScreen;
+                    ADKApp.router.navigate(screenName);
+                    screenModule = ADKApp[screenName];
+                }
+                if ($.isEmptyObject(ResourceService.patientRecordService.getCurrentPatient().attributes) && (screenModule.config.patientRequired === true)) {
+                    screenName = ScreensManifest.patientSearchScreen;
+                    ADKApp.router.navigate(screenName);
+                    screenModule = ADKApp[screenName];
+                    console.log('No Patient Selected: rerouting to patient-search-screen');
+                }
+                ScreenDisplay.createScreen(screenModule, screenName, routeOptions, ADKApp, extraScreenDisplayOptions);
+            });
+        }
     });
 
-    ADK.Messaging.on('patient:selected', function(patient) {
+    Messaging.on('patient:selected', function(patient) {
         SessionStorage.clear('appletStorage');
-        SessionStorage.clear('globalDate');
+        SessionStorage.delete.sessionModel('globalDate', true);
         SessionStorage.delete.sessionModel('patient');
         SessionStorage.addModel('patient', patient);
-        ADK.Messaging.trigger('patient:change');
     });
 
-    ADK.Messaging.on('patient:change', function() {
-        var currentRoute = Backbone.history.fragment;
-        ADKApp.execute('screen:display', currentRoute);
+    Messaging.reply('get:current:screen', function() {
+        return ADKApp.currentScreen;
+    });
+    Messaging.reply('get:current:workspace', function() {
+        return ADKApp.currentWorkspace;
     });
 
     /**
      * This is the part that WILL take the user to the login screen
      * @return {undefined}
      */
-    ADK.Messaging.on('user:sessionEnd', function() {
-        var screenName = ScreensManifest.predefinedDefaultScreen;
-        ADK.Navigation.navigate(screenName);
+    Messaging.on('user:sessionEnd', function() {
+        var screenName = ADKApp.userSelectedDefaultScreen;
+        Navigation.navigate(screenName);
     });
 
     ADKApp.addRegions({
@@ -115,7 +134,12 @@ function onResolveDependencies(Backbone, Marionette, _, $, Session, ADK, ScreenD
         topRegion: '#top-region',
         centerRegion: '#center-region',
         bottomRegion: '#bottom-region',
-        modalRegion: '#modal-region'
+        modalRegion: '#modal-region',
+        workflowRegion: '#workflow-region',
+        alertRegion: '#alert-region'
+    });
+    Messaging.reply('get:adkApp:region', function(regionName) {
+        return ADKApp[regionName];
     });
 
     var Router = Marionette.AppRouter.extend({
@@ -148,5 +172,31 @@ function onResolveDependencies(Backbone, Marionette, _, $, Session, ADK, ScreenD
         controller: new AppController()
     });
 
+    ADKApp.initAllRouters = function() {
+        var promise = ScreenBuilder.initAllRouters(ADKApp);
+        promise.done(function() {
+            ScreenBuilder.buildAll(ADKApp);
+            ADKApp.initAllRoutersPromise.resolve();
+        });
+    };
+
+    ADKApp.ScreenPassthrough = {
+        setNewDefaultScreen: function(id) {
+            return ScreenBuilder.setNewDefaultScreen(id);
+        },
+        deleteUserScreen: function(id) {
+            return ScreenBuilder.deleteUserScreen(id);
+        },
+        editScreen: function(options, id) {
+            return ScreenBuilder.editScreen(options, id);
+        },
+        titleExists: function(title) {
+            return ScreenBuilder.titleExists(title);
+        },
+        addNewScreen: function(options, app, index, callback) {
+            return ScreenBuilder.addNewScreen(options, app, index, callback);
+        }
+    };
+
     return ADKApp;
-}
+});

@@ -1,18 +1,1 @@
-var dependencies = [
-    "backbone",
-    "marionette",
-    "underscore",
-    "main/ADK"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, _, ADK) {
-
-    var EventHandlers = {
-
-
-    };
-
-    return EventHandlers;
-}
+define(["backbone","marionette","underscore"],function(e,n,r){var o={};return o});

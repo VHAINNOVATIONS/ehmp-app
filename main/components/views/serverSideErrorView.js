@@ -1,14 +1,10 @@
-var dependencies = [
+define([
     "backbone",
     "marionette",
     "underscore",
     "hbs!main/components/views/serverSideErrorTemplate",
     "hbs!main/components/views/serverSideError"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, _, ServerSideErrorTemplate, ServerSideError) {
+], function(Backbone, Marionette, _, ServerSideErrorTemplate, ServerSideError) {
     var Error = Backbone.Model.extend({
         defaults: {
             errormsg: 'Server timed out',
@@ -44,6 +40,14 @@ function onResolveDependencies(Backbone, Marionette, _, ServerSideErrorTemplate,
             this.listenTo(this.collection, "change", this.render());
         },
         addError: function(msg, title) {
+            if (_.isString(msg)) {
+                try {
+                    msg = JSON.parse(msg);
+                } catch (e) {}
+            }
+            if (_.isObject(msg) && _.has(msg, 'message')) {
+                msg = msg.message;
+            }
             this.collection.add(new Error({
                 errormsg: msg,
                 prefix: title
@@ -58,4 +62,4 @@ function onResolveDependencies(Backbone, Marionette, _, ServerSideErrorTemplate,
     });
 
     return ErrorListView;
-}
+});

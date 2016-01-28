@@ -2,7 +2,7 @@
 /*global jquery, _, $, define, navigator, window, document, nativeAuthLib */
 
 'use strict';
-define([ 'jquery', 'underscore', 'Portal', 'core/utilities/authentication', 'modules/error-dialog/ErrorDialogView', 'jquerymobile' ], function ($, _, Portal, authentication, ErrorDialogView) {
+define([ 'jquery', 'underscore', 'Portal', 'core/utilities/authentication', 'modules/error-dialog/ErrorDialogView' ], function ($, _, Portal, authentication, ErrorDialogView) {
     return (function () {
         var _errorHandling = {},
             defined = false;
@@ -29,15 +29,10 @@ define([ 'jquery', 'underscore', 'Portal', 'core/utilities/authentication', 'mod
                         // Should only happen for 401, but HA returns incorrect 403 status code for unauthenticated
                         authentication.wipeSessionData();
 
-                        // if this is in a phonegap runtime, make the respective native call
-                        if(window.cordova){
-                            nativeAuthLib.accessDeniedErrorReceived();
-                        }
-                        else{
-                            console.log("errorHandling.js resource directory access - consider decoupling");
-                            loginUrl = Portal.resources().get('oauth-login').get('href');
-                            authentication.gotoLoginWithRedirect(loginUrl);
-                        }
+                        console.log("errorHandling.js resource directory access - consider decoupling");
+                        loginUrl = Portal.resources().get('oauth-login').get('href');
+                        authentication.gotoLoginWithRedirect(loginUrl);
+
                     } else if (jqxhr.status === 500) {
                         if (jqxhr.responseText.indexOf('java.lang') > 0) {
                             displayErrorDialog.call();

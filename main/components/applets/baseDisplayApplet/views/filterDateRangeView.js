@@ -1,4 +1,4 @@
-var dependencies = [
+define([
     'jquery',
     'underscore',
     'jquery.inputmask',
@@ -6,11 +6,7 @@ var dependencies = [
     'moment',
     'hbs!main/components/applets/grid_applet/templates/dateRangePickerTemplate',
     "api/SessionStorage"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, _, InputMask, DatePicker, moment, dateRangePickerTemplate, SessionStorage) {
+], function($, _, InputMask, DatePicker, moment, dateRangePickerTemplate, SessionStorage) {
     'use strict';
 
 
@@ -45,10 +41,12 @@ function onResolveDependencies($, _, InputMask, DatePicker, moment, dateRangePic
         },
         enableDatePickers: function() {
             this.$('.input-group.date#custom-date-range1-' + this.options.appletId).datepicker({
-                format: 'mm/dd/yyyy'
+                format: 'mm/dd/yyyy',
+                autoclose: true
             });
             this.$('.input-group.date#custom-date-range2-' + this.options.appletId).datepicker({
-                format: 'mm/dd/yyyy'
+                format: 'mm/dd/yyyy',
+                autoclose: true
             });
             this.$('#filter-from-date-' + this.options.appletId).datepicker('remove');
             this.$('#filter-to-date-' + this.options.appletId).datepicker('remove');
@@ -178,4 +176,4 @@ function onResolveDependencies($, _, InputMask, DatePicker, moment, dateRangePic
     });
 
     return FilterDateRangeView;
-}
+});

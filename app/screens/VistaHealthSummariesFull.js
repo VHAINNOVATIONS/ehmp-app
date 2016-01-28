@@ -1,0 +1,1 @@
+define(["backbone","marionette"],function(e,t){"use strict";var a={id:"vista-health-summaries-full",contentRegionLayout:"gridOne",appletHeader:"navigation",appLeft:"patientInfo",applets:[{id:"vista_health_summaries",title:"Health Summaries",region:"center",fullScreen:!0,viewType:"summary"}],patientRequired:!0,globalDatepicker:!1,locked:{filters:!1}};return a});

@@ -1,4 +1,4 @@
-var dependencies = [
+define([
     'backbone',
     'marionette',
     'jquery',
@@ -14,11 +14,7 @@ var dependencies = [
     'main/backgrid/extensions/defaultOverrides',
     'backgrid.filter',
     'backgrid.paginator'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, $, _, Backgrid, dataGridView, ClickableRow, ModalRow, HeaderCell, GroupByBody, GroupByHeader) {
+], function(Backbone, Marionette, $, _, Backgrid, dataGridView, ClickableRow, ModalRow, HeaderCell, GroupByBody, GroupByHeader) {
     'use strict';
     var DataGrid = {};
 
@@ -86,6 +82,28 @@ function onResolveDependencies(Backbone, Marionette, $, _, Backgrid, dataGridVie
                 'keydown tr.selectable': 'onEnterRow',
                 'keydown th': 'onEnterHeader'
             },
+            onDestroy: function() {
+                try {
+                    if (this.loadingView && !this.loadingView.isDestroyed) {
+                        this.loadingView.destroy();
+                        this.loadingView = null;
+                    }
+                } catch (e) {
+                    console.error('Error destroying loadingView in applet:', this.appletConfig.id, e);
+                }
+                
+                try {
+                    if (this.gridView) {
+                        if (_.isFunction(this.gridView.remove))
+                            this.gridView.remove();
+                        if (_.isFunction(this.gridView.destroy))
+                            this.gridView.destroy();
+                        delete this.gridView;
+                    }
+                } catch (e) {
+                    console.error('Error destroying gridView in applet:', this.appletConfig.id, e);
+                }
+            },
             onEnterRow: function(event) {
                 if (event.which == 13 || event.which == 32) {
                     $(event.target).click();
@@ -97,12 +115,17 @@ function onResolveDependencies(Backbone, Marionette, $, _, Backgrid, dataGridVie
                 }
             },
             onClickRow: function(event) {
-                var row = $(event.target).closest("tr");
-                var model = row.data('model');
-                if (this.options.onClickRow) {
-                    this.options.onClickRow(model, event, this);
-                } else if (this.options.DetailsView) {
-                    this.expandRow(model, event);
+
+                ADK.utils.infoButtonUtils.onClickFunc(this, event, baseOnClickRow);
+
+                function baseOnClickRow(that, event) {
+                    var row = $(event.target).closest("tr");
+                    var model = row.data('model');
+                    if (that.options.onClickRow) {
+                        that.options.onClickRow(model, event, that);
+                    } else if (that.options.DetailsView) {
+                        that.expandRow(model, event);
+                    }
                 }
             },
             expandRow: function(model, event) {
@@ -112,10 +135,9 @@ function onResolveDependencies(Backbone, Marionette, $, _, Backgrid, dataGridVie
                 //Remove any bootstrap modal attributes on row
                 row.removeAttr('data-toggle');
                 row.removeAttr('data-target');
-                var id = row.attr('id');
+                //remove all special characters from the id
+                var id = row.attr('id').replace(/[^\w\s]/gi, '');
                 var detailsId = 'details-' + id;
-                //escape the special characters if any
-                id = id.replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/\[/g, '\\[').replace(/\]/g, '\\]').replace(/\{/g, '\\{').replace(/\}/g, '\\}').replace(/\#/g, '\\#');
                 var detailsSelector = '#details-' + id;
                 if ($(detailsSelector).hasClass('hide')) {
                     $(detailsSelector).removeClass('hide');
@@ -133,11 +155,19 @@ function onResolveDependencies(Backbone, Marionette, $, _, Backgrid, dataGridVie
                     var region = {};
                     region[detailsId] = detailsSelector;
                     this.addRegions(region);
+
                     var detailsView = new DetailsView({
                         model: model,
                         collection: collection
                     });
                     this[detailsId].show(detailsView);
+                    //add info button in expanded rows
+                    if (collection.length > 0 && !_.isUndefined(this.options.tblRowSelector)) {
+                        $(detailsSelector).find('tbody tr').each(function() {
+                            $(this).attr("data-infobutton", $(this).find('td:nth-child(2)').text());
+                        });
+                    }
+
                 }
             }
 
@@ -146,9 +176,9 @@ function onResolveDependencies(Backbone, Marionette, $, _, Backgrid, dataGridVie
     };
 
     DataGrid.create = function(options) {
-        var temp = this.returnView(options);
-        return new temp;
+        var Temp = this.returnView(options);
+        return new Temp();
     };
 
     return DataGrid;
-}
+});

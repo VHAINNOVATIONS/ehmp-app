@@ -1,17 +1,1 @@
-var dependencies = [
-    "backbone",
-    "marionette",
-    "hbs!app/applets/lab_results_grid/modal/errorTemplate"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, ErrorTemplate) {
-    'use strict';
-
-    var ErrorView = Backbone.Marionette.ItemView.extend({
-        template: ErrorTemplate
-    });
-
-    return ErrorView;
-}
+define(["backbone","marionette","hbs!app/applets/lab_results_grid/modal/errorTemplate"],function(e,t,r){"use strict";var a=e.Marionette.ItemView.extend({template:r});return a});

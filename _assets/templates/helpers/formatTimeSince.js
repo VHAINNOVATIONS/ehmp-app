@@ -1,5 +1,5 @@
 /*jslint node: true, nomen: true, unparam: true */
-/*global moment, jquery, $, _, define, Marionette, jqm, describe, it, expect, beforeEach, spyOn */
+/*global moment, jquery, $, _, define, Marionette, describe, it, expect, beforeEach, spyOn */
 'use strict';
 
 define(['handlebars', 'moment'], function(Handlebars, moment) {
@@ -20,27 +20,25 @@ define(['handlebars', 'moment'], function(Handlebars, moment) {
         var lHour = 'h';
         var lMin = '\'';
         var finalResult = '';
-        var finalResultText = '';
         var count = 1;
-        var timeUnits = 'h';
         if (min >= 0 && min < 60) {
-            finalResult = '< ' + count + 'h';
+            finalResult = '< ' + count + lHour;
             if (showMinutes !== undefined && showMinutes === true) {
                 count = Math.round(min);
                 finalResult = count + lMin;
             }
 
         } else if (days < 2) {
-            count = Math.round(hours);
+            count = Math.floor(hours);
             finalResult = count + lHour;
         } else if ((days >= 2) && (days <= 60)) {
-            count = Math.round(days);
+            count = Math.floor(days);
             finalResult = count + lDay;
         } else if ((months < 24) && (days > 60)) {
-            count = Math.round(months);
+            count = Math.floor(months);
             finalResult = count + lMonth;
         } else if (months >= 24) {
-            count = Math.round(years);
+            count = Math.floor(years);
             finalResult = count + lYear;
         }
         return finalResult;

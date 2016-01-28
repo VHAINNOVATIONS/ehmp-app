@@ -1,18 +1,1 @@
-var dependencies = [
-    'backbone',
-    'marionette',
-    'underscore'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(ADK, Backbone, Marionette, _) {
-    'use strict';
-    var Util = {};
-  
-    Util.getModalTitle = function(model) {
-        return 'CCD Document - ' + model.get('name');
-    };
-
-    return Util;
-}
+define(["backbone","marionette","underscore"],function(e,n,t){"use strict";var r={};return r.getModalTitle=function(e){return"CCD Document - "+e.get("name")},r});

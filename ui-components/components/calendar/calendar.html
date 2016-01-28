@@ -1,0 +1,176 @@
+<h3>Calendar</h3>
+<div class="description">
+    <p><strong><i class="fa fa-leanpub"></i> Description:</strong> The calendar allows the user to quickly enter or select a date. The user can enter in a date through the text field by using the keyboard, or the user can select a date by using the popup calendar.</p>
+    <p><strong><i class="fa fa-wheelchair"></i> 508 Guidelines:</strong> A calendar uses the input field, which will follow the same guidelines as in the form elements section. To pass 508 compliance, the input field is considered the alternative view, which will allow a keyboard user to type in a date. The title attribute explains what date format must be used, for example, MM/DD/YYYY. </p>
+    <p><strong><i class="fa fa-lightbulb-o"></i> TIP:</strong> If the calendar is wthin an existing form, remove the form attributes below and change the action attribute to "get" or "post". To allow only numeric inputs, add in validation for the input field.</p>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div id="calendar-copy">
+            <div class="form-group">
+                <label for="calendar">Calendar</label>
+                <div class="input-group date">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                    <input type="text" id="calendar" class="form-control" title="Please enter in a date in the following format, MM/DD/YYYY" placeholder="MM/DD/YYYY" />
+                </div>
+            </div>
+        </div>
+        <hr />
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div id="calendardropdown">
+            <div class="form-group">
+                <label for="calendar2">Calendar With Dropdown</label>
+                <div class="input-group">
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" title="Press enter to view menu then press tab to select date format">
+                            <span class="caret"></span>
+                            <span class="sr-only">Press enter to view menu then press tab to select date format</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="javascript:dateFormat('MM/DD/YYYY')" title="Press enter to select.">MM/DD/YYYY</a></li>
+                            <li><a href="javascript:dateFormat('MM/YYYY')" title="Press enter to select.">MM/YYYY</a></li>
+                            <li><a href="javascript:dateFormat('YYYY')" title="Press enter to select.">YYYY</a></li>
+                        </ul>
+                    </div>
+                    <span class="input-group-addon date-format" aria-hidden="true"><i class="fa fa-calendar"></i></span>
+                    <input type="text" id="calendar2" class="form-control" title="Please enter in a date in the following format, MM/DD/YYYY" placeholder="MM/DD/YYYY" />
+                </div>
+            </div>
+        </div>
+        <hr />
+    </div>
+</div>
+<div role="tabpanel" class="tabpanel">
+    <ul role="tablist" class="nav nav-tabs">
+        <li role="presentation" class="active"><a href="#markup-calendar" aria-controls="markup-calendar" role="tab" data-toggle="tab">Calendar</a></li>
+        <li role="presentation"><a href="#calendar-js" aria-controls="calendar-js" role="tab" data-toggle="tab">JavaScript Code</a></li>
+        <li role="presentation"><a href="#markup-calendardropdown" aria-controls="markup-calendardropdown" role="tab" data-toggle="tab">Calendar with dropdown</a></li>
+        <li role="presentation"><a href="#calendardropdown-js" aria-controls="calendardropdown-js" role="tab" data-toggle="tab">JavaScript Code</a></li>
+    </ul>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="markup-calendar">
+            <pre>
+&lt;div class=&quot;form-group&quot;&gt;
+    &lt;label for=&quot;calendar&quot;&gt;Calendar&lt;/label&gt;
+    &lt;div class=&quot;input-group date&quot;&gt;
+        &lt;span class=&quot;input-group-addon&quot;&gt;&lt;i class=&quot;fa fa-calendar&quot;&gt;&lt;/i&gt;&lt;/span&gt;
+        &lt;input type=&quot;text&quot; id=&quot;calendar&quot; class=&quot;form-control&quot; title=&quot;Please enter in a date in the following format, MM/DD/YYYY&quot; placeholder=&quot;MM/DD/YYYY&quot; /&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+            </pre>
+            <a onclick="copyToClipboard('calendar-copy')" role="button" tabindex="0" class="btn btn-default" data-trigger="focus" data-toggle="popover" data-placement="top" data-content="Copied" data-template='<div class="popover popover-sm" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'>Copy</a>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="calendar-js">
+            <pre>
+&lt;script&gt;
+$(function() {
+    $('.input-group.date').datepicker({
+        todayBtn: &quot;linked&quot;,
+        orientation: &quot;top left&quot;,
+        autoclose: true,
+        todayHighlight: true
+    });
+});
+&lt;/script&gt;
+            </pre>
+            <a onclick="copyToClipboard('calendar-js-copy')" role="button" tabindex="0" class="btn btn-default" data-trigger="focus" data-toggle="popover" data-placement="top" data-content="Copied" data-template='<div class="popover popover-sm" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'>Copy</a>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="markup-calendardropdown">
+            <pre>
+&lt;div class="row"&gt;
+    &lt;div class="col-xs-12"&gt;
+        &lt;div id="calendardropdown"&gt;
+            &lt;div class="form-group"&gt;
+                &lt;label for="calendar2"&gt;Calendar With Dropdown&lt;/label&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;div class="input-group-btn"&gt;
+                        &lt;button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"&gt;
+                            &lt;span class="caret"&gt;&lt;/span&gt;
+                            &lt;span class="sr-only"&gt;Press enter to view and select date format&lt;/span&gt;
+                        &lt;/button&gt;
+                        &lt;ul class="dropdown-menu"&gt;
+                            &lt;li&gt;&lt;a href="javascript:void(0)" title="Press enter to select."&gt;MM/DD/YYYY&lt;/a&gt;&lt;/li&gt;
+                            &lt;li&gt;&lt;a href="javascript:void(0)" title="Press enter to select."&gt;MM/YYYY&lt;/a&gt;&lt;/li&gt;
+                            &lt;li&gt;&lt;a href="javascript:void(0)" title="Press enter to select."&gt;YYYY&lt;/a&gt;&lt;/li&gt;
+                        &lt;/ul&gt;
+                    &lt;/div&gt;
+                    &lt;span class="input-group-addon date-format" aria-hidden="true"&gt;&lt;i class="fa fa-calendar"&gt;&lt;/i&gt;&lt;/span&gt;
+                    &lt;input type="text" id="calendar2" class="form-control" title="Please enter in a date in the following format, MM/DD/YYYY" placeholder="MM/DD/YYYY" /&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;hr /&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+            </pre>
+            <a onclick="copyToClipboard('calendardropdown-js-copy')" role="button" tabindex="0" class="btn btn-default" data-trigger="focus" data-toggle="popover" data-placement="top" data-content="Copied" data-template='<div class="popover popover-sm" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'>Copy</a>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="calendardropdown-js">
+            <pre>
+&lt;script&gt;
+$(function() {
+    $('.input-group-addon.date-format').datepicker({
+        todayBtn: &quot;linked&quot;,
+        orientation: &quot;top left&quot;,
+        autoclose: true,
+        todayHighlight: true
+    });
+});
+&lt;/script&gt;
+            </pre>
+            <a onclick="copyToClipboard('calendardropdown-js-copy')" role="button" tabindex="0" class="btn btn-default" data-trigger="focus" data-toggle="popover" data-placement="top" data-content="Copied" data-template='<div class="popover popover-sm" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'>Copy</a>
+        </div>
+    </div>
+</div>
+<script src="js/bootstrap-datepicker.js"></script>
+<div id="calendar-js-copy">
+    <script>
+    $(function() {
+        $('.input-group.date').each(function() {
+            $(this).datepicker({
+                todayBtn: "linked",
+                orientation: "top left",
+                autoclose: true,
+                todayHighlight: true,
+                showOnFocus: false
+            }).children('input[type="text"]').on('focus', function() {
+                $(this).parent().datepicker('hide');
+            });
+        });
+    });
+    </script>
+</div>
+<div id="calendardropdown-js-copy">
+    <script>
+    $(function() {
+        $('.input-group-addon.date-format').each(function() {
+            $(this).datepicker({
+                todayBtn: "linked",
+                orientation: "top left",
+                autoclose: true,
+                todayHighlight: true,
+                showOnFocus: false
+            }).children('input[type="text"]').on('focus', function() {
+                $(this).parent().datepicker('hide');
+            });
+        });
+    });
+
+    var dateFormat = function(f) {
+        if (f == "MM/YYYY") {
+            $("#calendar2").attr("placeholder", "MM/YYYY");
+            $("#calendar2").attr("title", "Please enter in a date in the following format, MM/YYYY");
+        } else if (f == "YYYY") {
+            $("#calendar2").attr("placeholder", "YYYY");
+            $("#calendar2").attr("title", "Please enter in a date in the following format, YYYY");
+        } else {
+            $("#calendar2").attr("placeholder", "MM/DD/YYYY");
+            $("#calendar2").attr("title", "Please enter in a date in the following format, MM/DD/YYYY");
+        }
+        $("#calendar2").focus();
+    }
+    </script>
+</div>

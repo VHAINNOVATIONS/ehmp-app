@@ -1,0 +1,1 @@
+define(["backbone","marionette","underscore","app/applets/task_list/views/taskListView"],function(e,t,i,n){var a={id:"task_list",getRootView:function(e){return ADK.Views.AppletControllerView.extend({viewType:e})},viewTypes:[{type:"expanded",view:n,chromeEnabled:!0}],defaultViewType:"expanded"};return a});

@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>eHMP Bootstrap UI Library - Overview</title>
+    <link rel="stylesheet" href="../../_assets/css/vendor.css" />
+    <link rel="stylesheet" href="../../_assets/css/adk.css" />
+    <link rel="stylesheet" href="../../app/css/applets.css" />
+    <link rel="stylesheet" href="../css/main-styles.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,300,600,700" />
+    <script src="../js/jquery-1.11.2.min.js"></script>
+</head>
+
+<body>
+    <br><br><br>
+    <div class="applet-chrome ftar-container">
+        <div class="applet-toolbar">
+            <h4 class="pull-left">Encounters</h4>
+            <p class="sr-only">Description of the information contained inside this panel</p>
+            <ul class="tool-icons">
+                <li>
+                    <button type="button" class="btn btn-sm btn-link applet-refresh-button " title="Press enter to refresh panel data">
+                        <i class="fa fa-refresh"></i>
+                        <span class="sr-only">Press enter to refresh the data.</span>
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="btn btn-sm btn-link applet-filter-button" title="Please enter in text to filter data, and then press enter when complete" data-toggle="popover" data-placement="top" data-content="<div class='filter-results'>
+                    <form class='backgrid-filter form-search all-margin-no'>
+                        <fieldset>
+                            <legend class='sr-only'>Search for filter</legend>
+                            <label class='sr-only' for='input-filter-search'>Enter Filter</label>
+                            <span class='search'>&nbsp;</span>
+                            <input id='input-filter-search' type='search' title='Enter Filter (special characters not allowed)' placeholder='Enter your text filter'>
+                            <a class='clear' data-backgrid-action='clear' href='#'>
+                                <i class='fa fa-times'></i>
+                                <span class='sr-only'>Press enter to clear filter text</span>
+                            </a>
+                            <div class='filter-container hidden collapse in'>
+                                <div class='udaf-border'></div>
+                                <div class='udaf'></div>
+                            </div>
+                        </fieldset>
+                    </form>
+                    </div>">
+                        <i class="fa fa-filter"></i>
+                        <span class="filter-name"></span>
+                        <span class="sr-only">Press enter to open the filter text box.</span>
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="btn btn-sm btn-link applet-maximize-button" title="Press enter to expand the applet" aria-hidden="true">
+                        <span class="fa fa-expand">
+                            <span class="sr-only">Press enter to expand the applet</span>
+                        </span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="main-header clear">
+            <div class="percent-width-91"><span>Encounters</span></div>
+            <div><span>Last</span></div>
+        </div>
+        <div class="accordion-container panel-group small ftar applet-scrolling-data" id="accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingOne">
+                    <div class="panel-title">
+                        <a class="collapsed accordion-toggle" data-toggle="collapse" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                            <div class="sr-only">You are on an accordion heading. Press enter to expand the accordion</div>
+                            <div class="percent-width-60">
+                                <div>Admissions 1
+                                    <div class="label applet-badges label-panel" aria-label="Lab Result">
+                                        <span class="sr-only">Number of results</span>22
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="percent-width-28">
+                                <span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                            </div>
+                            <div class="percent-width-10 text-center"><span>5d</span></div>
+                        </a>
+                    </div>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                    <div class="panel-body">
+                        <div class="faux-table-container">
+                            <div class="faux-table all-margin-no">
+                                <div class="header table-row">
+                                    <div class="table-cell percent-width-70">
+                                        <div>Visit Type</div>
+                                    </div>
+                                    <div class="table-cell percent-width-19">
+                                        <div>Occurance</div>
+                                    </div>
+                                    <div class="table-cell percent-width-2">
+                                        <div>Last</div>
+                                    </div>
+                                </div>
+                                <div class="body">
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="table-cell num-chart percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>3h</span>
+                                        </div>
+                                    </div>
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="num-chart table-cell percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>10d</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingTwo">
+                    <div class="panel-title">
+                        <a class="collapsed accordion-toggle" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            <div class="sr-only"><span>You are on an accordion heading. Press enter to expand the accordion</span></div>
+                            <div class="percent-width-60">
+                                <div>Admissions 2
+                                    <div class="label applet-badges label-panel" aria-label="Lab Result">
+                                        <span class="sr-only">Number of results</span>22
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="percent-width-28"><span>
+                                <span class="high-chart-placeholder" aria-hidden="true"></span>
+                            </span></div>
+                            <div class="percent-width-10 text-center"><span>5d</span></div>
+                        </a>
+                    </div>
+                </div>
+                <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                    <div class="panel-body">
+                        <div class="faux-table-container">
+                            <div class="faux-table all-margin-no">
+                                <div class="header table-row">
+                                    <div class="table-cell percent-width-70">
+                                        <div>Visit Type</div>
+                                    </div>
+                                    <div class="table-cell percent-width-19">
+                                        <div>Occurance</div>
+                                    </div>
+                                    <div class="table-cell percent-width-2">
+                                        <div>Last</div>
+                                    </div>
+                                </div>
+                                <div class="body">
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="table-cell num-chart percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>10h</span>
+                                        </div>
+                                    </div>
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="num-chart table-cell percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>6h</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingThree">
+                    <div class="panel-title">
+                        <a class="collapsed accordion-toggle" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            <div class="sr-only"><span>You are on an accordion heading. Press enter to expand the accordion</span></div>
+                            <div class="percent-width-60">
+                                <div>Admissions 3
+                                    <div class="label applet-badges label-panel" aria-label="Lab Result">
+                                        <span class="sr-only">Number of results</span>22
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="percent-width-28"><span>
+                                <span class="high-chart-placeholder" aria-hidden="true"></span>
+                            </span></div>
+                            <div class="percent-width-10 text-center"><span>5d</span></div>
+                        </a>
+                    </div>
+                </div>
+                <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                    <div class="panel-body">
+                        <div class="faux-table-container">
+                            <div class="faux-table all-margin-no">
+                                <div class="header table-row">
+                                    <div class="table-cell percent-width-70">
+                                        <div>Visit Type</div>
+                                    </div>
+                                    <div class="table-cell percent-width-19">
+                                        <div>Occurance</div>
+                                    </div>
+                                    <div class="table-cell percent-width-2">
+                                        <div>Last</div>
+                                    </div>
+                                </div>
+                                <div class="body">
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="table-cell num-chart percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>3h</span>
+                                        </div>
+                                    </div>
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="num-chart table-cell percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>10d</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingFour">
+                    <div class="panel-title">
+                        <a class="collapsed accordion-toggle" data-toggle="collapse" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                            <div class="sr-only"><span>You are on an accordion heading. Press enter to expand the accordion</span></div>
+                            <div class="percent-width-60">
+                                <div>Admissions 4
+                                    <div class="label applet-badges label-panel" aria-label="Lab Result">
+                                        <span class="sr-only">Number of results</span>22
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="percent-width-28"><span>
+                                <span class="high-chart-placeholder" aria-hidden="true"></span>
+                            </span></div>
+                            <div class="percent-width-10 text-center"><span>5d</span></div>
+                        </a>
+                    </div>
+                </div>
+                <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+                    <div class="panel-body">
+                        <div class="faux-table-container">
+                            <div class="faux-table all-margin-no">
+                                <div class="header table-row">
+                                    <div class="table-cell percent-width-70">
+                                        <div>Visit Type</div>
+                                    </div>
+                                    <div class="table-cell percent-width-19">
+                                        <div>Occurance</div>
+                                    </div>
+                                    <div class="table-cell percent-width-2">
+                                        <div>Last</div>
+                                    </div>
+                                </div>
+                                <div class="body">
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="table-cell num-chart percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>10h</span>
+                                        </div>
+                                    </div>
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="num-chart table-cell percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>6h</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingFive">
+                    <div class="panel-title">
+                        <a class="collapsed accordion-toggle" data-toggle="collapse" href="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                            <div class="sr-only"><span>You are on an accordion heading. Press enter to expand the accordion</span></div>
+                            <div class="percent-width-60">
+                                <div>Admissions 5
+                                    <div class="label applet-badges label-panel" aria-label="Lab Result">
+                                        <span class="sr-only">Number of results</span>22
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="percent-width-28"><span>
+                                <span class="high-chart-placeholder" aria-hidden="true"></span>
+                            </span></div>
+                            <div class="percent-width-10 text-center"><span>5d</span></div>
+                        </a>
+                    </div>
+                </div>
+                <div id="collapseFive" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive">
+                    <div class="panel-body">
+                        <div class="faux-table-container">
+                            <div class="faux-table all-margin-no">
+                                <div class="header table-row">
+                                    <div class="table-cell percent-width-70">
+                                        <div>Visit Type</div>
+                                    </div>
+                                    <div class="table-cell percent-width-19">
+                                        <div>Occurance</div>
+                                    </div>
+                                    <div class="table-cell percent-width-2">
+                                        <div>Last</div>
+                                    </div>
+                                </div>
+                                <div class="body">
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="table-cell num-chart percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>3h</span>
+                                        </div>
+                                    </div>
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="num-chart table-cell percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>10d</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingSix">
+                    <div class="panel-title">
+                        <a class="collapsed accordion-toggle" data-toggle="collapse" href="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                            <div class="sr-only"><span>You are on an accordion heading. Press enter to expand the accordion</span></div>
+                            <div class="percent-width-60">
+                                <div>Admissions 6
+                                    <div class="label applet-badges label-panel" aria-label="Lab Result">
+                                        <span class="sr-only">Number of results</span>22
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="percent-width-28"><span>
+                                <span class="high-chart-placeholder" aria-hidden="true"></span>
+                            </span></div>
+                            <div class="percent-width-10 text-center"><span>5d</span></div>
+                        </a>
+                    </div>
+                </div>
+                <div id="collapseSix" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSix">
+                    <div class="panel-body">
+                        <div class="faux-table-container">
+                            <div class="faux-table all-margin-no">
+                                <div class="header table-row">
+                                    <div class="table-cell percent-width-70">
+                                        <div>Visit Type</div>
+                                    </div>
+                                    <div class="table-cell percent-width-19">
+                                        <div>Occurance</div>
+                                    </div>
+                                    <div class="table-cell percent-width-2">
+                                        <div>Last</div>
+                                    </div>
+                                </div>
+                                <div class="body">
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="table-cell num-chart percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>10h</span>
+                                        </div>
+                                    </div>
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="num-chart table-cell percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>6h</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingSeven">
+                    <div class="panel-title">
+                        <a class="collapsed accordion-toggle" data-toggle="collapse" href="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                            <div class="sr-only"><span>You are on an accordion heading. Press enter to expand the accordion</span></div>
+                            <div class="percent-width-60">
+                                <div>Admissions 7
+                                    <div class="label applet-badges label-panel" aria-label="Lab Result">
+                                        <span class="sr-only">Number of results</span>22
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="percent-width-28"><span>
+                                <span class="high-chart-placeholder" aria-hidden="true"></span>
+                            </span></div>
+                            <div class="percent-width-10 text-center"><span>5d</span></div>
+                        </a>
+                    </div>
+                </div>
+                <div id="collapseSeven" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSeven">
+                    <div class="panel-body">
+                        <div class="faux-table-container">
+                            <div class="faux-table all-margin-no">
+                                <div class="header table-row">
+                                    <div class="table-cell percent-width-70">
+                                        <div>Visit Type</div>
+                                    </div>
+                                    <div class="table-cell percent-width-19">
+                                        <div>Occurance</div>
+                                    </div>
+                                    <div class="table-cell percent-width-2">
+                                        <div>Last</div>
+                                    </div>
+                                </div>
+                                <div class="body">
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="table-cell num-chart percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>3h</span>
+                                        </div>
+                                    </div>
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="num-chart table-cell percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>10d</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingEight">
+                    <div class="panel-title">
+                        <a class="collapsed accordion-toggle" data-toggle="collapse" href="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
+                            <div class="sr-only"><span>You are on an accordion heading. Press enter to expand the accordion</span></div>
+                            <div class="percent-width-60">
+                                <div>Admissions 8
+                                    <div class="label applet-badges label-panel" aria-label="Lab Result">
+                                        <span class="sr-only">Number of results</span>22
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="percent-width-28"><span>
+                                <span class="high-chart-placeholder" aria-hidden="true"></span>
+                            </span></div>
+                            <div class="percent-width-10 text-center"><span>5d</span></div>
+                        </a>
+                    </div>
+                </div>
+                <div id="collapseEight" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingEight">
+                    <div class="panel-body">
+                        <div class="faux-table-container">
+                            <div class="faux-table all-margin-no">
+                                <div class="header table-row">
+                                    <div class="table-cell percent-width-70">
+                                        <div>Visit Type</div>
+                                    </div>
+                                    <div class="table-cell percent-width-19">
+                                        <div>Occurance</div>
+                                    </div>
+                                    <div class="table-cell percent-width-2">
+                                        <div>Last</div>
+                                    </div>
+                                </div>
+                                <div class="body">
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="table-cell num-chart percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>10h</span>
+                                        </div>
+                                    </div>
+                                    <div class="table-row">
+                                        <div class="table-cell percent-width-70">
+                                            <span>Clinic</span>
+                                        </div>
+                                        <div class="num-chart table-cell percent-width-19">
+                                            <span><span>41</span><span class="high-chart-placeholder" aria-hidden="true"></span></span>
+                                        </div>
+                                        <div class="table-cell percent-width-2">
+                                            <span>6h</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../js/jquery-1.11.2.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/typeahead.js"></script>
+    <script>
+    $(function() {
+        $('[data-toggle="popover"]').popover({
+            html: true
+        });
+    });
+    </script>
+</body>
+
+</html>

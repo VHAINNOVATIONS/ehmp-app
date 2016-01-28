@@ -1,18 +1,14 @@
-'use strict';
-var dependencies = [
+define([
     'backbone',
     'marionette',
     'underscore',
     'hbs!main/components/adk_nav/navTemplate',
-    'main/ADK',
-    'app/screens/ScreensManifest'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, _, navTemplate, ADK, ScreensManifest) {
+    'api/UserService',
+    'api/Messaging'
+], function(Backbone, Marionette, _, navTemplate, UserService, Messaging) {
+    'use strict';
     return Backbone.Marionette.ItemView.extend({
-        model: ADK.UserService.getUserSession(),
+        model: UserService.getUserSession(),
         template: navTemplate,
         className: 'col-md-12 navbar-fixed-top heightSmall',
 
@@ -21,7 +17,7 @@ function onResolveDependencies(Backbone, Marionette, _, navTemplate, ADK, Screen
         },
 
         logout: function() {
-            ADK.Messaging.trigger('app:logout');
+            Messaging.trigger('app:logout');
         }
     });
-}
+});

@@ -1,30 +1,23 @@
 .editorTop{
-    margin: 0px 20px 20px 20px;
-    padding: 20px 50px 0px;
-    #doneEditing {
-    float: right;
-    right: 10px;
-    background-color: #455a64;
-    border-radius: 5px;
-    padding: 5px 15px;
-    color: #FFF;
-    text-transform: uppercase;
-    font-weight:bold;
+    padding: 15px 50px;
+    background-color: #cfd8dc;
+    #exitEditing {
+        float: right;
+        right: 10px;
+        background-color: #455a64;
+        border-radius: 5px;
+        padding: 5px 15px;
+        color: #FFF;
+        text-transform: uppercase;
+        font-weight:bold;
     }
     input#searchApplets{
-        border-radius: 5px;
-        width: 400px;
-        height: 22px;
         border: 1px solid gray;
     }
     button:hover{
-            background-color:#FFF;
-            border:1px solid #028482 ;
+        background-color:#FFF;
+        border:1px solid #028482 ;
     }
-}
-
-#mainOverlayRegion{
-    background-color: #cfd8dc;
 }
 
 .carousel {
@@ -99,7 +92,7 @@
         width: 80px;
         height: 55px;
         padding: 10px 3px;
-        border: 1px solid #00cccc;
+        border: 1px solid $primary;
         background-color: #ECEFF1;
         font-size: 9px;
         position: absolute;
@@ -165,13 +158,19 @@
         list-style: none;
         min-height: 300px;
         li {
-            background-color: white;
             color: #333333;
             padding: 10px 5px;
             font-weight: bold;
             border-radius: 4px;
             text-align: center;
             word-break: word-break;
+        }
+        li:not(.dragHere){
+            background-color: white;
+        }
+        .preview-holder {
+            border: 3px dashed #fff;
+            color: #fff;
         }
         .view-switchboard {
             border: 1px solid grey;
@@ -187,8 +186,9 @@
             -webkit-transform: translate(-20em, -6.5em);
             -ms-transform: translate(-20em, -6.5em);
             transform: translate(-20em, -6.5em);
-            top:6em!important;
-            left:50%!important;
+            top:6em;
+            left:50%;
+            position: relative;
             z-index: 100;
         }
         .options-list {
@@ -213,7 +213,7 @@
         margin-right: 2px;
     }
     .edit-applet:hover, .edit-applet:active, .edit-applet:focus{
-        color:#00CCCC;
+        color: $primary-light;
     }
     .applet-exit-options-button {
         float: right;
@@ -231,4 +231,21 @@
     width: 100%;
     overflow-y: hidden;
     overflow-x: hidden;
+}
+
+#boundaryIndicator{
+    position: fixed;
+    margin-left: 2px;
+    margin-top: 65px;
+    height: 380px;
+    color: #00CCFF;
+    text-align: center;
+    font-weight: bold;
+    .wireframe{
+        margin-bottom: 5px;
+        border: solid 1px #00CCFF;
+        width: 100%;
+        height: 100%;
+        border-radius: 5px;
+    }
 }

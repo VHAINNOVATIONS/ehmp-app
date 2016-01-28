@@ -1,19 +1,15 @@
-var dependencies = [
+define([
     'main/ADK',
     'backbone',
     'marionette',
     'underscore',
     'highcharts',
     'moment'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(ADK, Backbone, Marionette, _, Highcharts, moment) {
+], function(ADK, Backbone, Marionette, _, Highcharts, moment) {
     'use strict';
 
     var rect;
-    var selectionColor = 'rgba(59, 96, 102, .8)';
+    var selectionColor = '#003E4F';
 
     return {
         chartConfig: {
@@ -27,9 +23,6 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, Highcharts, moment)
             tooltip: {
                 enabled: true
             },
-            legend: {
-                enabled: false
-            },
             title: {
                 text: null,
                 style: {
@@ -41,10 +34,10 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, Highcharts, moment)
                     text: null
                 },
                 type: 'datetime',
-                dateTimeLabelFormats: {
-                    month: '%Y',
-                    year: '%Y'
-                },
+                // dateTimeLabelFormats: {
+                //      month: '%Y',
+                //      year: '%Y'
+                //  },
                 tickLength: 0,
                 gridLineWidth: 0,
                 minorGridLineWidth: 0,
@@ -86,17 +79,15 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, Highcharts, moment)
                 }
             },
             series: [{
-                name: 'Outpatient',
-                data: [
-                ],
-                color: '#BFCAD0',
-                id: 'outpatient'
-            }, {
                 name: 'Inpatient',
-                data: [
-                ],
+                data: [],
                 color: '#BFCAD0',
                 id: 'inpatient'
+            }, {
+                name: 'Outpatient',
+                data: [],
+                color: '#BFCAD0',
+                id: 'outpatient'
             }, {
                 name: '',
                 data: [
@@ -109,4 +100,4 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, Highcharts, moment)
         },
         selectionColor: selectionColor
     };
-}
+});

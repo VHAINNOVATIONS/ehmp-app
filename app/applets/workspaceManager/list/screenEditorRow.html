@@ -1,0 +1,85 @@
+<span class="sr-only">Table Row.</span>
+{{#if predefined}}
+    <div class="col-xs-7 all-padding-no">
+        <div class="col-xs-4 all-padding-no">
+            <div class="col-xs-1 text-center border-right all-padding-no">
+                <button type="button" class="default-workspace-btn btn btn-sm btn-icon all-padding-no" title="Press enter to set this workspace as the default screen that you will go to after logging in.">
+                    <span class="sr-only">Make Default.</span>
+                    <i class="fa fa-star-o"></i>
+                </button>
+                <!-- {{ui-button "Make Default." srOnlyLabel=true classes="btn-icon all-padding-no" title="Press enter to set this workspace as the default screen you will go to after logging in." icon="fa-star-o" size="sm"}} -->
+            </div>
+            <div class="col-xs-11 editor-title border-right">
+                <i class="fa fa-lock"></i>&nbsp;
+                <span class="predefined-title">{{title}}</span>
+            </div>
+        </div>
+        <button class="col-xs-1 show-associations border-right border-left btn btn-icon" id="association-trigger-{{ id }}" data-toggle="popover" title="Press enter to open a popover to manage the conditions associated with this workspace">
+            <span class="sr-only">Associated Conditions: </span>
+            <i class="fa fa-tags pull-left"></i>
+            <div class="associations-counter associations-counter-region"></div>
+        </button>
+        <div class="col-xs-7 border-right">{{description}}</div>
+    </div>
+{{else}}
+    <div class="col-xs-7 all-padding-no">
+        <div class="col-xs-4 all-padding-no">
+            <div class="col-xs-1 text-center border-right all-padding-no">
+                <button type="button" class="default-workspace-btn btn btn-sm btn-icon all-padding-no" title="Press enter to set this workspace as the default screen that you will go to after logging in.">
+                    <span class="sr-only">Make Default.</span>
+                    <i class="fa fa-star-o"></i>
+                </button>
+                <!-- {{ui-button "Make Default." srOnlyLabel=true classes="btn-icon all-padding-no" title="Press enter to set this workspace as the default screen you will go to after logging in." icon="fa-star-o" size="sm"}} -->
+            </div>
+            <div class="col-xs-11 form-group has-feedback">
+                <form action="#" method="post" class="workspace-editor editor-title">
+                    <label class="control-label sr-only" for="title-{{id}}">Workspace Title.</label>
+                    <input required id="tile-{{id}}" name="tile-{{id}}" type="text" class="editor-title-element editor-input-element form-control" value="{{title}}" origValue="{{title}}" maxlength='30' title="This input is used to change the title of the workspace. It cannot be left blank. Press enter to save your changes.">
+                    <span class="glyphicon form-control-feedback editor-glyphicon" aria-hidden="true"></span>
+                    <span class="sr-only" tabindex="-1"></span>
+                </form>
+            </div>
+        </div>
+        <button class="col-xs-1 show-associations border-right border-left btn btn-icon" id="association-trigger-{{ id }}" data-toggle="popover" title="Press enter to open a popover to manage the conditions associated with this workspace">
+            <span class="sr-only">Associated Conditions: </span>
+            <i class="fa fa-tags pull-left"></i>
+            <div class="associations-counter associations-counter-region"></div>
+        </button>
+        <div class="col-xs-7 form-group border-right has-feedback">
+            <form action="#" method="post" class="workspace-editor editor-description">
+                <label class="control-label sr-only" for="description-{{id}}">Workspace Description.</label>
+                <input type="text" class="editor-input-element form-control" value="{{description}}" origValue="{{description}}" placeholder="Add description" maxlength='140' title="Add or change your description of this workspace. Press enter to save your changes.">
+                <span class="glyphicon form-control-feedback editor-glyphicon" aria-hidden="true"></span>
+                <span class="sr-only" tabindex="-1"></span>
+            </form>
+        </div>
+    </div>
+    {{/if}}
+    <div class="col-xs-2">{{author}}</div>
+    <div class="col-xs-3">
+        <div class="col-xs-4 border-left all-padding-no">
+            <div class="col-xs-4 border-right all-padding-no text-center">
+                {{ui-button "Duplicate Workspace." srOnlyLabel=true classes="btn-icon duplicate-worksheet" title="Press enter to duplicate this workspace." icon="fa-files-o" size="sm"}}
+            </div>
+            <div class="col-xs-4 border-right all-padding-no text-center">
+                {{ui-button "Rearrange Workspace." srOnlyLabel=true classes="btn-icon rearrange-worksheet" title="Press enter to activate rearrange mode, and then press the up or down arrow keys to reorder this workspace in your list of workspaces." icon="fa-arrows-v" size="sm"}}
+            </div>
+            <div class="col-xs-4 border-right all-padding-no text-center">
+                {{#if predefined}}
+                    {{ui-button "This is a premade workspace and cannot be deleted." srOnlyLabel=true classes="btn-icon" title="Press enter to open the dialog to delete this workspace." icon="fa-lock" size="sm" disabled=true}}
+                {{else}}
+                    {{ui-button "Delete Workspace." srOnlyLabel=true classes="btn-icon delete-worksheet" title="Press enter to open the dialog to delete this workspace." icon="fa-trash-o" size="sm"}}
+                {{/if}}
+            </div>
+        </div>
+        {{#if hasApplets}}
+            <button type="button" class="previewWorkspace btn btn-sm btn-icon border-right col-xs-4 top-margin-xs" title="Press enter to preview the applets on the {{title}} workspace." aria-hidden="true">
+                Preview
+            </button>
+          <!--   {{ui-button "Preview" classes="btn-icon border-right col-xs-4 top-margin-xs" title="Press enter to preview the applets on this workspace." size="sm" extraAttributes=[{key="aria-hidden", value: true}] }} -->
+            <a href="#" class="launch-screen btn btn-sm btn-icon" title="Press enter to launch the {{title}} workspace" onclick="return false;">Launch</a>
+        {{else}}
+            {{ui-button "Preview" classes="btn-icon border-right col-xs-4 top-margin-xs" title="Unable to preview an empty workspace. Please customize this workspace." size="sm" disabled=true extraAttributes=[{key="aria-hidden", value: true}] }}
+            <a href="#" class="customize-screen btn btn-sm btn-icon" title="Press enter to customize the {{title}} workspace." onclick="return false;">Customize</a>
+        {{/if}}
+    </div>

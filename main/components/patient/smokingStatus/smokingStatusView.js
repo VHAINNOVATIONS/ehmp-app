@@ -1,14 +1,13 @@
-var dependencies = [
+define([
     "backbone",
     "marionette",
     "underscore",
     "main/ADK",
+    "api/Messaging",
+    "api/ResourceService",
+    "api/UserService",
     "hbs!main/components/patient/smokingStatus/smokingStatusTemplate"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, _, ADK, smokingStatusTemplate) {
+], function(Backbone, Marionette, _, ADK, Messaging, ResourceService, UserService, smokingStatusTemplate) {
 
     var SmokingStatusModal = {
         displayModal: function(){
@@ -19,7 +18,11 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, smokingStatusTempla
                 footerView: self.getFooterView()
             };
 
-            ADK.showModal(self.getModalView(), modalOptions);
+            var modal = new ADK.UI.Modal({
+                view: self.getModalView(),
+                options:  modalOptions
+            });
+            modal.show();
             $('#mainModal').show();
         },
         getModalView: function(){
@@ -46,7 +49,7 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, smokingStatusTempla
                     'click #smokingStatusSave': 'handleNext'
                 },
                 handleNext: function(){
-                    var smokingStatusChannel = ADK.Messaging.getChannel('smokingstatus');
+                    var smokingStatusChannel = Messaging.getChannel('smokingstatus');
                     var selectedInput = $('#smokingStatusModal input:checked')[0];
                     var model = new SmokingStatusModel();
                     model.set('snowmedCode', selectedInput.value);
@@ -54,7 +57,7 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, smokingStatusTempla
                     model.set('text', statusText);
                     model.save(null, {
                         success:function() {
-                            ADK.hideModal();
+                            ADK.UI.Modal.hide();
                             smokingStatusChannel.command('smokingstatus:updated', statusText);
                         },
                         error: function() {
@@ -68,7 +71,7 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, smokingStatusTempla
     };
 
     function sendAuthentication(xhr, settings) {
-        var userSession = ADK.UserService.getUserSession(),
+        var userSession = UserService.getUserSession(),
             user = userSession.attributes.username,
             pass = userSession.attributes.password,
             token = user.concat(":", pass);
@@ -92,19 +95,19 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, smokingStatusTempla
 
         },
         url: function() {
-            var pid = ADK.PatientRecordService.getCurrentPatient().get('pid');
-            return ADK.ResourceService.buildUrl('smoking-status', {'pid' : pid});
+            var pid = ResourceService.PatientRecordService.getCurrentPatient().get('pid');
+            return ResourceService.buildUrl('smoking-status', {'pid' : pid});
         }
     });
 
     var SmokingStatusView  = {
         handleStatusChange: function(){
-            var patient = ADK.PatientRecordService.getCurrentPatient();
+            var patient = ResourceService.PatientRecordService.getCurrentPatient();
 
             if(patient.get('visit')){
                 SmokingStatusModal.displayModal();
             }else {
-                var visitChannel = ADK.Messaging.getChannel('visit');
+                var visitChannel = Messaging.getChannel('visit');
                 visitChannel.command('openVisitSelector', 'smokingstatus');
                 visitChannel.on('set-visit-success:smokingstatus', SmokingStatusModal.displayModal);
             }
@@ -112,4 +115,4 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, smokingStatusTempla
     };
 
     return SmokingStatusView;
-}
+});

@@ -1,0 +1,1 @@
+define(["backbone","marionette","hbs!app/applets/narrative_lab_results_grid/modal/errorTemplate"],function(e,t,r){"use strict";var a=e.Marionette.ItemView.extend({template:r});return a});

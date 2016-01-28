@@ -1,11 +1,8 @@
-'use strict';
-var dependencies = [
+define([
+    'backbone',
     'backbone.radio'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies() {
+], function(Backbone) {
+    'use strict';
 
     var Messaging = Backbone.Radio.channel('global');
 
@@ -14,4 +11,4 @@ function onResolveDependencies() {
     };
 
     return Messaging;
-}
+});

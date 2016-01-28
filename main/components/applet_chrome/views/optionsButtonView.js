@@ -1,24 +1,23 @@
-var dependencies = [
+define('main/components/applet_chrome/views/optionsButtonView', [
+    'backbone',
+    'marionette',
     'jquery',
     'underscore',
-    'hbs!main/components/applet_chrome/templates/optionsButtonTemplate'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, _, optionsButtonTemplate) {
+    'hbs!main/components/applet_chrome/templates/optionsButtonTemplate',
+    'hbs!main/components/applet_chrome/templates/exitOptionsButtonTemplate'
+], function(Backbone,Marionette,$, _, optionsButtonTemplate, exitOptionsButtonTemplate) {
     'use strict';
     var OptionsButtonView = Backbone.Marionette.ItemView.extend({
         tagName: 'span',
-        template: optionsButtonTemplate
-        // getTemplate: function() {
-        //     //if you are on full screen or a non-gridster screen, dont show the cog
-        //     if (this.model.attributes.appletConfig.fullScreen || ($('.gridster').length === 0)) {
-        //         return _.template('');
-        //     } else {
-        //         return optionsButtonTemplate;
-        //     }
-        // }
+        modelEvents: {
+            'change openContext': 'render'
+        },
+        getTemplate: function() {
+            if (this.model.get('openContext')) {
+                return exitOptionsButtonTemplate;
+            }
+            return optionsButtonTemplate;
+        }
     });
     return OptionsButtonView;
-}
+});

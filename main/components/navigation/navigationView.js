@@ -1,13 +1,9 @@
-var dependencies = [
+define([
     "backbone",
     "marionette",
     "underscore",
     "hbs!main/components/navigation/navigationTemplate"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, _, PatientHeaderTemplate) {
+], function(Backbone, Marionette, _, PatientHeaderTemplate) {
 
     var PatientHeaderView = Backbone.Marionette.ItemView.extend({
         template: PatientHeaderTemplate,
@@ -17,4 +13,4 @@ function onResolveDependencies(Backbone, Marionette, _, PatientHeaderTemplate) {
     });
 
     return PatientHeaderView;
-}
+});

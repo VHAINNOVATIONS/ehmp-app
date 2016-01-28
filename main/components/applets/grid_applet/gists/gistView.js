@@ -7,10 +7,9 @@
 // Team:        Jupiter
 // Description: 
 //----------------------------------------
-var dependencies = [
+define([
     "jquery",
     "underscore",
-    "main/ADK",
     "backbone",
     "marionette",
     "main/components/applets/grid_applet/gists/gistViewConfig",
@@ -20,10 +19,7 @@ var dependencies = [
     "hbs!main/components/applets/grid_applet/gists/templates/problemsHeader"
     //"hbs!main/components/applets/grid_applet/gists/templates/observationsHeader"
 
-];
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, _, ADK, Backbone, Marionette, CONFIG, helper, interventionsHeader, gistLayoutTemplate, problemsHeader,observationsHeader) {
+], function($, _, Backbone, Marionette, CONFIG, helper, interventionsHeader, gistLayoutTemplate, problemsHeader,observationsHeader) {
     'use strict';
     var AppletID = null;
     var CurrentPopover = null;
@@ -168,4 +164,4 @@ function onResolveDependencies($, _, ADK, Backbone, Marionette, CONFIG, helper, 
         },
     });
     return GistView;
-}
+});

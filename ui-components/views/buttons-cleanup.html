@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>eHMP Bootstrap UI Library - Overview</title>
+    <link rel="stylesheet" href="../../_assets/css/vendor.css" />
+    <link rel="stylesheet" href="../../_assets/css/adk.css" />
+    <link rel="stylesheet" href="../../app/css/applets.css" />
+    <link rel="stylesheet" href="../css/main-styles.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,300,600,700" />
+    <script src="../js/jquery-1.11.2.min.js"></script>
+</head>
+
+<body style="background: #fff;padding:0;">
+    <div class="container">
+        <h3>Buttons</h3>
+        <div class="description">
+            <p><strong><i class="fa fa-lightbulb-o"></i> TIP:</strong> The default and hover button state will appear the same for the eHMP application.</p>
+            <p><strong><i class="fa fa-lightbulb-o"></i> TIP:</strong> To disable a button, add the attribute "disabled".</p>
+        </div>
+        <div id="buttons-states-copy">
+            <button type="button" class="btn btn-default" title="Press enter to select">Active</button>
+            <button type="button" class="btn btn-default active" title="Press enter to select">Selected</button>
+            <button type="button" class="btn btn-default" aria-disabled="true" title="Press enter to select" disabled>Disabled</button>
+        </div>
+        <hr />
+        <h4>Button Options</h4>
+        <div id="button-options-copy">
+            <button type="button" class="btn btn-default" title="Press enter to select">Default</button>
+            <button type="button" class="btn btn-primary" title="Press enter to select">Primary</button>
+            <button type="button" class="btn btn-success" title="Press enter to select">Success</button>
+            <button type="button" class="btn btn-info" title="Press enter to select">Info</button>
+            <button type="button" class="btn btn-warning" title="Press enter to select">Warning</button>
+            <button type="button" class="btn btn-danger" title="Press enter to select">Danger</button>
+            <button type="button" class="btn btn-link" title="Press enter to select">Link</button>
+        </div>
+        <hr />
+        <h4>Buttons with icons</h4>
+        <div class="description">
+            <p><strong><i class="fa fa-lightbulb-o"></i> TIP:</strong> To add icons to button, view the <a href="docs/font-awesome-icons.pdf">Selected Fontawesome Icons</a> <span class="small">[PDF, 881KB]</span> and place the class inside the &lt;i&gt; tag.</p>
+        </div>
+        <div id="buttons-icons-copy">
+            <button type="button" class="btn btn-default" title="Press enter to view coversheet"><i class="fa fa-th"></i> Coversheet</button>
+            <button type="button" class="btn btn-default" title="Press enter to view timeline"><i class="fa fa-bar-chart"></i> Timeline</button>
+            <button type="button" class="btn btn-default" title="Press enter to view meds review"><i class="fa fa-clipboard"></i> Meds Review</button>
+            <button type="button" class="btn btn-default" title="Press enter to view documents"><i class="fa fa-file-text-o"></i> Documents</button>
+        </div>
+        <hr />
+        <h4>Size</h4>
+        <div class="description">
+            <p><strong><i class="fa fa-lightbulb-o"></i> TIP:</strong> To change the size of a button, add .btn-lg, .btn-sm, or .btn-sm</p>
+        </div>
+        <div id="buttons-size-copy">
+            <button type="button" class="btn btn-default btn-lg" title="Press enter to select">Large button</button>
+            <button type="button" class="btn btn-default" title="Press enter to select">Default button</button>
+            <button type="button" class="btn btn-default btn-sm" title="Press enter to select">Small button</button>
+        </div>
+        <hr />
+        <h4>Icons as Buttons</h4>
+        <h5>Icon that has the button padding</h5>
+        <button type="button" class="btn btn-icon" title="Press enter to select"><i class="fa fa-eye"><span class="sr-only">summary view button</span></i></button>
+        <hr />
+        <h4>Buttons in Postings</h4>
+        <div class="description">
+            <p><strong><i class="fa fa-leanpub"></i> Description:</strong> These buttons are meant specifically for the patient care information box.</p>
+        </div>
+        <div id="buttons-postings-copy">
+            <div data-toggle="tooltip" class="posting">
+                <button type="button" class="label label-danger" title="Press enter to view crisis notes">C</button>
+                <button type="button" class="label disabled" title="Press enter to view warnings">W</button>
+                <button type="button" class="label label-danger" title="Press enter to view allergies">A</button>
+                <button type="button" class="label label-danger" title="Press enter to view directives">D</button>
+                <button type="button" class="label label-danger" title="Press enter to view patient flags">F</button>
+            </div>
+        </div>
+        <hr />
+        <h4>Buttons in Applet Toolbar</h4>
+        <div class="description">
+            <p><strong><i class="fa fa-leanpub"></i> Description:</strong> These buttons are meant specifically for the applet toolbar for pills and tiles</p>
+        </div>
+        <div id="buttons-toolbar-copy">
+            <button type="button" class="btn btn-primary btn-toolbar" title="This is the information button. To view more information press enter to open a new window within the application"><i class="fa fa-info"></i><span class="sr-only">This is the information button. To view more information press enter to open a new window within the application</span></button>
+            <button type="button" class="btn btn-primary btn-toolbar" title="This is the details view button. To view more information press enter to open a new window within the application"><i class="fa fa-file-text-o"></i><span class="sr-only">This is the details view button. To view more information press enter to open a new window within the application</span></button>
+            <button type="button" class="btn btn-primary btn-toolbar" title="This is the summary view button. To view more information press enter to open a data table below"><i class="fa fa-eye"></i><span class="sr-only">This is the summary view button. To view more information press enter to open a data table below</span></button>
+        </div>
+        <hr />
+        <h4>Button with dropdown</h4>
+        <div class="description">
+            <p><strong><i class="fa fa-leanpub"></i> Description:</strong> Split buttons have dual functionality. The text side allows users to type in content and the button triggers a drop down menu with options that users can select.</p>
+            <p><strong><i class="fa fa-wheelchair"></i> 508 Guidelines:</strong> A text field uses the input field and the button uses a drop down menu, which will both follow the same guidelines as in the form elements section.</p>
+        </div>
+        <h4>Single button dropdown</h4>
+        <div id="single-buttons-copy">
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary btm-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Accept <span class="caret"></span>
+                <span class="sr-only">Press enter to toggle dropdown</span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a href="#" title="Please enter to accept">Accept</a></li>
+                <li><a href="#" title="Please enter to accept and add another">Accept & Add Another</a></li>
+                <li><a href="#" title="Please enter to accept and sign">Accept & Sign</a></li>
+            </ul>
+        </div>
+        </div>
+        <hr />
+        <h4>Split buttons with dropdown</h4>
+        <div id="split-buttons-copy">
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary btn-sm btn-divider" title="Please enter to accept">Accept</button>
+            <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="caret"></span>
+                <span class="sr-only">Press enter to toggle dropdown</span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a href="#" title="Please enter to accept">Accept</a></li>
+                <li><a href="#" title="Please enter to accept and add another">Accept & Add Another</a></li>
+                <li><a href="#" title="Please enter to accept and sign">Accept & Sign</a></li>
+            </ul>
+        </div>
+        </div>
+        <hr />
+        <h4>Dropup variation</h4>
+        <div id="split-dropup-copy">
+        <div class="btn-group dropup">
+            <button type="button" class="btn btn-primary btn-sm btn-divider" title="Please enter to accept">Accept</button>
+            <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="caret"></span>
+                <span class="sr-only">Press enter to toggle dropup</span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a href="#" title="Please enter to accept">Accept</a></li>
+                <li><a href="#" title="Please enter to accept and add another">Accept & Add Another</a></li>
+                <li><a href="#" title="Please enter to accept and sign">Accept & Sign</a></li>
+            </ul>
+        </div>
+        </div>
+        <hr />
+        <div id="text-dropdowns-copy">
+        <div class="col-xs-2">
+            <div class="control form-group">
+                <div class="input-group">
+                    <label for="dosage-unit">Dosage/Unit</label>
+                    <input class="form-control" type="text" title="Please enter in dsage/unit" id="dosage-unit" />
+                    <div class="input-group-btn">
+                        <label for="dosage-unit-select" class="sr-only">Dosage Unit</label>
+                        <select class="form-control btn-form-control" name="dosageUnit" title="Please select from the list" id="dosage-unit-select" required>
+                            <option> </option>
+                            <option>cc</option>
+                            <option>mL</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <hr />
+        <h4>Buttons Block</h4>
+        <div class="description">
+            <p><strong><i class="fa fa-leanpub"></i> Description:</strong> A button block spans the entire width of its parent.</p>
+        </div>
+        <div id="buttons-block-copy">
+        <button type="button" class="btn btn-default btn-block" title="Press enter to select">Button Block</button>
+        </div>
+        <hr /> 
+    </div>
+
+    <script src="../js/jquery-1.11.2.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/typeahead.js"></script>
+    <script>
+    $(function() {
+        $('[data-toggle="popover"]').popover({
+            html: true
+        });
+    });
+    </script>
+</body>
+
+</html>

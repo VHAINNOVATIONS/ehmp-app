@@ -1,14 +1,1 @@
-var dependencies = [
-	"backbone",
-	"marionette",
-	"underscore",
-	"hbs!app/applets/problems/modalView/table"
-];
-'use strict';
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, _, modalTemplate) {
-	return Backbone.Marionette.ItemView.extend({
-		template: modalTemplate
-	});
-}
+define(["backbone","marionette","underscore","hbs!app/applets/problems/modalView/table"],function(e,t,n,a){return e.Marionette.ItemView.extend({template:a})});

@@ -1,22 +1,20 @@
 'use strict';
-var dependencies = [
+define([
     'backbone',
     'jquery',
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, $) {
+    'api/Messaging'
+], function(Backbone, $, Messaging) {
     var Events = {
-        navigate: function(screenName, routeOptions) {
-            if(screenName.charAt(0) === '#') {
+        navigate: function(screenName, routeOptions, extraScreenDisplayOptions) {
+            if (screenName.charAt(0) === '#') {
                 screenName = screenName.slice(1);
             }
+            Messaging.trigger('screen:navigate');
             var globalChannel = Backbone.Wreqr.radio.channel('global');
-            globalChannel.commands.execute('screen:navigate', screenName, routeOptions);
+            globalChannel.commands.execute('screen:navigate', screenName, routeOptions, extraScreenDisplayOptions);
         },
         displayScreen: function(screenName) {
-            if(screenName.charAt(0) === '#') {
+            if (screenName.charAt(0) === '#') {
                 screenName = screenName.slice(1);
             }
             var globalChannel = Backbone.Wreqr.radio.channel('global');
@@ -25,4 +23,4 @@ function onResolveDependencies(Backbone, $) {
     };
 
     return Events;
-}
+});

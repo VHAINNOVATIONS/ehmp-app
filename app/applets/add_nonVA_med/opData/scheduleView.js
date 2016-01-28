@@ -1,10 +1,1 @@
-var dependencies = [
-    "app/applets/add_nonVA_med/opData/opDataUtil"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(opDataUtil) {
-
-    return opDataUtil.getComboBoxView('name');
-}
+define(["app/applets/add_nonVA_med/opData/opDataUtil"],function(a){return a.getComboBoxView("name")});

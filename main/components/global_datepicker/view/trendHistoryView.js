@@ -1,5 +1,4 @@
-var dependencies = [
-    'main/ADK',
+define([
     'backbone',
     'marionette',
     'underscore',
@@ -8,12 +7,10 @@ var dependencies = [
     'main/components/global_datepicker/util/parseEvents',
     'hbs!main/components/global_datepicker/template/trendHistoryTemplate',
     'api/SessionStorage',
-    'moment'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartStyling, parseEvents, trendHistoryTemplate, SessionStorage, moment) {
+    'moment',
+    'api/Messaging',
+    'api/ResourceService'
+], function(Backbone, Marionette, _, ChartHelper, ChartStyling, parseEvents, trendHistoryTemplate, SessionStorage, moment, Messaging, ResourceService) {
     'use strict';
 
     var fetchOptions = {
@@ -25,7 +22,7 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
         }
     };
 
-    var leftHandle, rightHandle, rect;
+    var leftHandle, rightHandle, rect, label;
     var allEventsChart; // , selectedEventsChart;
 
     var allEventsChartOptions = $.extend(true, {}, ChartHelper.chartConfig, ChartStyling.allEventsChartStyles);
@@ -34,29 +31,40 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
     var handleWidth = 14;
     var handleHeight = 19;
     var handleHalfWidth = handleWidth / 2;
+    var handleQuarterWidth = handleWidth / 4;
+    var dateModel;
 
     return Backbone.Marionette.ItemView.extend({
         template: trendHistoryTemplate,
         initialize: function(options) {
 
             var self = this;
-
-            ADK.Messaging.on('globalDate:customDateRangeSelected', function(dateModel) {
-                var dateRange = self.deriveSelectedDateRange(dateModel);
-                self.updateDateSliderPosition(dateRange.from, dateRange.to);
-            });
-
-            ADK.Messaging.on('resetDateSliderPosition', function(dateRange) {
-                self.updateDateSliderPosition(dateRange.from, dateRange.to);
-            });
+            self.dateModel = dateModel = options.dateModel;
 
             fetchOptions.onSuccess = function(collection) {
                 self.displayCharts(collection);
+                self.listenTo(Messaging, 'globalDate:customDateRangeSelected', function(dateModel) {
+                    var dateRange = self.deriveSelectedDateRange(dateModel);
+                    self.updateDateSliderPosition(dateRange.from, dateRange.to);
+                });
+
+                self.listenTo(Messaging, 'resetDateSliderPosition', function(dateRange) {
+                    self.updateDateSliderPosition(dateRange.from, dateRange.to);
+                });
             };
-            ADK.PatientRecordService.fetchCollection(fetchOptions);
+            ResourceService.patientRecordService.fetchCollection(fetchOptions);
         },
         deriveSelectedDateRange: function(dateModel) {
-            var from = moment(dateModel.get('customFromDate'), 'MM/DD/YYYY').valueOf();
+            var from;
+
+            if (dateModel.get('selectedId') === 'all-range-global') {
+                if (dateModel.get('firstEventDate') !== undefined && dateModel.get('firstEventDate') !==null) {
+                    from = moment(dateModel.get('firstEventDate'), 'MM/DD/YYYY').valueOf();
+                }
+            } else {
+                from = moment(dateModel.get('customFromDate'), 'MM/DD/YYYY').valueOf();
+            }
+
             var to;
             if (allEventsChart !== undefined && dateModel.get('selectedId') === 'all-range-global') {
                 to = allEventsChart.xAxis[0].getExtremes().dataMax;
@@ -68,39 +76,55 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
                 from = moment(allEventsChart.xAxis[0].getExtremes().dataMin).valueOf();
             }
 
-            if (dateModel.get('selectedId') === 'all-range-global') {
-                dateModel.set('firstEventDate', moment(from).format('MM/DD/YYYY'));
-                dateModel.set('lastEventDate', moment(to).format('MM/DD/YYYY'));
-                ADK.Messaging.trigger('globalDate:customAllDateRangeDefined', dateModel);
+            if (dateModel.get('selectedId') === '2yr-range-global' && from < allEventsChart.xAxis[0].getExtremes().dataMin){
+                from = allEventsChart.xAxis[0].getExtremes().min;
             }
 
             var dateRange = {
                 from: from,
                 to: to
             };
+            Messaging.trigger('updateGlobalTimelineDateRange', dateRange);
+            
             return dateRange;
         },
         updateDateSliderPosition: function(from, to) {
+
             if ((leftHandle !== undefined) && (rightHandle !== undefined) && (rect !== undefined) && (allEventsChart !== undefined)) {
+
+                var extremes = allEventsChart.xAxis[0].getExtremes();
+                if(to > extremes.dataMax && from < extremes.dataMin){
+                    allEventsChart.xAxis[0].setExtremes(from, to);
+                }
+
+                if(from < extremes.dataMin){
+                    from = dataMin;
+                }
+
                 leftHandle.attr({
-                    x: allEventsChart.xAxis[0].toPixels(from)
+                    x: allEventsChart.xAxis[0].toPixels(from) - handleHalfWidth
                 });
 
                 rightHandle.attr({
-                    x: allEventsChart.xAxis[0].toPixels(to)
+                    x: allEventsChart.xAxis[0].toPixels(to) - handleHalfWidth
                 });
 
                 rect.attr({
-                    width: rightHandle.attr('x') - leftHandle.attr('x'),
-                    x: leftHandle.attr('x') + handleHalfWidth
+                    width: allEventsChart.xAxis[0].toPixels(to) - allEventsChart.xAxis[0].toPixels(from),
+                    x: allEventsChart.xAxis[0].toPixels(from)
                 });
             }
         },
         displayCharts: function(mockCollection) {
-            allEventsChartOptions.series[0].data = this.buildOutpatientArray(mockCollection);
-            allEventsChartOptions.series[1].data = this.buildInpatientArray(mockCollection);
+            allEventsChartOptions.series[1].data = this.buildOutpatientArray(mockCollection);
+            allEventsChartOptions.series[0].data = this.buildInpatientArray(mockCollection);
             allEventsChartOptions.plotOptions.series.pointRange = 1;
             allEventsChartOptions.tooltip.enabled = false;
+            allEventsChartOptions.chart.events.redraw = function() {
+                label.attr({
+                    x: allEventsChart.xAxis[0].toPixels(moment().valueOf()) - (label.attr('width') / 2)
+                });
+            };
             var self = this;
 
             var interval = setInterval(function() {
@@ -111,10 +135,7 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
                     allEventsChart = new Highcharts.Chart(allEventsChartOptions, self.allEventsChartCallback);
                     self.drawAndZoom();
 
-                    var sessionGlobalDate = ADK.SessionStorage.get.sessionModel('globalDate');
-                    sessionGlobalDate.set('firstEventDate', moment(allEventsChart.xAxis[0].getExtremes().dataMin).format('MM/DD/YYYY').valueOf());
-                    sessionGlobalDate.set('lastEventDate', moment(allEventsChart.xAxis[0].getExtremes().dataMax).format('MM/DD/YYYY').valueOf());
-                    ADK.SessionStorage.set.sessionModel('globalDate', sessionGlobalDate);
+
                 }
             }, 500);
         },
@@ -129,7 +150,7 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
                 beingDragged,
                 currentY;
 
-            var label = allEventsChart.renderer.label('TODAY', allEventsChart.xAxis[0].toPixels(moment().valueOf()), false)
+            label = allEventsChart.renderer.label('TODAY', allEventsChart.xAxis[0].toPixels(moment().valueOf()), false)
                 .attr({
                     fill: '#FF0000',
                     padding: 2,
@@ -144,7 +165,8 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
             var w = label.attr('width');
             var x1 = label.attr('x');
             label.attr({
-                x: x1 - (w / 2)
+                x: x1 - (w / 2),
+                y: 20
             });
 
             group.attr({
@@ -163,7 +185,7 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
                     zIndex: 99
                 })
                 .css({
-                    cursor: 'e-resize',
+                    cursor: 'col-resize',
                     zIndex: 99
                 })
                 .add();
@@ -173,7 +195,7 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
                     zIndex: 99
                 })
                 .css({
-                    cursor: 'w-resize'
+                    cursor: 'col-resize'
                 })
                 .add();
 
@@ -236,8 +258,13 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
                 //if we're reasonably close to today's date in the "to" field, set to date to today's date.  This is for usability purposes
                 // since each pixel of dragging represents nearly two weeks.  If users want finer control, they can explicitly specify from/to
                 // date in custom fields
-                var from = allEventsChart.xAxis[0].toValue(leftHandle.attr('x') + handleHalfWidth);
-                var to = allEventsChart.xAxis[0].toValue(rightHandle.attr('x') + handleHalfWidth);
+                // var from = allEventsChart.xAxis[0].toValue(leftHandle.attr('x') + handleHalfWidth);
+                // var to = allEventsChart.xAxis[0].toValue(rightHandle.attr('x') + handleHalfWidth);
+                
+
+                // CHANGE FROM AND TO DATES TO REFLECT RECTTANGLE LOCATION AND WIDTH INSTEAD OF LEFT HANDLE X AND RIGHT HANDLE X
+                var from = allEventsChart.xAxis[0].toValue(rect.attr('x'));
+                var to = allEventsChart.xAxis[0].toValue(rect.attr('x') + rect.attr('width'));
 
                 var timeDiffFromNow = moment.duration(moment(to).diff(moment().valueOf()));
                 var timeDiffInDays = timeDiffFromNow.asDays();
@@ -250,7 +277,10 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
                         from: from,
                         to: to
                     };
-                    ADK.Messaging.trigger('updateGlobalTimelineDateRange', newDateRange);
+
+                    dateModel.set('selectedId', 'custom-range-apply-global');
+
+                    Messaging.trigger('updateGlobalTimelineDateRange', newDateRange);
                 }
 
                 beingDragged = null;
@@ -269,12 +299,10 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
                 var dateTime = key + '';
                 var num = value.length;
                 if(dateTime.length > 6){
-                    dateTime = dateTime.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
-                    outpatientArray.push([moment(dateTime, 'YYYY-MM-DD').valueOf(), num]);
+                    outpatientArray.push([moment(dateTime, 'YYYYMMDD').valueOf(), num]);
                 }
                 else{
-                    dateTime = dateTime.replace(/(\d{4})(\d{2})/, '$1-$2');
-                    outpatientArray.push([moment(dateTime, 'YYYY-MM').valueOf(), num]);
+                    outpatientArray.push([moment(dateTime, 'YYYYMM').valueOf(), num]);
                 }
             });
 
@@ -292,47 +320,63 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
                 var dateTime = key + '';
                 var num = value.length;
                 if(dateTime.length > 6){
-                    dateTime = dateTime.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
-                    inpatientArray.push([moment(dateTime, 'YYYY-MM-DD').valueOf(), num]);
+                    inpatientArray.push([moment(dateTime, 'YYYYMMDD').valueOf(), num]);
                 }
                 else{
-                    dateTime = dateTime.replace(/(\d{4})(\d{2})/, '$1-$2');
-                    inpatientArray.push([moment(dateTime, 'YYYY-MM').valueOf(), num]);
+                    inpatientArray.push([moment(dateTime, 'YYYYMM').valueOf(), num]);
                 }
             });
             return inpatientArray;
         },
         groupPatientsByTimeSlice: function(patients) {
-            return _.groupBy(patients, function(patient) {
+            var globalDate = SessionStorage.getModel('globalDate');
+            var firstEventDate = globalDate.get('firstEventDate');
+            var lastEventDate = globalDate.get('lastEventDate');
+            if (firstEventDate === undefined || firstEventDate === null){
+                firstEventDate = moment();
+                firstEventDate.subtract(1,'d');
+            }
+            else{
+                firstEventDate = moment(firstEventDate, 'MM/DD/YYYY');
+            }
+
+            if (lastEventDate === undefined || lastEventDate === null){
+                lastEventDate = moment();
+            }
+            else{
+                lastEventDate = moment(lastEventDate, 'MM/DD/YYYY');
+            }
+
+            var patientGroup = _.groupBy(patients, function(patient) {
                 var time = patient.dateTime + '';
                 time = time.slice(0, 8);
                 var year = parseInt(time.slice(0, 4), 10);
                 var month = parseInt(time.slice(4, 6), 10);
                 var day = parseInt(time.slice(6, 8), 10);
-                if (moment([year, month-1, day]).diff(moment(), 'days') >= 0){
+                var date = moment([year, month-1, day]);
+                if (date.diff(moment(), 'days') >= 0){
+
+                    if (lastEventDate.isBefore(date)){
+                        lastEventDate = date;
+                    }
+
                     // 1-7: (month) 7
                     // 8-14: (month) 14
                     // 15-21: (month) 21
                     // 22-31: (month+1) 1
 
-                    if (day >= 1 && day <= 7){
-                        day = 7;
+                    if (day < 8){
+                        day = '07';
                     }
-                    else if(day >= 8 && day <= 14){
-                        day = 14;
+                    else if(day < 15){
+                        day = '14';
                     }
-                    else if (day >= 15 && day <= 21){
-                        day = 21;
+                    else if (day < 22){
+                        day = '21';
                     }
-                    else if (day >= 22){
-                        day = 1;
+                    else{
+                        day = '01';
                         month = month + 1;
-                    }
-
-                    if (day < 10) {
-                        day = '0' + day;
-                    } else {
-                        day = '' + day;
                     }
 
                     if (month < 10) {
@@ -344,6 +388,10 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
                     return (year + '' + month + '' + day);
                 }
                 else{
+                    if (date.isBefore(firstEventDate)){
+                        firstEventDate = date;
+                    }
+
                     var quarterlyBinning = (Math.floor((month + 2) / 3) * 3) - 2;
                     if ((quarterlyBinning) < 10) {
                         quarterlyBinning = '0' + quarterlyBinning;
@@ -354,6 +402,13 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
                     return timeSlice;
                 }
             });
+
+            globalDate.set('firstEventDate',firstEventDate.format('MM/DD/YYYY'));
+            globalDate.set('lastEventDate',lastEventDate.format('MM/DD/YYYY'));
+
+            SessionStorage.set.sessionModel('globalDate', globalDate);
+
+            return patientGroup;
         },
         addAllEventsChartMouseEvents: function(allEventsChart) {
 
@@ -395,7 +450,7 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
                 x: leftHandle.attr('x') + handleHalfWidth
             });
 
-            ADK.Messaging.trigger('updateGlobalTimelineDateRange', {
+            Messaging.trigger('updateGlobalTimelineDateRange', {
                 from: from,
                 to: to
             });
@@ -403,7 +458,6 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
         onBeforeDestroy: function() {
             // this.destroySelectedEventsChart();
             this.destroyAllEventsChart();
-            ADK.Messaging.off('globalDate:customDateRangeSelected');
         },
         // destroySelectedEventsChart: function() {
         //     if (selectedEventsChart !== undefined && selectedEventsChart !== null) {
@@ -418,4 +472,4 @@ function onResolveDependencies(ADK, Backbone, Marionette, _, ChartHelper, ChartS
             }
         }
     });
-}
+});

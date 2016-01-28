@@ -1,4 +1,4 @@
-var dependencies = [
+define([
     'jquery',
     'underscore',
     'main/Utils',
@@ -11,18 +11,22 @@ var dependencies = [
     'main/components/applets/grid_applet/views/filterDateRangeView',
     'hbs!main/components/applets/grid_applet/templates/containerTemplate',
     'main/components/applets/grid_applet/gists/gistView'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, ResourceService, SessionStorage, LoadingView, ErrorView, FilterDateRangeView, containerTemplate, GistView) {
+], function($, _, utils, DataGrid, CollectionFilter, ResourceService, SessionStorage, LoadingView, ErrorView, FilterDateRangeView, containerTemplate, GistView) {
     'use strict';
 
     var SCROLL_TRIGGERPOINT = 40;
     var SCROLL_ADDITIONAL_ROWS = 100;
     var INITIAL_NUMBER_OF_ROWS = 30;
 
-    var AppletLayoutView = Backbone.Marionette.LayoutView.extend({
+    function markInfobuttonData(that) {
+        if (that.dataGridOptions.collection.length > 0 && !_.isUndefined(that.dataGridOptions.tblRowSelector)) {
+            $(that.dataGridOptions.tblRowSelector).each(function() {
+                $(this).attr("data-infobutton", $(this).find('td:first').text());
+            });
+        }
+    }
+
+    return Backbone.Marionette.LayoutView.extend({
         initialize: function(options) {
             if (this.options.appletConfig && _.isUndefined(this.options.appletConfig.instanceId)) {
                 this.options.appletConfig.instanceId = this.options.appletConfig.id;
@@ -32,20 +36,36 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
                 this.options.appletConfig.instanceId = this.dataGridOptions.appletConfig.instanceId;
             }
 
+            var maximizedApplet = ADK.Messaging.request('applet:maximized');
+            if (!_.isUndefined(maximizedApplet)) {
+                this.options.appletConfig.filterName = maximizedApplet.get('filterName');
+                ADK.Messaging.reply("applet:maximized", function() {
+                    return undefined;
+                });
+            }
+
             var appletConfig = this.options.appletConfig;
             this.appletConfig = appletConfig;
             var dataGridOptions = this.dataGridOptions || {}; //Set in extending view
             this.dataGridOptions = dataGridOptions;
-            dataGridOptions.emptyText = dataGridOptions.emptyText || 'No Records Found';
-            this.listenTo(dataGridOptions.collection, 'sync', this.onSync);
-            this.listenTo(dataGridOptions.collection, 'error', this.onError);
-
-
-            dataGridOptions.appletConfig = appletConfig;
+            this.dataGridOptions.emptyText = dataGridOptions.emptyText || 'No Records Found';
+            this.dataGridOptions.appletConfig = appletConfig;
             this.routeParam = this.options.routeParam;
+            this.expandedAppletId = this.appletConfig.instanceId;
+            if (this.appletConfig.fullScreen) {
+                this.parentWorkspace = ADK.Messaging.request('get:current:workspace');
+                var expandedModel = SessionStorage.get.sessionModel('expandedAppletId');
+                if (!_.isUndefined(expandedModel) && !_.isUndefined(expandedModel.get('id'))) {
+                    this.expandedAppletId = expandedModel.get('id');
+                    SessionStorage.set.sessionModel('expandedAppletId', new Backbone.Model({
+                        'id': undefined
+                    }));
+
+                }
+            }
             //Set default filterEnabled
-            if (dataGridOptions.filterEnabled === undefined) {
-                dataGridOptions.filterEnabled = true;
+            if (this.dataGridOptions.filterEnabled === undefined) {
+                this.dataGridOptions.filterEnabled = true;
             }
 
             //Set Data Grid Columns
@@ -57,38 +77,10 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
                 SessionStorage.setAppletStorageModel(this.appletConfig.instanceId, 'fullScreen', false);
             }
 
+            appletConfig.workspaceId = ADK.Messaging.request('get:current:screen').config.id;
             this.model = new Backbone.Model(appletConfig);
 
-            //Create Filter and Filter Button View
-            if (dataGridOptions.filterEnabled === true) {
-                var filterFields;
-                if (dataGridOptions.filterFields) {
-                    filterFields = dataGridOptions.filterFields;
-                } else {
-                    filterFields = _.pluck(dataGridOptions.columns, 'name');
-                }
-
-                var filterOptions = {
-                    collection: dataGridOptions.collection,
-                    filterFields: filterFields,
-                    filterDateRangeEnabled: dataGridOptions.filterDateRangeEnabled,
-                    filterDateRangeField: dataGridOptions.filterDateRangeField,
-                    id: appletConfig.instanceId,
-                    formattedFilterFields: dataGridOptions.formattedFilterFields
-                };
-
-                this.filterView = CollectionFilter.create(filterOptions);
-
-                dataGridOptions.appletId = appletConfig.id;
-                dataGridOptions.instanceId = appletConfig.instanceId;
-                if (dataGridOptions.filterDateRangeEnabled) {
-                    this.filterDateRangeView = new FilterDateRangeView({
-                        model: new Backbone.Model(dataGridOptions),
-                        appletId: dataGridOptions.appletId,
-                        appletView: this
-                    });
-                }
-            }
+            this.initFilterView();
 
             if (this.dataGridOptions.hasOwnProperty('onClickAdd')) {
                 this.onClickAdd = this.dataGridOptions.onClickAdd;
@@ -98,13 +90,86 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
                 this.toolbarView = this.dataGridOptions.toolbarView;
             }
 
-            //Create Data Grid View
-            this.setAppletView();
+            this.createDataGridView();
 
             //Create Loading View
             this.loadingView = LoadingView.create();
+            this.listenTo(dataGridOptions.collection, 'sync', this.onSync);
+            this.listenTo(dataGridOptions.collection, 'error', this.onError);
+
+            this.dataGridOptions.collection.markInfobutton = {
+                'that': this,
+                'func': markInfobuttonData
+            };
+            var self = this;
+            this.listenTo(this.dataGridOptions.collection, 'backgrid:sort', function() {
+                self.dataGridOptions.collection.markInfobutton.func(self.dataGridOptions.collection.markInfobutton.that);
+            });
+            if (this.options.appletConfig.viewType === 'gist') {
+                //set up events to close quicklooks
+                var manualScrollingEvent = function() {
+                    self.$('[data-toggle=popover]').popover('hide');
+                };
+                this.listenTo(this, 'show', function() {
+                    /* listen for scroll on mousewheel only */
+                    this.$('.grid-applet-panel').on('mousewheel', function() {
+                        manualScrollingEvent();
+                    });
+                    /* listen for up and down arrow keys */
+                    this.$('.grid-applet-panel').on('keydown', function(e) {
+                        if (e.which === 38 || e.which === 40) {
+                            manualScrollingEvent();
+                        }
+                    });
+                });
+                this.listenTo(this, 'destroy', function() {
+                    this.$('.grid-applet-panel').off('mousewheel');
+                    this.$('.grid-applet-panel').off('keydown');
+                });
+            }
         },
-        setAppletView: function() {
+        initFilterView: function() {
+            //Create Filter and Filter Button View
+            if (this.dataGridOptions.filterEnabled === true) {
+                var filterFields;
+                if (this.dataGridOptions.filterFields) {
+                    filterFields = this.dataGridOptions.filterFields;
+                } else {
+                    filterFields = _.pluck(this.dataGridOptions.columns, 'name');
+                }
+
+                var maximizedScreen = false;
+                if (!_.isUndefined(this.options.appletConfig.filterName)) {
+                    maximizedScreen = true;
+                }
+
+                var filterOptions = {
+                    collection: this.dataGridOptions.collection,
+                    filterFields: filterFields,
+                    filterDateRangeEnabled: this.dataGridOptions.filterDateRangeEnabled,
+                    filterDateRangeField: this.dataGridOptions.filterDateRangeField,
+                    formattedFilterFields: this.dataGridOptions.formattedFilterFields,
+                    id: this.appletConfig.instanceId,
+                    workspaceId: ADK.Messaging.request('get:current:screen').config.id,
+                    model: this.model,
+                    maximizedScreen: maximizedScreen,
+                    fullScreen: this.appletConfig.fullScreen
+                };
+
+                this.filterView = CollectionFilter.create(filterOptions);
+
+                this.dataGridOptions.appletId = this.appletConfig.id;
+                this.dataGridOptions.instanceId = this.appletConfig.instanceId;
+                if (this.dataGridOptions.filterDateRangeEnabled && this.appletConfig.fullScreen) {
+                    this.filterDateRangeView = new FilterDateRangeView({
+                        model: new Backbone.Model(this.dataGridOptions),
+                        appletId: this.dataGridOptions.appletId,
+                        appletView: this
+                    });
+                }
+            }
+        },
+        createDataGridView: function() {
             if (this.dataGridOptions.collection instanceof Backbone.PageableCollection) {
                 if (this.appletConfig.fullScreen || this.appletConfig.fullScreen === true) {
                     this.dataGridOptions.collection.setPageSize(100, {
@@ -130,7 +195,6 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
             }
         },
         onRender: function() {
-            window.scrollTo(0, 0);
             this.loading();
             var self = this;
             if (this.filterView) {
@@ -142,30 +206,42 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
 
                 this.gridFilter.show(this.filterView);
                 var queryInputSelector = 'input[name=\'q-' + this.appletConfig.instanceId + '\']';
-
                 this.filterView.$el.find('input[type=search]').on('change', function() {
-                    SessionStorage.setAppletStorageModel(self.appletConfig.instanceId, 'filterText', $(this).val());
-                    SessionStorage.setAppletStorageModel(self.appletConfig.id, 'filterText', $(this).val());
+                    SessionStorage.setAppletStorageModel(self.expandedAppletId, 'filterText', $(this).val(), true, this.parentWorkspace);
                 });
 
                 this.filterView.$el.find('a[data-backgrid-action=clear]').on('click', function() {
-                    SessionStorage.setAppletStorageModel(self.appletConfig.id, 'filterText', $(this).val());
+                    SessionStorage.setAppletStorageModel(self.expandedAppletId, 'filterText', $(this).val(), true, this.parentWorkspace);
                 });
 
-                if (this.dataGridOptions.filterDateRangeEnabled && this.appletConfig.fullScreen) {
+                if (this.filterDateRangeView) {
                     this.gridFilterDateRange.show(this.filterDateRangeView);
                 }
+
+                this.listenTo(this, 'destroy', function() {
+                    this.filterView.$el.find('input[type=search]').off('change');
+                    this.filterView.$el.find('a[data-backgrid-action=clear]').off('click');
+                });
 
                 $('.grid-filter').find('input').attr('tabindex', '0');
             }
             if (this.dataGridOptions.collection instanceof Backbone.PageableCollection) {
                 if (!this.appletConfig.fullScreen || this.appletConfig.fullScreen !== true) {
-                    this.$el.find('#grid-panel-' + this.appletConfig.id).on('scroll', function(event) {
+                    this.$el.find('#grid-panel-' + this.appletConfig.instanceId).on('scroll', function(event) {
                         self.fetchRows(event);
                     });
                 }
 
+                this.listenTo(this, 'destroy', function() {
+                    this.$el.find('#grid-panel-' + this.appletConfig.instanceId).off('scroll');
+                });
+
             }
+        },
+        onShow: function() {
+            this.showFilterView();
+
+            //TODO: move fetch data for grid to this section
         },
         template: containerTemplate,
         regions: {
@@ -191,6 +267,12 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
             if ((e.scrollTop + e.clientHeight + SCROLL_TRIGGERPOINT > e.scrollHeight) && this.dataGridOptions.collection.hasNextPage()) {
                 event.preventDefault();
                 this.dataGridOptions.collection.setPageSize(this.dataGridOptions.collection.state.pageSize + SCROLL_ADDITIONAL_ROWS);
+
+                if (this.dataGridOptions.collection.length > 0 && !_.isUndefined(this.dataGridOptions.tblRowSelector)) {
+                    $(this.dataGridOptions.tblRowSelector).each(function() {
+                        $(this).attr("data-infobutton", $(this).find('td:first').text());
+                    });
+                }
             }
         },
         toolbar: function() {
@@ -198,40 +280,50 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
                 this.gridToolbar.show(this.toolbarView);
             }
         },
-        onSync: function(collection) {
-            $("[data-instanceid='" + this.appletConfig.instanceId + "']").find('.fa-refresh').removeClass('fa-spin');
+        onSync: function() {
+            var applet = this.$("[data-instanceid='" + this.appletConfig.instanceId + "']");
+            if (applet.length === 0) {
+                applet = this.$el.closest("[data-instanceid='" + this.appletConfig.instanceId + "']");
+            }
+            applet.find('.fa-refresh').removeClass('fa-spin');
+
             this.toolbar();
 
             if (this.filterView) {
-                var searchText = SessionStorage.getAppletStorageModel(this.appletConfig.instanceId, 'filterText');
-                if (searchText !== undefined && searchText !== null && searchText.trim().length > 0) {
+                var searchText = SessionStorage.getAppletStorageModel(this.expandedAppletId, 'filterText', true, this.parentWorkspace);
+                if (this.filterView.userDefinedFilters.length > 0 || (searchText !== undefined && searchText !== null && searchText.trim().length > 0)) {
                     this.filterView.search();
                 }
             }
-            if (this.dataGridOptions.gistView) {
-                //this.dataGridOptions.collection.trigger('collectionSynced');
 
+            //this.dataGridView.gridView.collection.reset(this.dataGridOptions.collection);
+            if (this.dataGridOptions.gistView) {
                 /* Adds Fields to the collection that match Gist Fields. It is up to the applet to provide the correct gist field names */
                 /* Mapping done here to avoid double rendering in initialize */
 
                 var options = this.dataGridOptions;
-                _.each(collection.models, function(item) {
+                this.dataGridOptions.collection.each(function(model) {
                     _.each(options.appletConfiguration.gistModel, function(object) {
-                        var id = object.id;
-                        item.set(object.id, item.get(object.field));
+                        model.set(object.id, model.get(object.field));
                     });
-
                 });
-                this.dataGridOptions.collection.reset(collection.models);
-
-                this.gridContainer.show(this.dataGridView, {
-                    preventDestroy: true
-                });
+                if (this.dataGridView.collection !== this.dataGridOptions.collection) {
+                    this.dataGridView.collection.reset(this.dataGridOptions.collection.models);
+                }
             } else {
-                this.gridContainer.show(this.dataGridView, {
-                    preventDestroy: true
-                });
+                //TODO: find a way to bind datagridview collection to the dataGridView's collection
+                if (this.dataGridView.collection) {
+                    if (this.dataGridView.collection !== this.dataGridOptions.collection) {
+                        this.dataGridView.collection.reset(this.dataGridOptions.collection.models);
+                    }
+                } else {
+                    if (this.dataGridView.gridView.collection !== this.dataGridOptions.collection) {
+                        this.dataGridView.gridView.collection.reset(this.dataGridOptions.collection.models);
+                    }
+
+                }
             }
+            this.showViewInGridContainer(this.dataGridView);
 
             if (this.dataGridOptions.collection instanceof Backbone.PageableCollection) {
                 if (this.appletConfig.fullScreen || this.appletConfig.fullScreen === true) {
@@ -240,24 +332,39 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
                         self.fetchRows(event);
                     });
                     this.$el.find('.data-grid').trigger("scroll");
+                    this.listenTo(this, 'destroy', function() {
+                        this.$el.find('.data-grid').off('scroll');
+                    });
                 } else {
-                    this.$el.find('#grid-panel-' + this.appletConfig.id).trigger("scroll");
+                    this.$el.find('#grid-panel-' + this.appletConfig.instanceId).trigger("scroll");
                 }
             }
+
+            if (this.dataGridOptions.collection.length > 0 && !_.isUndefined(this.dataGridOptions.tblRowSelector)) {
+                $(this.dataGridOptions.tblRowSelector).each(function() {
+                    $(this).attr("data-infobutton", $(this).find('td:first').text());
+                });
+            }
+            var i;
+            _.each(this.dataGridOptions.columns, function(column, index) {
+                i = index + 1;
+                $(applet).find('thead th:nth-child(' + i + ') a').attr('tooltip-data-key', column.hoverTip);
+            });
         },
         onError: function(collection, resp) {
             var errorModel = new Backbone.Model(resp);
             var errorView = ErrorView.create({
                 model: errorModel
             });
-            this.gridContainer.show(errorView, {
-                preventDestroy: true
-            });
+            this.showViewInGridContainer(errorView);
         },
         loading: function() {
-            this.gridContainer.show(this.loadingView, {
-                preventDestroy: true
-            });
+            this.showViewInGridContainer(this.loadingView);
+        },
+        showViewInGridContainer: function(viewToShow, options) {
+            options = options || {};
+            options.preventDestroy = (this.gridContainer.currentView == this.loadingView);
+            this.gridContainer.show(viewToShow, options);
         },
         refresh: function(event) {
             if (this.dataGridOptions.refresh !== undefined) {
@@ -272,14 +379,17 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
                 });
             }
             this.loading();
-            this.setAppletView();
+            this.createDataGridView();
             if (collection instanceof Backbone.PageableCollection) {
                 collection.fullCollection.reset();
             } else {
                 collection.reset();
             }
             ResourceService.clearCache(collection.url);
-            ResourceService.fetchCollection(collection.fetchOptions, collection);
+            this.fetchData();
+        },
+        fetchData: function() {
+            ResourceService.fetchCollection(this.dataGridOptions.collection.fetchOptions, this.dataGridOptions.collection);
         },
         buildJdsDateFilter: function(dateField, options) {
             var isOverrideGlobalDate, fromDate, toDate, customFilter, operator;
@@ -338,6 +448,9 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
             this.dataGridOptions.collection.fetchOptions.criteria.filter =
                 this.buildJdsDateFilter(filterParameter, options);
 
+            if (this.dataGridOptions.filterRemoved)
+                this.dataGridOptions.collection.fetchOptions.criteria.filter = 'and(ne(removed, true),' + this.dataGridOptions.collection.fetchOptions.criteria.filter + ')';
+
             var collection = this.dataGridOptions.collection;
             if (this.dataGridOptions.collection instanceof Backbone.PageableCollection) {
                 collection.setPageSize(INITIAL_NUMBER_OF_ROWS, {
@@ -365,8 +478,8 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
             if (routeParam) {
                 var row = $('#' + routeParam);
                 row.click();
-                windowHeight = $(window).height();
-                scrollPosition = row.offset().top;
+                var windowHeight = $(window).height();
+                var scrollPosition = row.offset().top;
                 if ((scrollPosition + row.next().height() + 50) > windowHeight) {
                     $('html, body').animate({
                         scrollTop: scrollPosition - 100
@@ -375,10 +488,7 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
             }
         },
         showFilterView: function() {
-            var filterText = SessionStorage.getAppletStorageModel(this.appletConfig.instanceId, 'filterText');
-            if (_.isUndefined(filterText) || _.isNull(filterText)) {
-                filterText = SessionStorage.getAppletStorageModel(this.appletConfig.id, 'filterText');
-            }
+            var filterText = SessionStorage.getAppletStorageModel(this.expandedAppletId, 'filterText', true, this.parentWorkspace);
             if (this.dataGridOptions.filterEnabled === true && filterText !== undefined && filterText !== null && filterText.length > 0) {
                 this.$el.find('#grid-filter-' + this.appletConfig.instanceId).toggleClass('collapse in');
                 this.$el.find('input[name=\'q-' + this.appletConfig.instanceId + '\']').val(filterText);
@@ -387,10 +497,24 @@ function onResolveDependencies($, _, utils, DataGrid, CollectionFilter, Resource
                 this.$el.find('#grid-filter-' + this.appletConfig.instanceId).toggleClass('collapse in');
             }
         },
-        onShow: function() {
-            this.showFilterView();
+        onDestroy: function() {
+            try {
+                if (this.loadingView && !this.loadingView.isDestroyed) {
+                    this.loadingView.destroy();
+                    this.loadingView = null;
+                }
+            } catch (e) {
+                console.error('Error destroying loadingView in applet:', this.appletConfig.id, e);
+            }
+
+            try {
+                if (this.dataGridView && !this.dataGridView.isDestroyed) {
+                    this.dataGridView.destroy();
+                    this.dataGridView = null;
+                }
+            } catch (e) {
+                console.error('Error destroying dataGridView in applet:', this.appletConfig.id, e);
+            }
         }
     });
-
-    return AppletLayoutView;
-}
+});

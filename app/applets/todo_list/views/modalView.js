@@ -1,0 +1,1 @@
+define(["backbone","marionette","underscore","app/applets/todo_list/eventHandler","hbs!app/applets/todo_list/templates/modalTemplate"],function(t,e,n,o,l){return t.Marionette.ItemView.extend({template:l,events:{"click button":"onButtonClick"},onButtonClick:function(t){o.modalButtonsOnClick.call(this,t)}})});

@@ -1,10 +1,1 @@
-var dependencies = [
-    'app/applets/addOrder/helpers/opDataUtil'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(opDataUtil) {
-
-    return opDataUtil.getComboBoxView('name');
-}
+define(["app/applets/addOrder/helpers/opDataUtil"],function(e){return e.getComboBoxView("name")});

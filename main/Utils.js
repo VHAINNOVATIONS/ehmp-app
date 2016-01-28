@@ -1,15 +1,29 @@
-var dependencies = ["backbone", "main/adk_utils/dateUtils", "main/adk_utils/resizeUtils", "main/adk_utils/collectionUtils", "main/adk_utils/appletViewTypesUtils", "main/Session", "backbone-sorted-collection", "moment", "underscore"];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils, AppletViewTypesUtils, Session, SortedCollection,  moment, _) {
+define([
+    "backbone",
+    "main/adk_utils/dateUtils",
+    "main/adk_utils/resizeUtils",
+    "main/adk_utils/collectionUtils",
+    "main/adk_utils/appletUtils",
+    "main/adk_utils/helpUtils",
+    "main/adk_utils/pdfUtils",
+    "main/adk_utils/infoButtonUtils",
+    "main/Session",
+    "backbone-sorted-collection",
+    "moment",
+    "underscore",
+    "main/adk_utils/tooltipUtils"
+], function(Backbone, DateUtils, ResizeUtils, CollectionUtils, AppletUtils, HelpUtils, PdfUtils, InfoButtonUtils, Session, SortedCollection,  moment, _, TooltipUtils) {
 
     var Utils = {};
 
     Utils.dateUtils = DateUtils;
     Utils.resize = ResizeUtils;
     Utils.collection = CollectionUtils;
-    Utils.appletViewTypes = AppletViewTypesUtils;
+    Utils.appletUtils = AppletUtils;
+    Utils.helpUtils = HelpUtils;
+    Utils.pdfUtils = PdfUtils;
+    Utils.infoButtonUtils = InfoButtonUtils;
+    Utils.tooltipUtils = TooltipUtils;
 
     Utils.formatDate = function(date, displayFormat, sourceFormat) {
 
@@ -27,12 +41,23 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
         }
     };
 
+    Utils.applyMaskingForSpecialCharacters = function(val) {
+        val.inputmask("Regex", {
+                regex: "^[a-zA-Z0-9\\s]*$"
+        });
+    };
+
     Utils.getTimeSince = function(dateString, showMinutes) {
-        var startDate = moment(dateString, 'YYYYMMDDHHmmssSSS'); 
-        var endDate = moment();
+        var future = false;
+        var startDate = moment(dateString, 'YYYYMMDDHHmmssSSS');
+        var isDataValid = startDate.isValid();
+        //var endDate = moment(dateString, 'YYYYMMDDHHmmssSSS');
+        //var startDate  = moment();
+          var endDate = moment();
         if(startDate.isAfter(endDate)){
-            endDate = moment(dateString, 'YYYYMMDDHHmmssSSS'); 
-            startDate = moment();        
+            endDate = moment(dateString, 'YYYYMMDDHHmmssSSS');
+            startDate = moment();
+            future = true;  
         }
         var duration = moment.duration(endDate.diff(startDate));
 
@@ -85,18 +110,25 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
         if (count >= 2) {
             finalResultText = finalResultText + 's';
         }
+        //if(!future) finalResult = "-"+finalResult;
+        if(future) finalResult = "";
 
         //recent check
         var recent = false;
         if (months <= 6) {
             recent = true;
         }
+        if(!isDataValid){
+          finalResult = "None";
+        }
+        
         return {
             timeSince: finalResult,
             count: count,
             timeUnits: timeUnits,
             timeSinceDescription: finalResultText,
-            isRecent: recent
+            isRecent: recent,
+            isValid: isDataValid
         };
 
     };
@@ -186,7 +218,7 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
             sorts the collection on that column. sortOrder & sortType are  optional parameters which specify
             the order of sort and the type of sort. Else the default is ascending order & alphabetical type.
             */
-        sort: function(collection, key, sortOrder, sortType) {
+        sort: function(collection, key, sortOrder, sortType, customSortFunction) {
             /* Save the unsorted collection models */
             if (collection.unsortedModels === undefined) {
                 collection.unsortedModels = collection.models;
@@ -231,6 +263,18 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
                         };
                         return toInt(model.get(key));
                     }, order);
+                    break;
+                case 'custom':
+                    var customSortCollection = Backbone.Collection.extend({
+                        comparator: function(firstModel, secondModel) {
+                            if (order === 'desc') {
+                                return -customSortFunction(firstModel, secondModel);
+                            }
+                            return customSortFunction(firstModel, secondModel);
+                        }
+                    });
+                    var customSortedCollection = new customSortCollection(collection.models);
+                    sortedCollection._collection.models = customSortedCollection.models;
                     break;
                 default:
                     sortedCollection.setSort(function(model) {
@@ -310,7 +354,7 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
             var dateFilter = new Date();
             dateFilter.setDate(dateFilter.getDate() - numberOfDays);
 
-            if (!(typeof model.get(dateKey) === 'undefined')) {
+            if (typeof model.get(dateKey) !== 'undefined') {
                 var filterYear = model.get(dateKey).substring(0, 4),
                     filterMonth = model.get(dateKey).substring(4, 6),
                     filterDay = model.get(dateKey).substring(6, 8);
@@ -341,7 +385,7 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
 
         filterFunction = function(model) {
 
-            if (!(typeof model.get(dateKey) === 'undefined')) {
+            if (typeof model.get(dateKey) !== 'undefined') {
                 var filterYear = model.get(dateKey).substring(0, 4),
                     filterMonth = model.get(dateKey).substring(4, 6),
                     filterDay = model.get(dateKey).substring(6, 8);
@@ -371,7 +415,7 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
 
         filterFunction = function(model) {
 
-            if (!(typeof model.get(key) === 'undefined')) {
+            if (typeof model.get(key) !== 'undefined') {
                 var field = model.get(key);
                 return field.indexOf(filterValue) === 0;
             } else {
@@ -394,7 +438,7 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
 
         filterFunction = function(model) {
 
-            if (!(typeof model.get(key) === 'undefined')) {
+            if (typeof model.get(key) !== 'undefined') {
                 var field = model.get(key);
                 return field.indexOf(substring) > -1;
             } else {
@@ -417,7 +461,7 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
 
         filterFunction = function(model) {
 
-            if (!(typeof model.get(key) === 'undefined')) {
+            if (typeof model.get(key) !== 'undefined') {
                 var field = model.get(key);
                 return field.indexOf(substring) <= -1;
             } else {
@@ -440,7 +484,7 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
 
         filterFunction = function(model) {
 
-            if (!(typeof model.get(key) === 'undefined')) {
+            if (typeof model.get(key) !== 'undefined') {
                 var field = model.get(key);
                 return field == filterValue;
             } else {
@@ -450,9 +494,8 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
 
         Utils.setCollection(collection, filterFunction);
     };
-    
     Utils.chartDataBinning = function (graphData, config) {
-       // by default for data normalization will be used Math.log(x/0.1)
+       // by default no data normalization
        // but user can define normalization function as config parameter
        var DEBUG = config.debug || false;
        //if(diag) DEBUG = true;
@@ -471,14 +514,15 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
        if (_.isFunction(config.normal_function)) {
            fNormalization = config.normal_function;
        }else{
-           fNormalization = function(val){ return val;}
-       } 
+           fNormalization = function(val){ return val;};
+       }
        var data = graphData.series || [];
        var nColumns = chartWidth / (barWidth + barPadding);
        var firstEvent = moment(graphData.oldestDate);
        var lastEvent = moment(graphData.newestDate);
        var diffDays = lastEvent.diff(firstEvent, "days");
        var daysPerBin = Math.round(diffDays / nColumns);
+       if(daysPerBin < 1) daysPerBin =1; // not accurate enough at this time (1 day scale)
        if (DEBUG) {
            console.log("Chart width: " + chartWidth+ "px");
            console.log("Number of chart columns: " + Math.round(nColumns));
@@ -487,55 +531,136 @@ function onResolveDependencies(Backbone, DateUtils, ResizeUtils, CollectionUtils
            console.log("Days range: " + diffDays);
            console.log("Days per bean: " + daysPerBin);
        }
-       //------- Sieve cell calculation function ----------------
-       var arrBolter = [];
-       var start = moment(firstEvent);
-       var stop = moment(firstEvent);
-       var stopFlag = true;
-       stop.add(daysPerBin, "days"); 
-       if (DEBUG) {
-           console.log(moment(start).format("YYYY-MM-DD"));
-           console.log(moment(stop).format("YYYY-MM-DD"));
-       }
-       for (var n = 0; n < nColumns; n++) {
-           arrBolter.push([moment(start), moment(stop)]);
-           start = moment(stop);
-           stop = moment(start).add(daysPerBin, "days");
-           if((start.isBefore()) && (stop.isAfter())&& stopFlag){
-                stop = moment();
-                nColumns++; // extra coloumn, because of splitted bin
-               stopFlag = false;
-                if(DEBUG){
-                   console.log("Splitted bin --->> !!!");
-                   console.log(moment(start).format("YYYY-MM-DD"));
-                   console.log(moment(stop).format("YYYY-MM-DD"));                    
-                   console.log("Days per Bin -->> "+daysPerBin);                    
+  
+     var agrData = [];
+     var arrMatrix = []; 
+     var indStart = 0;
+     var indStop = 0;
+     var mxVal = 0;
+     var binEge = daysPerBin;
+     var binVal = 0;
+     var binDate;
+     var iteration = 0;        
+     var dataMatrixLength =diffDays;
+    // create empty data matrix
+     if(diffDays <=2 ) dataMatrixLength++;  // for short period of time (24 hours) adds extra empty data set   
+     for(var emx = 0; emx < dataMatrixLength; emx++){
+        arrMatrix.push([emx,0]);
+      }         
+    if(graphData.isDuration){  // for duration data binning
+        if (DEBUG) console.log("Duration binning");      
+        for(var j=0;j<data.length; j++){        
+            indStart = Math.round((moment.duration(data[j][0].diff(firstEvent))).asDays());
+            indStop = Math.round((moment.duration(data[j][1].diff(firstEvent))).asDays());
+            if(indStop === indStart){ indStop++;} // for 1 day period
+            if(indStop > arrMatrix.length){ indStart--; indStop--;}
+            if (DEBUG) {
+                console.log("index Start --->>" +indStart ); 
+                console.log(data[j][0]);
+                console.log("index Stop --->>" +indStop );
+                console.log(data[j][1]);
+            }
+            for(var dmx=indStart;dmx<indStop; dmx++){
+               mxVal = arrMatrix[dmx][1] + 1;
+               arrMatrix[dmx][1] = mxVal;       
+            }
+        }
+         //----- Agrigate duration data --------------------
+        for(var f=0;f<arrMatrix.length; f++){
+          if(f<=binEge){
+            binVal = binVal + arrMatrix[f][1];
+          }else{
+            if(binVal !== 0){
+                binDate = moment.utc(moment(firstEvent).add(Math.round((daysPerBin*iteration)+(daysPerBin/2)), "days")).valueOf(); 
+                agrData.push([binDate,fNormalization(binVal)]);
+                binVal = 0;
+            }
+            binEge = binEge + daysPerBin;
+            iteration++;
+          }
+        }
+    }else{        
+        if(DEBUG) console.log("Normal binning");
+        var indexDay = 0;
+        var indexNow = Math.round((moment.duration(moment().diff(firstEvent))).asDays());
+       
+      for(var iterData=0; iterData<data.length; iterData++){    
+         indexDay = Math.round((moment.duration(moment(data[iterData][0]).diff(firstEvent))).asDays());
+         if((diffDays>=indexDay)&&(indexDay>=0)){ // if day index is in time range
+            mxVal = arrMatrix[indexDay][1] + data[iterData][1];
+            arrMatrix[indexDay][1] = mxVal;
+            if(DEBUG) { 
+                console.log("Day index--->>" + arrMatrix[indexDay][0]); 
+                console.log("Value--->>" + arrMatrix[indexDay][1]); 
+             }
+         }else{
+            if(DEBUG) console.log("Error ---->>event is out of chart's time range");
+         }
+      }
+         //----- Agrigate discrete data --------------------
+        var splBinLeft  = 0;
+        var splBinRight = 0;
+        var lastBin     = 0;
+        var isSplBin    = false;
+        var isLastBin   = false;
+        for(var matxIter=0;matxIter<arrMatrix.length; matxIter++){
+            binVal = binVal + arrMatrix[matxIter][1];
+            if(matxIter<=binEge){
+                  if(matxIter === indexNow){ //check for splited binn
+                      // splitted bin calculation
+                      if(DEBUG) console.log("Splitted Bin----->>!!!");
+                      splBinRight = binEge - matxIter; //length of splitted bin right side
+                      splBinLeft  = daysPerBin - splBinRight; //length of splitted bin left side
+                        if(binVal !== 0){
+                            binDate = moment.utc(moment(firstEvent).add(Math.round((daysPerBin*iteration)+(splBinLeft/2)), "days")).valueOf();
+                            agrData.push([binDate,fNormalization(binVal)]);
+                            if(DEBUG) console.log("Left side of splitted Date->>"+ moment(binDate).format("YYYY-MM-DD") + " value->" +binVal);
+                            binVal = 0;
+                        }
+                        isSplBin = true;
+                  }
+                if(isLastBin){
+                    if(binVal !== 0){
+                        binDate = moment.utc(moment(firstEvent).add(Math.round((daysPerBin*iteration)+(lastBin/2)), "days")).valueOf(); 
+                        agrData.push([binDate,fNormalization(binVal)]);
+                        if(DEBUG) console.log("Last bin Date->>"+ moment(binDate).format("YYYY-MM-DD") + " value->" +binVal);
+                    }
                 }
-           }
-       }
-       if (DEBUG) {
-           console.log("Number of sieve cells: " + arrBolter.length);
-           console.log(arrBolter);
-       }
-        
-       //----- Agrigate data --------------------
-       var agrData = [];
-       for (var z = 0; z < arrBolter.length; z++) {
-           var count = 0;
-           for (var x = 0; x < data.length; x++) {
-               //if ((moment(moment(data[x][0])).isBetween(arrBolter[z][0], arrBolter[z][1])) || ((moment(moment(data[x][0])).isSame(arrBolter[z][0])))) {// version for moment 2.9.0
-               if (((moment(moment(data[x][0])).isAfter(arrBolter[z][0]))&&(moment(moment(data[x][0])).isBefore(arrBolter[z][1]))) || ((moment(moment(data[x][0])).isSame(arrBolter[z][0])))) {
-                   count = count + data[x][1];
-               }
-           }
-           if (count !== 0) {
-              agrData.push([moment.utc(moment(arrBolter[z][0]).add(Math.round(((arrBolter[z][1]).diff(arrBolter[z][0], "days")) / 2), "days")).valueOf(), fNormalization(count)]);
-           }
-           if (DEBUG) console.log((moment(arrBolter[z][0]).add(Math.round(daysPerBin / 2), "days")).format("YYYY-MM-DD") + " - " + count);
-       }
+          }else{
+              if(isSplBin){  // right part of splitted bin
+                        if(binVal !== 0){
+                            binDate = moment.utc(moment(firstEvent).add(Math.round((daysPerBin*iteration+splBinLeft)+(splBinRight/2)), "days")).valueOf(); 
+                            agrData.push([binDate,fNormalization(binVal)]);
+                            if(DEBUG) console.log("Right side of sptitted Date->>"+ moment(binDate).format("YYYY-MM-DD") + " value->" +binVal);
+                            binVal = 0;
+                        }                
+                  isSplBin = false;
+              }else{              
+                if(binVal !== 0){ // normal binn
+                    binDate = moment.utc(moment(firstEvent).add(Math.round((daysPerBin*iteration)+(daysPerBin/2)), "days")).valueOf(); 
+                    agrData.push([binDate,fNormalization(binVal)]);
+                    if(DEBUG) console.log("Normal bin Date->>"+ moment(binDate).format("YYYY-MM-DD") + " value->" +binVal);
+                    binVal = 0;
+                }
+              }
+            binEge = binEge + daysPerBin;
+            if(binEge>arrMatrix.length){
+                lastBin = daysPerBin - (binEge - arrMatrix.length);
+                binEge =arrMatrix.length;
+                isLastBin = true;
+            }
+            iteration++;
+          }
+        }
+    }
        if (DEBUG) console.log(agrData);
        return agrData;
    };
 
+
+    Utils.isNotUndefinedAndNotNull = function(object) {
+        return !(_.isUndefined(object) || _.isNull(object));
+    };
+
     return Utils;
-}
+});

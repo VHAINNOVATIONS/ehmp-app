@@ -1,31 +1,69 @@
-<div id='observations-gist-popover-{{uid}}' tabindex="0" data-content="{{tooltip}}" data-toggle="popover" {{! data-placement="top"}} class='gistItem columnItem selectable changecolor {{#if verticalLine}} border-vertical{{/if}}'>
-
+<div class="toolbarContainer"/>
+<div id="observations_{{displayName}}" class="row equalHeights noMargin gistItemInner" {{#if userWorkspace}} draggable='true' {{/if}}>
 {{#if vitalColumns}}
-	<span class="sr-only">{{fullName}}</span>
-	<span id="{{observationType}}_problem_name_{{normalizedName}}" class="col-sm-3">{{{descriptionColumn}}}</span>
-	{{#if isValid}}
-		{{#if resultAndUnitsMerged}}
-			<span id="{{observationType}}_problem_result_{{normalizedName}}" class="col-sm-4 paddingLeft">{{finalResult}}</span>
-		{{else}}
-			<span id="{{observationType}}_problem_result_{{normalizedName}}" class="col-sm-2 vitalsResult paddingLeft">{{result}}</span>
-			<span id="{{observationType}}_problem_units_{{normalizedName}}" class="col-sm-2 vitalsUnits">{{finalUnits}}</span>
-		{{/if}}
-		{{#if interpretationField}}
-			<span class="sr-only">{{interpretationField}}</span>
-		{{/if}}
-	{{else}}
-		<span class="col-sm-4 paddingLeft no-value">{{result}}</span>
-	{{/if}}
+    <div class='col-sm-4 quickDraw selectable info-display noPadding'>
+        <div class="row equalHeights noMargin border-vertical">
+            <span class="sr-only">{{fullName}}</span>
+            <div id='{{observationType}}_problem_name_{{displayName}}' class="col-sm-12 problem-name" >
+                {{{descriptionColumn}}}
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-8 quickDraw selectable noPadding" data-toggle="popover" data-content="{{tooltip}}" tabindex="0">
+        {{#if result}}
+        <div class="row equalHeights noMargin noPadding">
+            <div id="quickLook_{{id}}" class="quickviewOverlay right-side"></div>
+            {{#if isValid}}
+            <div class="border-vertical col-sm-5">
+                <div id='{{observationType}}_problem_result_{{displayName}}'
+                    class="eventsTimeSince counter2 text-center">{{result}}{{#if units}} {{units}}{{/if}}
+                    {{#if metricResult}}<span class="smallergreyText">{{metricResult}}{{#if metricUnits}} {{metricUnits}}{{/if}}</span>{{/if}}</div>
+            </div>
+            {{else}}
+                <div class="border-vertical col-sm-5">
+                <div id='{{observationType}}_problem_result_{{displayName}}'
+                    class="eventsTimeSince counter2 text-center">{{result}}</div>
+            </div>
+            {{/if}}
+            <span class="sr-only">{{numericTime}}</span>
+            <div id='{{observationType}}_time_since_{{displayName}}'
+                 class="eventsCount col-sm-2 counter2 text-center">{{timeSince}}</div>
+            <div id="chartArea"
+                 class="col-sm-5 text-center noPadding noTopBottomFixedHeight">
+                    {{{sparkline graphOptions result previousResult low high interpretationCode previousInterpretationCode standardDeviation}}}
+            </div>
+        </div>
+        {{else}}
+            <span id="{{observationType}}_no_record_{{displayName}}" class="col-sm-12 no-record">No record</span>
+        {{/if}}
+    </div>
 {{else}}
-	<span id="{{observationType}}_problem_name_{{displayName}}" class="col-sm-5 overflowEllipsis">{{shortName}}</span>
-	<span id="{{observationType}}_problem_result_{{displayName}}" class="col-sm-1 labsResult overflowEllipsis">{{result}}</span>
-	<span id="{{observationType}}_problem_units_{{displayName}}" class="labsUnits col-sm-2">{{units}}</span>
+    <div class='col-sm-4 quickDraw selectable info-display noPadding'>
+        <div class="row equalHeights noMargin border-vertical">
+            <div id='{{observationType}}_problem_name_{{displayName}}' class="col-sm-12 problem-name">
+                {{shortName}}
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-8 quickDraw selectable noPadding" id='quickDraw_{{id}}' data-toggle="popover" data-content="{{tooltip}}" tabindex="0">
+        <div class="row equalHeights noMargin noPadding">
+            <div id="quickLook_{{id}}" class="quickviewOverlay right-side"></div>
+            <div class="border-vertical col-sm-5">
+                <div id='{{observationType}}_problem_result_{{displayName}}'
+                     class="eventsTimeSince counter2 text-center">{{result}} {{units}}</div>
+            </div>
+            <span class="sr-only">{{numericTime}}</span>
+            <div id='{{observationType}}_time_since_{{displayName}}'
+                 class="eventsCount col-sm-2 counter2 text-center">{{timeSince}}</div>
+            {{#if result}}
+            <div id="chartArea"
+                 class="col-sm-5 text-center noPadding noTopBottomFixedHeight">
+                    {{{sparkline graphOptions result previousResult low high interpretationCode previousInterpretationCode standardDeviation}}}
+            </div>
+            {{else}}
+                <span id="{{observationType}}_no_record_{{displayName}}" class="col-sm-5 no-record">No record</span>
+            {{/if}}
+        </div>
+    </div>
 {{/if}}
-{{#if result}}
-	<span id="{{observationType}}_graph_{{displayName}}" class="col-sm-3 graph-container">{{{sparkline graphOptions result previousResult low high interpretationCode previousInterpretationCode standardDeviation}}}</span>
-{{else}}
-	<span id="{{observationType}}_no_record_{{displayName}}" class="col-sm-3 no-record">No record</span>
-{{/if}}
-<span class="sr-only">{{numericTime}}</span>
-<span id="{{observationType}}_time_since_{{displayName}}" class="col-sm-1">{{timeSince}}</span>
 </div>

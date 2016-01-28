@@ -1,0 +1,1 @@
+define(["backbone","marionette","underscore","hbs!app/applets/stackedGraph/list/pickListViewTemplate"],function(e,t,n,i){var a=e.Marionette.ItemView.extend({tagName:"span",id:"pickList",template:i,events:{"click button":"eventFunction"},onShow:function(){}});return a});

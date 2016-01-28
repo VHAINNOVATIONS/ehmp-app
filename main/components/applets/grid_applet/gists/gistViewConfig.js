@@ -1,9 +1,5 @@
-var dependencies = [
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies() {
+define([
+], function() {
     'use strict';
 
 var Config = {
@@ -12,4 +8,4 @@ var Config = {
         defaultTimeFormat: true
     };
   return Config;
-}
+});

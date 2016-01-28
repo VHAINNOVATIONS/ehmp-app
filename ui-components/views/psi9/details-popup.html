@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>eHMP Bootstrap UI Library - Patient Search</title>
+    <link rel="stylesheet" href="../../../_assets/css/vendor.css" />
+    <link rel="stylesheet" href="../../../_assets/css/adk.css" />
+    <link rel="stylesheet" href="../../../app/css/applets.css">
+    <link rel="stylesheet" href="../../css/main-styles.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,300,600,700" />
+    <script src="../../js/jquery-1.11.2.min.js"></script>
+    <script src="../../js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div clas="col-md-12">
+                <div class="text-center">
+                    <button type="button" class="btn btn-default btn-md" data-toggle="modal" data-target="#myModal" title="Select the button to open up a modal window">Launch Details View Modal</button>
+                </div>
+                <div class="modal fade details-modal" id="myModal" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-liquid">
+                        <div class="modal-content">
+                            <div class="modal-header hidden-overflow">
+                                <h4 class="modal-title pull-left" id="myModalLabel">Documents</h4>
+                                <button type="button" class="close pull-right" data-dismiss="modal" title="Press enter to close"><span aria-hidden="true">&times;</span></button>
+                            </div>
+                            <div class="modal-body hidden-overflow all-padding-no">
+                                <div class="details-nav hidden-overflow full-height pull-left">
+                                    <div id="notesNav" class="nav-list" role="application" title="This is a column navigation. Press enter to start browsing the options. Use your arrow keys to navigate through them and press enter, spacebar or the right arrow to make a selection. To exit navigation press The escape key."></div>
+                                </div>
+                                <!-- we assign tabindex -1 to the button to make it untabbable (completely hidden from accessibility rules) -->
+                                <button id="collapseNav" class="details-nav-button" type="button" title="Toggle column navigation" aria-hidden="true" tabindex="-1"><i class="fa fa-chevron-left"></i></button>
+                                <div class="details-content auto-overflow full-height pull-left">
+                                    <div class="all-padding-sm">
+                                        <h3 class="all-margin-no all-padding-no all-border-no">Primary Care General Note</h3>
+                                        <p class="all-margin-no">04/11/2015 - 03:30</p>
+                                        <p class="all-margin-no pull-left bottom-margin-xs">Doe, John Q</p>
+                                        <p class="all-margin-no pull-right bottom-margin-xs"><strong>SIGNED</strong></p>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-icon text-big" title="Press enter to edit"><i class="fa fa-pencil"></i></button>
+                                            <button class="btn btn-icon text-big" title="Press enter to print"><i class="fa fa-print"></i></button>
+                                            <button class="btn btn-icon text-big" title="Press enter to delete"><i class="fa fa-trash"></i></button>
+                                        </div>
+                                        <hr>
+                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In dapibus, est eget sodales vestibulum, lorem erat fringilla felis, vel vestibulum dolor turpis sed orci. Aenean lacinia quis risus eget laoreet. Pellentesque rhoncus justo ac urna sollicitudin egestas.</p>
+                                        <p>Suspendisse malesuada ipsum nisi, sed sollicitudin arcu condimentum a. Nulla facilisi. Sed hendrerit enim lacus, id tempor arcu euismod dapibus.</p>
+                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In dapibus, est eget sodales vestibulum, lorem erat fringilla felis, vel vestibulum dolor turpis sed orci. Aenean lacinia quis risus eget laoreet. Pellentesque rhoncus justo ac urna sollicitudin egestas.</p>
+                                        <p>Suspendisse malesuada ipsum nisi, sed sollicitudin arcu condimentum a. Nulla facilisi. Sed hendrerit enim lacus, id tempor arcu euismod dapibus.</p>
+                                        <h4>Active Inpatient and Outpatient Medications:</h4>
+                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In dapibus, est eget sodales vestibulum, lorem erat fringilla felis, vel vestibulum dolor turpis sed orci. Aenean lacinia quis risus eget laoreet. Pellentesque rhoncus justo ac urna sollicitudin egestas.</p>
+                                        <p>Suspendisse malesuada ipsum nisi, sed sollicitudin arcu condimentum a. Nulla facilisi. Sed hendrerit enim lacus, id tempor arcu euismod dapibus.</p>
+                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In dapibus, est eget sodales vestibulum, lorem erat fringilla felis, vel vestibulum dolor turpis sed orci. Aenean lacinia quis risus eget laoreet. Pellentesque rhoncus justo ac urna sollicitudin egestas.</p>
+                                        <p>Suspendisse malesuada ipsum nisi, sed sollicitudin arcu condimentum a. Nulla facilisi. Sed hendrerit enim lacus, id tempor arcu euismod dapibus.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    $.makeId = function() {
+        var
+            text = "",
+            possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (var i = 0; i < 5; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
+    };
+    $.fn.navlist = function(a) {
+        var
+            args = $.extend({
+                items: [], // an object that contains the items of the nav.
+                growFunction: function() {}, // gets triggered when the nav expands to a new column
+                shrinkFunction: function() {}, // gets triggered when the nav shrinks to the previous column,
+                width: null,
+                height: null
+            }, a),
+            deployEventListener = function(f) {
+                // we bind this only once to the document to prevent multiple binding of the same event over and over.
+                // We re-bind only if necessary within the same function
+                // we also provide a namespace with the id of the list to overwrite the same eventlisterner if fired more than once
+                // just once--V
+                $(document).one('keydown.navlist', function(e) {
+                    e.preventDefault(); // prevent the default action (scroll / move caret)
+                    var el;
+                    var timefocus = false;
+                    switch (e.which) {
+                        case 37: // left
+                            var theUl = f.parent().prev();
+                            removeHigherLevels(theUl);
+                            el = theUl.find('.selected');
+                            clearSelected(el);
+                            break;
+                        case 38: // up
+                            el = f.prev().not('.nav-list-heading');
+                            break;
+                        case 13:
+                        case 32:
+                        case 39: // right
+                            f.trigger('click');
+                            timefocus = true;
+                            el = f.parent().next().children('li.nav-list-action:first');
+                            break;
+                        case 40: // down
+                            el = f.next();
+                            break;
+                        case 27: //esc
+                            el = f.parent().parent();
+                            el.find('li').removeAttr('tabindex');
+                            break;
+                        default:
+                            return; // exit this handler for other keys
+                    }
+                    if (el.length) {
+                        if (timefocus) {
+                            setTimeout(function(){el.focus();},150);
+                        } else {
+                            el.focus();
+                        }
+                    } else {
+                        deployEventListener(f);
+                    }
+
+                });
+            },
+            removeEventListener = function() {
+                $(document).off('keydown.navlist');
+            },
+            removeHigherLevels = function(myUl) {
+                // get the index of my ul and remove thos that are after it
+                var ulIndex = myUl.index();
+                myUl.parent().children(':gt(' + ulIndex + ')').remove();
+                if (typeof(args.shrinkFunction) == 'function') args.shrinkFunction();
+            },
+            clearSelected = function(b) {
+                b.parent().find('.selected').removeClass('selected');
+            },
+            openList = function(b) {
+                b.addClass('selected');
+                var bid = b.attr('id');
+                var myUl = b.closest('ul');
+                removeHigherLevels(myUl);
+                if ($('#navlist-' + bid).length === 0) {
+                    var nuUl = genItemsHtml(b.data('children'), bid);
+                    myUl.after(nuUl);
+                }
+            },
+            createButton = function(ob, ind, heading) {
+                var buttonLabel = (heading ? '<p class="sr-only">' + heading + '</p>' : '') + ob.label;
+                var button = $(document.createElement('li')).attr({
+                    'class': 'nav-list-action',
+                    'data-item-id': ind,
+                    'id': $.makeId(),
+                    'tabindex': '-1'
+                }).html(buttonLabel).focus(function() {
+                    deployEventListener($(this));
+                }).blur(function() {
+                    removeEventListener();
+                });
+                if (typeof(ob.childList) != 'undefined') {
+                    button.addClass('has-children').data('children', ob.childList).click(function() {
+                        clearSelected($(this));
+                        openList($(this));
+                        if (typeof(args.growFunction) == 'function') args.growFunction();
+                    }).html(buttonLabel + '<span class="sr-only"> Press enter, spacebar, or the right arrow key to expand the sub menu.</span>');
+                } else {
+                    button.click(function() {
+                        var t = $(this);
+                        var ul = t.closest('ul');
+                        clearSelected($(this));
+                        removeHigherLevels(ul);
+                        if ((typeof(ob.action) == 'function') && (ob.action)) {
+                            ob.action();
+                        }
+                    });
+                }
+                return button;
+            },
+            genItemsHtml = function(itemsObj, parentId) {
+                var ul = $(document.createElement('ul')).attr('id', 'navlist-' + parentId).addClass('list-block pull-left');
+                var heading = (((typeof(itemsObj.heading) !== 'undefined') && itemsObj.heading) ? itemsObj.heading : null);
+                if (args.width) {
+                    ul.width(args.width);
+                }
+                if (heading) ul.append('<li aria-hidden="true" class="nav-list-heading">' + itemsObj.heading + '</li>');
+                for (var i = 0; i < itemsObj.items.length; i++) {
+                    var li = createButton(itemsObj.items[i], i, heading);
+                    ul.append(li);
+                }
+                return ul;
+            };
+        return this.each(function() {
+            var t = $(this);
+            if (args.height) t.height(args.height);
+
+            var enterNavEl = function() {
+                $(document).one('keydown.activateColumnNav', function(e) {
+                    switch (e.which) {
+                        case 39: //right
+                        case 40: // down
+                            t.next().focus();
+                            break;
+                        case 37:
+                        case 38:
+                            t.prev().focus();
+                            break;
+                        case 13:
+                            // make elements navigable
+                            t.find('li.nav-list-action').attr('tabindex', '0');
+                            t.find('.nav-list-action:first').focus();
+                            break;
+                        default:
+                            //re-add event listnener
+                            enterNavEl();
+                            return;
+                    }
+                    e.preventDefault(); // prevent the default action (scroll / move caret)
+                });
+            };
+            var escaper = '<span tabindex="-1"></span>';
+            t.attr({
+                'tabindex': '0'
+            }).focus(function() {
+                enterNavEl();
+            }).blur(function() {
+                $(document).off('keypress.activateColumnNav');
+            }).append(genItemsHtml(args.items, $.makeId())).after(escaper).before(escaper);
+        });
+    };
+    $(document).ready(function() {
+        var list = {
+            'heading': 'Column 1',
+            'items': [{
+                'label': 'one',
+                'childList': {
+                    'heading': 'one children',
+                    'items': [{
+                        'label': 'one.one'
+                    }, {
+                        'label': 'one.two'
+                    }, {
+                        'label': 'one.three'
+                    }, {
+                        'label': 'one.four'
+                    }]
+                }
+            }, {
+                'label': 'two'
+            }, {
+                'label': 'three',
+                'childList': {
+                    'heading': 'three children',
+                    'items': [{
+                        'label': 'three.one'
+                    }, {
+                        'label': 'three.two'
+                    }, {
+                        'label': 'three.three'
+                    }, {
+                        'label': 'three.four'
+                    }]
+                }
+            }, {
+                'label': 'four (clickable)',
+                'action': function() {
+                    alert('Thanks for clicking!');
+                }
+            }]
+        };
+        var gsFunc = function() {
+            var ulw = $('#notesNav ul').length * 150;
+            $('.details-nav .nav-list').width(ulw);
+            $('.details-nav').width(ulw);
+            $('.details-content').css('width', 'calc(100% - ' + ulw + 'px - 10px)');
+        };
+        $('.nav-list').navlist({
+            items: list,
+            growFunction: gsFunc,
+            shrinkFunction: gsFunc
+        });
+        $('#collapseNav').click(function() {
+            var t = $(this);
+            var dn = $('.details-nav');
+            if (dn.hasClass('collapsed')) {
+                gsFunc();
+                dn.removeClass('collapsed');
+            } else {
+                dn.width(0).addClass('collapsed');
+                $('.details-content').css('width', 'calc(100% - 10px)');
+            }
+            t.children().toggleClass('fa-chevron-left');
+            t.children().toggleClass('fa-chevron-right');
+        });
+        // prevent modal from closing if ESC key is hit from within the column navigation
+        $('#myModal').on('hide.bs.modal', function () {
+            if ($(':focus').hasClass('nav-list')){
+                return false;
+            }
+        });
+    });
+    </script>
+</body>
+
+</html>

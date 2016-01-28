@@ -1,12 +1,47 @@
-<div class="complete-background">
-<div class="editorTopManager">
-  <input type="text" name="searchScreens" id="searchScreens" placeholder="Enter title or description to filter workspaces">
-  <input type="button" name="addScreen" id="addScreen" value="ADD NEW WORKSPACE">
-  <input type="button" name="doneEditing" id="doneEditing" value="CLOSE">
-</div>
-<div class="deleteActiveRegion"></div>
-<div class="addEditFormRegion"></div>
-<div class="applet-tray">
-</div>
+<div class="container-fluid full-height" role="dialog" aria-labelledby="workspaceManagerHeading">
+    <div class="row">
+        {{ui-button "Close Workspace Manager" srOnlyLabel=true classes="btn-icon pull-right" title="Press enter to close the Workspace Manager and return to your previous screen" icon="fa-times-circle-o" id="doneEditing"}}
+    </div>
+    <div class="panel-primary">
+        <div class="panel-heading row">
+            <h1 id="workspaceManagerHeading" class="pull-left">WORKSPACE MANAGER</h1>
+            <div class="pull-right">
+                {{ui-button "Add a new workspace." srOnlyLabel=true classes="btn-icon addScreen" title="Press enter to add a new workspace." icon="fa-plus"}}
+                <button id="grid-filter-button-workspace-manager" type="button" data-toggle="collapse" class="btn btn-icon collapsed" title="Filter Workspaces. You can tab to the Workspace Filter after opening the tab panel." role="tab" data-target="#workspace-filter" aria-controls="workspace-filter">
+                    <span class="sr-only">Filter Workspaces</span>
+                    <i class="fa fa-filter"></i>
+                </button>
 
+            </div>
+        </div>
+        <div id="workspace-filter" class="grid-filter row all-padding-no collapse" role="tabpanel" aria-labelledby="grid-filter-button-workspace-manager" aria-expanded="true">
+            <div class="pull-right right-margin-sm filterRegion all-padding-sm">
+                <form class="backgrid-filter form-search all-margin-no">
+                    <!-- <label class="sr-only" for="searchScreens">Filter Workspaces by title or description. Workspaces will be filtered as you type, you do not need to press anything to submit. Also, as you type a button to clear your filter text will appear. You can tab to that Clear button</label> -->
+                    <span class="search">&nbsp;</span>
+                    <input id="searchScreens" type="search" title="Filter workspaces by title or description. The filter results will start being read as you type" placeholder="Filter by title or description" name="searchScreens">
+                    {{ui-button "Remove filter text." srOnlyLabel=true classes="btn-icon clear all-padding-no" title="Press enter to clear the workspace filter textbox." icon="fa-times" id="clearSearch"}}
+                </form>
+            </div>
+        </div>
+            <div class=" workspaceTable row">
+                <span class="sr-only">You are now entering a table.</span>
+                <div class="header-bar row">
+                    <span class="sr-only">Table Header.</span>
+                    <span class="sr-only">Default Workspace Selector.</span>
+                    <div class="col-xs-3 header">Title</div>
+                    <span class="sr-only">Association Conditions Manager.</span>
+                    <div class="col-xs-4 header">Description</div>
+                    <div class="col-xs-1 header ">Author</div>
+                    <span class="sr-only">Duplicate Workspace.</span>
+                    <span class="sr-only">Rearrange Workspace.</span>
+                    <span class="sr-only">Delete Workspace.</span>
+                    <span class="sr-only">Launch or Customize.</span>
+                </div>
+                <span class="sr-only">Table Body.</span>
+                <div id="list-group" class="panel-body" aria-live="polite"></div>
+            </div>
+    </div>
+</div>
+<div class="previewRegion" role="dialog" aria-hidden="false" data-backdrop="static"></div>
 

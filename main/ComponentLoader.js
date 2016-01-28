@@ -1,4 +1,5 @@
-var dependencies = [
+define([
+    "underscore",
     "backbone",
     "marionette",
     "main/AppletBuilder",
@@ -12,88 +13,109 @@ var dependencies = [
     "main/components/footer/footerView",
     "main/components/navSearch/navView",
     "main/components/applet_header/navView",
-    "main/components/patient/patientSidebarInfoView",
-    "api/UserDefinedScreens"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, AppletBuilder, PatientSearchView, PatientHeaderView, NavigationView,
-                               NavView, AdkNavView, TesterNavView, BlankNavView, FooterView, NavSearchView, AppletNavigationView, PatientSidebarInfoView,
-                               UserDefinedScreens) {
+    "main/components/patient/patientSidebarInfoView"
+], function(_, Backbone, Marionette, AppletBuilder, PatientSearchView, PatientHeaderView, NavigationView,
+    NavView, AdkNavView, TesterNavView, BlankNavView, FooterView, NavSearchView, AppletNavigationView, PatientSidebarInfoView) {
 
     var ComponentLoader = {};
 
-    ComponentLoader.load = function(marionetteApp, TopRegionView, CenterRegionView, screenConfig, patient) {
-
-        var region;
-        var screenConfigModel = new Backbone.Model(screenConfig);
+    ComponentLoader.load = function(marionetteApp, TopRegionView, CenterRegionView, currentScreenConfig, patient) {
 
         //Load Top Region
-        region = TopRegionView.header_region;
-        if (screenConfig.appHeader == "nav") {
-            loadComponent(region, NavView);
-        } else if (screenConfig.appHeader == "adkNav") {
-            loadComponent(region, AdkNavView);
-        } else if (screenConfig.appHeader == "searchNav") {
-            loadComponent(region, NavSearchView);
-        } else if (screenConfig.appHeader == "appletTesterNav") {
-            loadComponent(region, TesterNavView);
-        } else if (screenConfig.appHeader == "blankNav") {
-            loadComponent(region, BlankNavView);
-        } else if (screenConfig.appHeader == "none") {
-            region.empty();
-        } else {
-            loadComponent(region, NavView);
+        var headerRegion = TopRegionView.header_region;
+        switch (currentScreenConfig.appHeader) {
+            case "nav":
+                loadComponent(headerRegion, NavView);
+                break;
+            case "adkNav":
+                loadComponent(headerRegion, AdkNavView);
+                break;
+            case "searchNav":
+                loadComponent(headerRegion, NavSearchView);
+                break;
+            case "appletTesterNav":
+                loadComponent(headerRegion, TesterNavView);
+                break;
+            case "blankNav":
+                loadComponent(headerRegion, BlankNavView);
+                break;
+            case "none":
+                headerRegion.empty();
+                break;
+            default:
+                loadComponent(headerRegion, NavView);
         }
+        var isNonPatientCentricView = (!_.isUndefined(currentScreenConfig.nonPatientCentricView) &&
+            currentScreenConfig.nonPatientCentricView === true);
 
-        if (screenConfig.patientRequired === true) {
-            region = TopRegionView.patientDemographic_region;
-            if (region.currentView === undefined || !(region.currentView instanceof PatientHeaderView)) {
-                region.show(new PatientHeaderView({
+        if (currentScreenConfig.patientRequired === true || isNonPatientCentricView) {
+
+            var patientDemographicRegion = TopRegionView.patientDemographic_region;
+            if (!isNonPatientCentricView && (patientDemographicRegion.currentView === undefined || !(patientDemographicRegion.currentView instanceof PatientHeaderView))) {
+                patientDemographicRegion.show(new PatientHeaderView({
                     model: patient
                 }));
             }
-            
-            if (TopRegionView.navigation_region.currentView === undefined ||
-                !(TopRegionView.navigation_region.currentView instanceof AppletNavigationView)) {
-
-                UserDefinedScreens.getScreensConfig().done(function(screenConfig){
-                    var showGlobalDatepicker = (typeof screenConfig.globalDatepicker === "undefined" ? true : screenConfig.globalDatepicker);
-                    screenConfigModel.set("screens", screenConfig.screens);
-                    TopRegionView.navigation_region.show(new AppletNavigationView({
-                        model: screenConfigModel,
-                        globalDatepicker: showGlobalDatepicker
-                    }));
+            var navigationRegion = TopRegionView.navigation_region;
+            var showGlobalDatepicker = (typeof currentScreenConfig.globalDatepicker === "undefined" ? true : currentScreenConfig.globalDatepicker);
+            if (isNonPatientCentricView) {
+                showGlobalDatepicker = false;
+            }
+            if (navigationRegion.currentView === undefined || !(navigationRegion.currentView instanceof AppletNavigationView)) {
+                navigationRegion.show(new AppletNavigationView({
+                    model: new Backbone.Model({
+                        'currentScreen': currentScreenConfig,
+                        'globalDatepicker': showGlobalDatepicker
+                    })
+                }));
+            } else {
+                navigationRegion.currentView.model.set({
+                    'currentScreen': currentScreenConfig,
+                    'globalDatepicker': showGlobalDatepicker
                 });
+                navigationRegion.currentView.updateWorkspaceList();
             }
         }
 
         //Load Bottom Region
-        region = marionetteApp.bottomRegion;
-        if (screenConfig.appFooter == "footer") {
-            loadComponent(region, FooterView.getView());
-        } else if (screenConfig.appHeader == "none") {
-            region.empty();
-        } else {
-            loadComponent(region, FooterView.getView());
+        var bottomRegion = marionetteApp.bottomRegion;
+        var footerOptions = {
+            'currentScreen': currentScreenConfig
+        };
+        switch (currentScreenConfig.appFooter) {
+            case "footer":
+                if (bottomRegion.currentView === undefined || !(bottomRegion.currentView instanceof FooterView)) {
+                    bottomRegion.show(new FooterView(footerOptions));
+                    break;
+                }
+                bottomRegion.currentView.model.set('currentScreen', currentScreenConfig);
+                break;
+            case "none":
+                bottomRegion.empty();
+                break;
+            default:
+                if (bottomRegion.currentView === undefined || !(bottomRegion.currentView instanceof FooterView)) {
+                    bottomRegion.show(new FooterView(footerOptions));
+                    break;
+                }
+                bottomRegion.currentView.model.set('currentScreen', currentScreenConfig);
         }
 
         //Load Left Region
-        if (screenConfig.content_left && screenConfig.content_left != "none" && screenConfig.contentRegionLayout === 'fixed_left') {
-            region = CenterRegionView.content_sidebarLeft_region;
+        if (currentScreenConfig.content_left && currentScreenConfig.content_left != "none" && currentScreenConfig.contentRegionLayout === 'fixed_left') {
+            var leftRegion = CenterRegionView.content_sidebarLeft_region;
 
-            if (screenConfig.appLeft == "patientSearch") {
+            if (currentScreenConfig.appLeft == "patientSearch") {
                 loadComponent(region, PatientSearchView);
-            } else if (screenConfig.appLeft == "patientInfo") {
-                if (region.currentView === undefined || !(region.currentView instanceof PatientSidebarInfoView)) {
-                    region.show(new PatientSidebarInfoView({
+            } else if (currentScreenConfig.appLeft == "patientInfo") {
+                if (leftRegion.currentView === undefined || !(leftRegion.currentView instanceof PatientSidebarInfoView)) {
+                    leftRegion.show(new PatientSidebarInfoView({
                         model: patient
                     }));
                 }
             } else {
-                if (region.currentView === undefined || !(region.currentView instanceof PatientSidebarInfoView)) {
-                    region.show(new PatientSidebarInfoView({
+                if (leftRegion.currentView === undefined || !(leftRegion.currentView instanceof PatientSidebarInfoView)) {
+                    leftRegion.show(new PatientSidebarInfoView({
                         model: patient
                     }));
                 }
@@ -109,4 +131,4 @@ function onResolveDependencies(Backbone, Marionette, AppletBuilder, PatientSearc
     }
 
     return ComponentLoader;
-}
+});

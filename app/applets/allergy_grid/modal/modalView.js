@@ -1,15 +1,1 @@
-var dependencies = [
-    'backbone',
-    'marionette',
-    'underscore',
-    'hbs!app/applets/allergy_grid/modal/modalTemplate'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, _, modalTemplate) {
-    'use strict';
-    return Backbone.Marionette.ItemView.extend({
-        template: modalTemplate
-    });
-}
+define(["backbone","marionette","underscore","app/applets/allergy_grid/util","hbs!app/applets/allergy_grid/modal/modalTemplate","app/applets/allergy_grid/modal/modalHeaderView"],function(e,t,l,i,a,o){"use strict";var d,r=[],s=e.Marionette.ItemView.extend({template:a,initialize:function(e){this.model=e.model,this.collection=e.collection,d=e.collection,this.getModals()},events:{"click .allergy-grid-next":"getNextModal","click .allergy-grid-previous":"getPrevModal"},getNextModal:function(e){var t=l.indexOf(r,this.model)+1;t>=r.length&&(this.getModals(),t=0);var i=r[t];this.setNextPrevModal(i)},getPrevModal:function(e){var t=l.indexOf(r,this.model)-1;0>t&&(this.getModals(),t=r.length-1);var i=r[t];this.setNextPrevModal(i)},getModals:function(){r=d.models},setNextPrevModal:function(e){this.showNavHeader&&(e.attributes.navHeader=!0);var t,l=new s({model:e,collection:d});ADK.UserService.getUserSession().get("site"),e.get("pid")?e.get("pid").split(";")[0]:"";t={title:i.getModalTitle(e),size:"normal",headerView:o.extend({model:e,theView:l})};var a=new ADK.UI.Modal({view:l,options:t});a.show()}});return s});

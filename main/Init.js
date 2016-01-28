@@ -1,19 +1,38 @@
-'use strict';
-var dependencies = [
+define([
     'backbone',
     'marionette',
     'jquery',
     'underscore',
-    'ADKApp',
-    'main/ScreenBuilder',
-    'ResourceDirectory',
-    'main/ADK',
-    'main/components/views/globalErrorView'
-];
+    'api/Messaging',
+    'api/UIComponents',
+    'main/AppletsManifest',
+    'main/ScreensManifest',
+    'main/NewUserScreen',
+    'main/PreDefinedScreens',
+    '_assets/js/browserDetector/browserDetector',
+    'api/UserService',
+    'api/ResourceService'
+], function(Backbone, Marionette, $, _, Messaging, UIComponents, AppletsManifest, ScreensManifest, NewUserScreen, PreDefinedScreens, BrowserDetector, UserService, ResourceService) {
+    'use strict';
 
-define(dependencies, onResolveDependencies);
+    var SCREENS_MANIFEST = 'app/screens/ScreensManifest.js';
+    var PREDEFINED_SCREENS = 'app/screens/PreDefinedScreens.js';
+    var NEW_USERS_SCREENS = 'app/screens/NewUserScreen.js';
+    var APPLETS_MANIFEST = 'app/applets/appletsManifest.js';
 
-function onResolveDependencies(Backbone, Marionette, $, _, ADKApp, ScreenBuilder, ResourceDirectory, ADK, GlobalErrorView) {
+    /** Start loading the ehmp-ui related files */
+    var EhmpUiFilesLoaded = $.Deferred();
+    var ScreenManifestsLoaded = $.Deferred();
+    var PreDefinedScreensLoaded = $.Deferred();
+    var NewUserScreenLoaded = $.Deferred();
+    var AppletsManifestLoaded = $.Deferred();
+    var appManifest = new Backbone.Model();
+    var appConfig = new Backbone.Model();
+    var facilityMonikers = new Backbone.Collection();
+    var Init = {};
+
+    // limit browser to supported browsers
+    BrowserDetector.enforceBrowserType();
 
     // this allows AJAX to send cookies to a server
     // these cookies are needed for the server's session to run
@@ -22,44 +41,6 @@ function onResolveDependencies(Backbone, Marionette, $, _, ADKApp, ScreenBuilder
             withCredentials: true
         };
     });
-
-    // $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
-    //     // (jqxhr.status === 401 && ADKApp.currentScreen.id !== 'logon-screen') ||
-    //     if (jqxhr.status === 500 || (jqxhr.status === 503 && ADKApp.currentScreen.id !== 'logon-screen')) {
-    //         var errorMessage, refreshButton, clearSession;
-    //         switch (jqxhr.status) {
-    //             case 401:
-    //                 errorMessage = 'Access Denied<br/><small>You have been logged out.</small>';
-    //                 refreshButton = 'LOGON';
-    //                 clearSession = true;
-    //                 break;
-    //             case 500:
-    //                 errorMessage = 'Critical Error!<br/><small>No response from server. Check your network settings and refresh the page.</small>';
-    //                 refreshButton = 'Refresh Page';
-    //                 break;
-    //             case 503:
-    //                 errorMessage = 'Operational Sync Not Complete<br/><small>Please wait a few minutes and try again.</small>';
-    //                 refreshButton = 'Try Again';
-    //                 break;
-    //             default:
-    //                 errorMessage = 'Error: ' + jqxhr.status + '<br/><small>Try refreshing the browser.</small>';
-    //                 refreshButton = 'Refresh Page';
-    //                 break;
-    //         }
-    //         var ModalRegionView = new GlobalErrorView({
-    //             errorMessage: errorMessage,
-    //             refreshButton: refreshButton,
-    //             clearSession: clearSession
-    //         });
-    //         ADKApp.modalRegion.show(ModalRegionView);
-    //         $('#mainModal').modal({
-    //             show: true,
-    //             backdrop: 'static',
-    //             keyboard: false
-    //         });
-    //         $("#msg").append("<li>Error requesting page " + settings.url + "</li>");
-    //     }
-    // });
 
     Array.prototype.equals = function(array) {
         if (!array)
@@ -78,84 +59,165 @@ function onResolveDependencies(Backbone, Marionette, $, _, ADKApp, ScreenBuilder
         return true;
     };
 
-    ADKApp.on('before:start', function() {
+    Messaging.reply("NewUserScreen", function() {
+        return NewUserScreen;
+    });
 
-        ADKApp.resourceDirectoryLoaded = $.Deferred();
+    Messaging.reply("PreDefinedScreens", function() {
+        return PreDefinedScreens;
+    });
 
-        var appManifest = new Backbone.Model();
-        appManifest.fetch({
-            url: '../manifest.json',
-            global: false
+    Messaging.reply("AppletsManifest", function() {
+        return AppletsManifest;
+    });
+
+    Messaging.reply("ScreensManifest", function() {
+        return ScreensManifest;
+    });
+
+    Messaging.reply("facilityMonikers", function() {
+        return facilityMonikers;
+    });
+
+    Init.beforeStart = function() {
+
+        //make sure that we have screens and applets to use first
+        require([SCREENS_MANIFEST], function(data) {
+            _.extend(ScreensManifest, data);
+            ScreenManifestsLoaded.resolve();
         });
-        ADK.Messaging.reply("appManifest", function() {
-            return appManifest;
+
+        require([PREDEFINED_SCREENS], function(data) {
+            _.extend(PreDefinedScreens, data);
+            PreDefinedScreensLoaded.resolve();
         });
 
-        var appConfig = new Backbone.Model();
-        ADK.Messaging.reply("appConfig", function() {
-            return appConfig;
+        require([NEW_USERS_SCREENS], function(data) {
+            _.extend(NewUserScreen, data);
+            NewUserScreenLoaded.resolve();
         });
 
-        function fetchAppConfig() {
-            var deferred = $.Deferred();
-            appConfig.fetch({
-                    url: '../app.json',
+        require([APPLETS_MANIFEST], function(data) {
+            _.extend(AppletsManifest, data);
+            AppletsManifestLoaded.resolve();
+        });
+
+        $.when(ScreenManifestsLoaded, PreDefinedScreensLoaded, NewUserScreenLoaded, AppletsManifestLoaded).then(function() {
+            EhmpUiFilesLoaded.resolve();
+            Init.start();
+        }, function() {
+            EhmpUiFilesLoaded.reject();
+        });
+
+
+    };
+
+    Init.start = function() {
+        //make sure that ADK is available to everything
+        require([
+            'main/ADK'
+        ], function(ADK) {
+            //now that ADK is ready and global lets allow things to use it
+            require([
+                'main/ADKApp',
+                'main/ResourceDirectory',
+                'main/components/views/globalErrorView'
+            ], function(ADKApp, ResourceDirectory, GlobalErrorView) {
+
+                var resourceDirectoryLoaded = $.Deferred();
+                var facilityMonikersLoaded = $.Deferred();
+
+                appManifest.fetch({
+                    url: '../manifest.json',
                     global: false
-                })
-                .done(function() {
-                    deferred.resolve(appConfig);
-                })
-                .fail(function() {
-                    console.log('Failed to resolve app.json');
-                    deferred.reject();
+                });
+                ADK.Messaging.reply("appManifest", function() {
+                    return appManifest;
                 });
 
-            return deferred.promise();
-        }
+                ADK.Messaging.reply("appConfig", function() {
+                    return appConfig;
+                });
 
-        var onError = function() {
-            var ModalRegionView = new GlobalErrorView({
-                errorMessage: "No Response From Resource Server<br/><small>Ensure that you have a stable network connection.</small>",
-                refreshButton: 'Refresh Page'
-            });
-            ADKApp.modalRegion.show(ModalRegionView);
-            $('#mainModal').modal({
-                show: true,
-                backdrop: 'static',
-                keyboard: false
-            });
-        };
+                function fetchAppConfig() {
+                    var deferred = $.Deferred();
+                    appConfig.fetch({
+                            url: '../app.json',
+                            global: false
+                        })
+                        .done(function() {
+                            deferred.resolve(appConfig);
+                        })
+                        .fail(function() {
+                            console.log('Failed to resolve app.json');
+                            deferred.reject();
+                        });
 
-        $.when(fetchAppConfig()).then(function(appConfig) {
-            console.log("AppConfig: ", appConfig);
-            var resourceDirectory = ResourceDirectory.instance();
-            resourceDirectory.fetch({
-                url: appConfig.get('resourceDirectoryPath'),
-                success: function() {
-                    ADKApp.resourceDirectoryLoaded.resolve();
-                },
-                error: function() {
-                    onError();
+                    return deferred.promise();
                 }
-            });
-        }).fail(onError);
 
-        ADKApp.initAllRoutersPromise = new $.Deferred();
-        ADKApp.resourceDirectoryLoaded.done(function() {
-            var promise = ScreenBuilder.initAllRouters(ADKApp);
-            promise.done(function() {
-                ScreenBuilder.buildAll(ADKApp);
-                ADKApp.initAllRoutersPromise.resolve();
+                function onError() {
+                    var ModalRegionView = new GlobalErrorView({
+                        errorMessage: "No Response From Resource Server<br/><small>Ensure that you have a stable network connection.</small>",
+                        refreshButton: 'Refresh Page'
+                    });
+                    ADKApp.modalRegion.show(ModalRegionView);
+                    $('#mainModal').modal({
+                        show: true,
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                }
+
+                $.when(fetchAppConfig()).then(function(appConfig) {
+                    console.log("AppConfig: ", appConfig);
+                    var resourceDirectory = ResourceDirectory.instance();
+                    resourceDirectory.fetch({
+                        url: appConfig.get('resourceDirectoryPathFetch'),
+                        success: function() {
+                            resourceDirectoryLoaded.resolve();
+                        },
+                        error: function() {
+                            onError();
+                        }
+                    });
+                }).fail(onError);
+
+                function fetchFacilityMonikers() {
+                    var facilityMonikerUrl = ResourceService.buildUrl('locations-facility-monikers');
+                    facilityMonikers.fetch({
+                            url: facilityMonikerUrl,
+                            success: function() {
+                                facilityMonikersLoaded.resolve();
+                            },
+                            error: function() {
+                                console.log('Failed to resolve facility monikers');
+                            }
+                        });
+                }
+
+                $.when(resourceDirectoryLoaded).done(function() {
+                    fetchFacilityMonikers();
+                });
+
+                ADKApp.on('before:start', function() {
+
+                    $.when(resourceDirectoryLoaded, EhmpUiFilesLoaded, facilityMonikersLoaded).done(function() {
+                        ADKApp.initAllRouters();
+                    });
+
+                    var doit;
+                    $(window).on('resize load', function() {
+                        clearTimeout(doit);
+                        doit = setTimeout(ADK.utils.resize.dw, 300);
+                    });
+                });
+
+                ADKApp.start({});
             });
         });
 
+    };
 
-        var doit;
-        $(window).on('resize load', function() {
-            clearTimeout(doit);
-            doit = setTimeout(ADK.utils.resize.dw, 300);
-        });
-    });
-    ADKApp.start({});
-    
-}
+    return Init;
+});

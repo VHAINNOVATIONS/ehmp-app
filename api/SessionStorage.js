@@ -1,13 +1,10 @@
-var dependencies = [
+define([
     'backbone',
     'marionette',
     'jquery',
-    'main/Session'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, $, session) {
+    'main/Session',
+    'api/Messaging'
+], function(Backbone, Marionette, $, session, Messaging) {
     'use strict';
 
     var APPLET_STORAGE_KEY = 'appletStorage';
@@ -47,50 +44,53 @@ function onResolveDependencies(Backbone, Marionette, $, session) {
                 if (Storage.check.supportsSessionStorage()) {
                     window.sessionStorage.setItem(key, JSON.stringify(value.toJSON()));
                 }
-                if ( (!preference || preference === 'session') && Storage.check.existsInMemory(key) ) {
+                if ((!preference || preference === 'session') && Storage.check.existsInMemory(key)) {
                     session[key].set(value.toJSON());
                 }
             },
-            appletStorageModel: function(appletId, key, value) {
-                var model = Storage.get.appletStorageModel(appletId, key);
-                model.get(appletId)[key] = value;
+            appletStorageModel: function(workspaceId, appletId, key, value) {
+                var appletKey = Storage.getAppletStorageKey(workspaceId, appletId);
+                var model = Storage.get.appletStorageModel(workspaceId, appletId, key);
+                model.get(appletKey)[key] = value;
                 Storage.set.sessionModel(APPLET_STORAGE_KEY, model);
             }
         },
         get: {
             sessionModel: function(key, preference) {
-                if ( (!preference || preference === 'session') && Storage.check.existsInMemory(key) ) {
+                if ((!preference || preference === 'session') && Storage.check.existsInMemory(key)) {
                     return session[key];
                 } else if (Storage.check.supportsSessionStorage()) {
                     return new Backbone.Model(JSON.parse(window.sessionStorage.getItem(key)));
                 }
                 return null;
             },
-            appletStorageModel: function(appletId) {
+            appletStorageModel: function(workspaceId, appletId) {
+                var key = Storage.getAppletStorageKey(workspaceId, appletId);
                 var model = Storage.get.sessionModel(APPLET_STORAGE_KEY);
-                if (!Storage.check.appletHasSessionStorage(appletId, model)) {
-                    model.set(appletId, {});
+                if (!Storage.check.appletHasSessionStorage(key, model)) {
+                    model.set(key, {});
                 }
                 return model;
             }
         },
         delete: {
-            sessionModel: function(key) {
-                if ( Storage.check.existsInMemory(key) ) {
-                    session.clearSessionModel(key);
+            sessionModel: function(key, setDefault) {
+                if (Storage.check.existsInMemory(key)) {
+                    session.clearSessionModel(key, setDefault);
                 } else if (Storage.check.supportsSessionStorage()) {
                     window.sessionStorage.removeItem(key);
                 }
             },
-            appletStorageModel: function(appletId) {
+            appletStorageModel: function(workspaceId, appletId) {
+                var key = Storage.getAppletStorageKey(workspaceId, appletId);
                 var model = Storage.get.sessionModel(APPLET_STORAGE_KEY);
 
-                if (!Storage.check.appletHasSessionStorage(appletId, model)) {
-                    model.unset(appletId);
+                if (Storage.check.appletHasSessionStorage(key, model)) {
+                    model.unset(key);
                     Storage.set.sessionModel(APPLET_STORAGE_KEY, model);
                 }
             },
-            all: function(){
+            all: function() {
                 session.clearAllSessionModels();
                 window.sessionStorage.clear();
             }
@@ -109,20 +109,48 @@ function onResolveDependencies(Backbone, Marionette, $, session) {
         getModel_SessionStoragePreference: function(key) {
             return this.get.sessionModel(key);
         },
-        setAppletStorageModel: function(appletId, key, value) {
-            this.set.appletStorageModel(appletId, key, value);
+        getAppletStorageKey: function(workspaceId, appletId) {
+            return workspaceId + '$' + appletId;
         },
-        getAppletStorageModel: function(appletId, key) {
-            return this.get.appletStorageModel(appletId).get(appletId)[key];
+        setAppletStorageModel: function(appletId, key, value, bindToWorkspace, customWorkspace) {
+            var workspaceId;
+            if (!_.isUndefined(customWorkspace)) {
+                workspaceId = customWorkspace;
+            } else {
+                workspaceId = Messaging.request('get:current:screen').id;
+            }
+            if (!_.isUndefined(bindToWorkspace) && !bindToWorkspace) {
+                workspaceId = 'unbound-' + appletId;
+            }
+            this.set.appletStorageModel(workspaceId, appletId, key, value);
         },
-        clearAppletStorageModel: function(appletId) {
-            this.delete.appletStorageModel(appletId);
+        getAppletStorageModel: function(appletId, key, boundToWorkspace, customWorkspace) {
+            var workspaceId;
+            if (!_.isUndefined(customWorkspace)) {
+                workspaceId = customWorkspace;
+            } else {
+                workspaceId = Messaging.request('get:current:screen').id;
+            }
+            if (!_.isUndefined(boundToWorkspace) && !boundToWorkspace) {
+                workspaceId = 'unbound-' + appletId;
+            }
+            var appletKey = this.getAppletStorageKey(workspaceId, appletId);
+            return this.get.appletStorageModel(workspaceId, appletId).get(appletKey)[key];
+        },
+        clearAppletStorageModel: function(appletId, customWorkspace) {
+            var workspaceId;
+            if (!_.isUndefined(customWorkspace)) {
+                workspaceId = customWorkspace;
+            } else {
+                workspaceId = Messaging.request('get:current:screen').id;
+            }
+            this.delete.appletStorageModel(workspaceId, appletId);
         }
     };
 
-    session.user.on('change', Storage.set.sessionModel('user', session.user,'sessionStorage'));
-    session.patient.on('change', Storage.set.sessionModel('patient', session.patient,'sessionStorage'));
-    session.globalDate.on('change', Storage.set.sessionModel('globalDate', session.globalDate,'sessionStorage'));
+    session.user.on('change', Storage.set.sessionModel('user', session.user, 'sessionStorage'));
+    session.patient.on('change', Storage.set.sessionModel('patient', session.patient, 'sessionStorage'));
+    session.globalDate.on('change', Storage.set.sessionModel('globalDate', session.globalDate, 'sessionStorage'));
 
     return Storage;
-}
+});

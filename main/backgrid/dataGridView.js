@@ -1,13 +1,9 @@
-var dependencies = [
+define([
     "backbone",
     "marionette",
     "underscore",
     "hbs!main/backgrid/dataGridTemplate"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, _, dataGridTemplate) {
+], function(Backbone, Marionette, _, dataGridTemplate) {
     'use strict';
 
     var dataGridView = Backbone.Marionette.LayoutView.extend({
@@ -20,4 +16,4 @@ function onResolveDependencies(Backbone, Marionette, _, dataGridTemplate) {
     });
 
     return dataGridView;
-}
+});

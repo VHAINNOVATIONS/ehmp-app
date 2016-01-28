@@ -1,13 +1,9 @@
-var dependencies = [
+define([
     'jquery',
     'underscore',
     'main/components/applets/baseDisplayApplet/view',
     'main/components/views/appletViews/eventsGistView/views/eventsGistView'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, _, BaseDisplayApplet, EventsView) {
+], function($, _, BaseDisplayApplet, EventsView) {
     'use strict';
 
     // this.appletOptions = {
@@ -27,8 +23,9 @@ function onResolveDependencies($, _, BaseDisplayApplet, EventsView) {
 
     var EventsGistView = BaseDisplayApplet.extend({
         initialize: function(options) {
-            console.log("eventsGistView Initialize");
+
             this._base = baseDisplayApplet.prototype;
+
             if (!this.options.appletConfig) {
                 this.options.appletConfig = {};
                 this.options.appletConfig.id = this.appletOptions.appletConfig.id;
@@ -59,4 +56,4 @@ function onResolveDependencies($, _, BaseDisplayApplet, EventsView) {
     });
 
     return EventsGistView;
-}
+});

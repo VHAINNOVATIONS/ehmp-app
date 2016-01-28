@@ -1,5 +1,8 @@
 <div class="confirmHeader row">
-    <div class="patientName">{{displayName}}</div>
+    <div class="patientName">
+        {{displayName}}
+        {{{helpIconLink 'patient_search_restricted' 'helpIconInverted'}}}
+    </div>
 </div>
 <div class="fixedHeightZone">
     {{#each patientRecordFlag}}

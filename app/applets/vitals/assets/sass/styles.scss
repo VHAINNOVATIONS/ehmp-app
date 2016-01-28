@@ -8,7 +8,7 @@
 }
 
 .notLatestVital {
-    color: #707070;
+    color: $grey-darker;
     font-style: italic;
 }
 
@@ -55,13 +55,9 @@ border-right: 1px solid #B9B9B9;
 }
 .b-table table{
     float:left; width: 48%; margin-top: 2px;
-    // border-left: 1px solid #BCBCBC;
 }
 .a-table td, .b-table td {
     padding: 2px 5px
-}
-tr:nth-child(even) {
-    background-color: #f2f8fe;
 }
 tr.clickable{
     cursor:pointer;
@@ -74,9 +70,14 @@ td.right-aligned{
 }
 .emptyTextVital {
     font-style: italic;
-    color: #707070;
+    color: $grey-darker;
     min-height: 40px;
     padding: 10px;
+}
+
+.smallergreyText {
+    color:#999999;
+    padding-left:2px;
 }
 
 [data-appletid="vitals"] {
@@ -84,62 +85,29 @@ td.right-aligned{
         cursor: pointer;
     }
     div.gistItem {
-        color: #666666;
-        padding: 0px 1px 0px 1px;
-        border-radius: 1px;
-        height: 20px;
-        display:inline;
-        width: 50%;
+        border-bottom: 1px solid $grey-lighter;
         .sub-elements {
             display: none;
         };
-        span {
-            line-height:20px;
-            white-space:nowrap;
-        }
-        div.gistItem {
-            display: block;
-            width: 100%;
-        }
-        .vitalsResult {
-            text-align:right;
-            padding-right:2px;
-        }
-         .vitalsUnits {
-            text-align:left;
-            padding-left:2px;
-        }
-        .paddingLeft {
-            padding-left:5px;
-        }
         .graph-container {
-            z-index:2;
-            height:20px;
+            vertical-align: middle;
+            z-index: 2;
+            height: 21px;
             overflow:hidden;
+            text-align: right;
+            padding-right: 0px;
+            position:absolute;
+            top: 50%;
+            margin-top: -11px;
         }
-        position:static !important;
+    }
+
+    .border-vertical {
+        border-right: 1px solid #e5e5e5;
     }
     .info-display {
         margin-left: -10px;
         margin-right: 10px;
-    }
-    .gistList > .gistItem:nth-child(odd) {
-        border-right: 1px solid #E5E5E5;
-    }
-
-    .gistList .gistItem:nth-child(4n-1){
-        background-color: #f2f8fe;
-    }
-    .gistList .gistItem:nth-child(4n){
-        background-color: #f2f8fe;
-    }
-    .gistList .gistItem:hover {
-        color: #000000;
-        background-color: #F0F0F0;
-    }
-    .gistList .gistItem:focus {
-        outline-width: 3px;
-        outline-offset:-3px
     }
     .clearBoth {
         clear: both;
@@ -151,7 +119,7 @@ td.right-aligned{
         padding: 10px;
     }
     .changecolor + .tooltip > .tooltip-inner {
-    border: 1px solid #CCCCCC;
+    border: 1px solid $grey;
     text-align:left;
     max-width: 320px;
         .row{
@@ -160,17 +128,13 @@ td.right-aligned{
         }
     }
     .changeArrow{
-    color: #37779e;
+    color: $blue;
     font-size: 15px;
     }
     .header-bar {
-    background-color: white;
     box-shadow: 0px 0px 4px 0px #999999;
     height: 20px;
     margin-bottom: 5px;
-    }
-    .header{
-        color: #206473;
     }
     .warning{
     color: #CC0000;
@@ -180,61 +144,20 @@ td.right-aligned{
     padding-left: 5px;
     padding-right: 5px;
     }
-
-    .gistTrendGraph {
-        background-color: transparent;
-        display: inline;
-        margin-left: -2px;
-        +span+.gistTrendGraph {
-            margin-left: 1px;
-        }
-        .outterBorder {
-            stroke: #bbbbbb;
-            fill: transparent;
-        }
-        .criticalRange {
-            stroke: #e4e4e4;
-            fill: #e4e4e4;
-        }
-        .abnormalRange {
-            stroke: #f2f2f2;
-            fill: #f2f2f2;
-        }
-        .normalRange {
-            stroke: #ffffff;
-            fill: #ffffff;
-        }
-        .trendLine {
-            stroke: #000000;
-        }
-        .previousValue {
-            stroke: #000000;
-            fill: #000000;
-        }
-        .criticalValue {
-            stroke: #cc0000;
-            fill: #cc0000;
-        }
-        .abnormalValue {
-            stroke: #ff9900;
-            fill: #ff9900;
-        }
-        .normalValue {
-            stroke: #0099ff;
-            fill: #0099ff;
-        }
-        .textureHashed {
-            path {
-                stroke: #bbbbbb;
-                stroke-width: 1;
-                fill: none;
+    .quickDraw:hover {
+        .quickviewOverlay{
+            display: block;
             }
-            rect {
-                @extend .abnormalRange;
-            }
-        }
-        .hashedRange {
-            fill: url(#textureHashed);
-        }
     }
+    .quickDraw{
+         height: 100%;
+    }
+    .noTopBottomFixedHeight{
+        height: 21px !important;
+        padding-bottom: 0 !important;
+        padding-top: 0 !important;
+    }
+}
+.vitals-full #lr-data-table-view .table-responsive .data-grid {
+    overflow: hidden;
 }

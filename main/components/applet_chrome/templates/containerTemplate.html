@@ -1,20 +1,20 @@
-<div class="panel panel-primary" title="{{title}}">
-  <div class="panel-heading grid-applet-heading">
-    <span class="pull-left">
-      <span class="grid-refresh-button"></span>
+<div class="panel panel-primary">
+  <div class="panel-heading grid-applet-heading" title="{{title}}">
+    <span class="pull-right right-button-region">
     </span>
     <span class="pull-right">
-      <span class="grid-titlebar"></span>
-      <span class="grid-add-button"></span>
-      <span class="grid-filter-button"></span>
-      <span class="grid-options-button"></span>
-      <span class="grid-resize"></span>
+      <span class="grid-refresh-button"></span>
     </span>
-    <span class="center-block text-center panel-title">{{title}}</span>
+    <span class="panel-title center-block">
+      <h5 class="panel-title-label">
+        {{title}}
+      </h5>
+      <input type="text" class="form-control input-sm center-block hidden panel-title-textbox text-align-center" value="{{title}}" maxlength="30" />
+    </span>
   </div>
 
   <div class="appletDiv_ChromeContainer"></div>
-  <div class="switchboard-container"></div>
+  <div class="switchboard-container hide"></div>
 
   <div class="grid-footer">
     <span class="gs-resize-handle gs-resize-handle-both"></span>

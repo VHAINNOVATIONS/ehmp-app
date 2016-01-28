@@ -1,8 +1,4 @@
-var dependencies = [];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies() {
+define([], function() {
 
     var GroupByHelper = {
         aggregateBy: function (collection, aggregateFunc) {
@@ -28,4 +24,4 @@ function onResolveDependencies() {
         }
     };
     return GroupByHelper;
-}
+});

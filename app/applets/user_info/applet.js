@@ -1,0 +1,1 @@
+define(["app/applets/user_info/views/userInfoSummaryView","app/applets/user_info/views/userInfoExpandedView"],function(e,i){var n={id:"user_info",getRootView:function(e){return ADK.Views.AppletControllerView.extend({viewType:e})},viewTypes:[{type:"summary",view:e,chromeEnabled:!0},{type:"expanded",view:i,chromeEnabled:!0}],defaultViewType:"expanded"};return n});

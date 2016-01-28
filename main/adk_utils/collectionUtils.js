@@ -1,8 +1,4 @@
-var dependencies = ["backbone", "main/Session"];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Session) {
+define(["backbone", "main/Session"], function(Backbone, Session) {
 
     var CollectionUtils = {};
     /*
@@ -94,7 +90,7 @@ function onResolveDependencies(Backbone, Session) {
             var dateFilter = new Date();
             dateFilter.setDate(dateFilter.getDate() - numberOfDays);
 
-            if (!(typeof model.get(dateKey) === 'undefined')) {
+            if (typeof model.get(dateKey) !== 'undefined') {
                 var filterYear = model.get(dateKey).substring(0, 4),
                     filterMonth = model.get(dateKey).substring(4, 6),
                     filterDay = model.get(dateKey).substring(6, 8);
@@ -125,7 +121,7 @@ function onResolveDependencies(Backbone, Session) {
 
         filterFunction = function(model) {
 
-            if (!(typeof model.get(dateKey) === 'undefined')) {
+            if (typeof model.get(dateKey) !== 'undefined') {
                 var filterYear = model.get(dateKey).substring(0, 4),
                     filterMonth = model.get(dateKey).substring(4, 6),
                     filterDay = model.get(dateKey).substring(6, 8);
@@ -155,7 +151,7 @@ function onResolveDependencies(Backbone, Session) {
 
         filterFunction = function(model) {
 
-            if (!(typeof model.get(key) === 'undefined')) {
+            if (typeof model.get(key) !== 'undefined') {
                 var field = model.get(key);
                 return field.indexOf(filterValue) === 0;
             } else {
@@ -178,7 +174,7 @@ function onResolveDependencies(Backbone, Session) {
 
         filterFunction = function(model) {
 
-            if (!(typeof model.get(key) === 'undefined')) {
+            if (typeof model.get(key) !== 'undefined') {
                 var field = model.get(key);
                 return field.indexOf(substring) > -1;
             } else {
@@ -201,7 +197,7 @@ function onResolveDependencies(Backbone, Session) {
 
         filterFunction = function(model) {
 
-            if (!(typeof model.get(key) === 'undefined')) {
+            if (typeof model.get(key) !== 'undefined') {
                 var field = model.get(key);
                 return field.indexOf(substring) <= -1;
             } else {
@@ -224,7 +220,7 @@ function onResolveDependencies(Backbone, Session) {
 
         filterFunction = function(model) {
 
-            if (!(typeof model.get(key) === 'undefined')) {
+            if (typeof model.get(key) !== 'undefined') {
                 var field = model.get(key);
                 return field == filterValue;
             } else {
@@ -236,4 +232,4 @@ function onResolveDependencies(Backbone, Session) {
     };
 
     return CollectionUtils;
-}
+});

@@ -1,16 +1,12 @@
-var dependencies = [
+define([
     'moment'
-];
-
-define(dependencies, onResolveDependencies, moment);
-
-function onResolveDependencies() {
+], function(moment) {
 
     function defaultEventGistChartOptions(graphData) {
         var now = moment.utc().startOf('day').valueOf();
         //var now = moment.utc(moment().format("YYYYMMDDHHmmssSSS"), "YYYYMMDD").valueOf();
 
-        return eventGistChartOptions = {
+        return {
             global: {
                 useUTC: false,
                 timezoneOffset: 5 * 60
@@ -20,7 +16,7 @@ function onResolveDependencies() {
                 zoomType: '',
                 type: 'column',
                 spacing: [1, 1, 1, 1],
-                backgroundColor: '#f3f3f3',
+                backgroundColor: '#F2F2F2',
                 events: {
                     click: function(e) {
                         $(e.target).closest('[data-toggle=popover]').trigger('click');
@@ -68,9 +64,9 @@ function onResolveDependencies() {
                     }
                 },
                 plotLines: [{
-                    color: '#BCBCBC',
+                    color: '#F20000',
                     value: now,
-                    dashStyle: 'shortdash',
+                    dashStyle: 'solid',
                     width: 2,
                     zIndex: 5
                 }],
@@ -97,10 +93,10 @@ function onResolveDependencies() {
             }],
             series: [{
                 data: graphData.series || [],
-                pointRange: 24 * 3600 * 1000 *30,
+                pointRange: 24 * 3600 * 1000 * 30,
                 color: 'rgb(124, 181, 236)'
             }, {
-                pointRange: 24 * 3600 * 1000 *30,
+                pointRange: 24 * 3600 * 1000 * 30,
                 data: [
                     [graphData.oldestDate, 0],
                     [graphData.newestDate, 0]
@@ -110,4 +106,4 @@ function onResolveDependencies() {
     }
 
     return defaultEventGistChartOptions;
-}
+});

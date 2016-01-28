@@ -1,12 +1,12 @@
-<table id='{{uid}}' data-toggle="popover" class='table table-condensed has-popover' tabindex="0">
+<table id='{{id}}' class='table table-condensed'>
     <thead>
         <tr class='row'>
             <th>Date</th>
             <th>Description</th>
-            <th>Code</th>
+            <th>Facility</th>
         </tr>
     </thead>
-    <tbody>{{#if allGroupedEncounters}}{{#each allGroupedEncounters}}<tr class='row'>
+    <tbody>{{#if attributes.allGroupedEncounters}}{{#each attributes.allGroupedEncounters}}<tr class='row'>
             <td>{{dateTime}}</td>
             <td>{{problemText}}</td>
             <td>{{stopCodeName}}</td>

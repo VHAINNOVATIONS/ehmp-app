@@ -1,0 +1,1 @@
+define([],function(){"use strict";var e={id:"access-control-coordinator",contentRegionLayout:"gridOne",appletHeader:"navigation",appLeft:"patientInfo",applets:[{id:"user_info",title:"User Info",region:"center",showInUDWSelection:!0}],patientRequired:!1,predefined:!0,freezeApplets:!0,onStart:function(){},onStop:function(){},nonPatientCentricView:!0,addNavigationTab:!0};return e});

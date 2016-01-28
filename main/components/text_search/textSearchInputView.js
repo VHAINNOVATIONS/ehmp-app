@@ -1,15 +1,13 @@
-var dependencies = [
+define([
     "backbone",
     "marionette",
-    "main/ADK",
     "hbs!main/components/text_search/templates/searchBarAreaTemplate",
-    "hbs!main/components/text_search/templates/searchSuggestTemplate"
-];
-
-define(dependencies, onResolveDependencies);
-
-
-function onResolveDependencies(Backbone, Marionette, ADK, searchBarAreaTemplate, searchSuggestTemplate) {
+    "hbs!main/components/text_search/templates/searchSuggestTemplate",
+    'api/SessionStorage',
+    'api/Messaging',
+    'api/ResourceService',
+    'api/Navigation'
+], function(Backbone, Marionette, searchBarAreaTemplate, searchSuggestTemplate, SessionStorage, Messaging, ResourceService, Navigation) {
 
     var SuggestView = Backbone.Marionette.ItemView.extend({
         template: searchBarAreaTemplate,
@@ -22,18 +20,18 @@ function onResolveDependencies(Backbone, Marionette, ADK, searchBarAreaTemplate,
         lastQuery: '',
 
         onBeforeDestroy: function() {
-
+            $(document).off('click.'+this.cid);
         },
         initialize: function() {
             var self = this;
-            var storageText = ADK.SessionStorage.getAppletStorageModel('search', 'searchText');
+            var storageText = SessionStorage.getAppletStorageModel('search', 'searchText');
             if (storageText) {
                 this.searchTerm = storageText;
             }
         },
         onRender: function(event) {
             var self = this;
-            $(document).on('click', function() {
+            $(document).on('click.'+this.cid, function() {
                 self.clearSuggestList($('#suggestList'));
                 $('#suggestList').hide();
                 $('#suggestListDiv').hide();
@@ -55,6 +53,7 @@ function onResolveDependencies(Backbone, Marionette, ADK, searchBarAreaTemplate,
                 var trimmedSearchText = $searchText.val().trim();
                 if (trimmedSearchText && trimmedSearchText.length > 2) {
                     $('#suggestList').hide();
+                    $('#noResults').hide();
                     $('#suggestListDiv').show();
                     $('#suggestSpinner').show();
 
@@ -63,13 +62,13 @@ function onResolveDependencies(Backbone, Marionette, ADK, searchBarAreaTemplate,
                             "query": trimmedSearchText
                         }
                     };
-                    fetchOptions.patient = ADK.PatientRecordService.getCurrentPatient();
+                    fetchOptions.patient = ResourceService.patientRecordService.getCurrentPatient();
 
-                    //fetchOptions.patient = ADK.PatientRecordService.getCurrentPatient();
+                    //fetchOptions.patient = ResourceService.patientRecordService.getCurrentPatient();
                     //fetchOptions.resourceTitle = 'patient-record-search-text';
                     fetchOptions.resourceTitle = 'patient-record-search-suggest';
 
-                    self.suggestResults = ADK.PatientRecordService.fetchCollection(fetchOptions);
+                    self.suggestResults = ResourceService.patientRecordService.fetchCollection(fetchOptions);
                     self.suggestResults.on("sync", self.fillSuggestList, self);
                 }
             }, 500);
@@ -92,51 +91,64 @@ function onResolveDependencies(Backbone, Marionette, ADK, searchBarAreaTemplate,
 
             var me = this,
                 IDNumCount = 0;
+            var duplicates = [];
+            var modelsLength = this.suggestResults.models.length;
+            if (modelsLength === 1) {
+                $('#noResults').show();
+                $('#suggestList').hide();
+            } else {
+                $('#noResults').hide();
+                this.suggestResults.models.forEach(function(item) {
+                    var category = '';
+                    var query = item.get('query');
+                    for (var i = 0; i < duplicates.length; i++) {
+                        if (query == duplicates[i]) {
+                            return;
+                        }
+                    }
+                    duplicates.push(query);
+                    document.getElementById('suggestPanel').className = 'dropdown open';
+                    if (typeof(item.get('category')) !== 'undefined') {
+                        category = item.get('category');
+                    }
+                    var suggestID = 'SuggestItem' + IDNumCount.toString();
+                    var display = (item.get('display') || '');
+                    var searchText = $('#searchtext').val().toString();
 
-            this.suggestResults.models.forEach(function(item) {
-                var category = '';
-                var query = item.get('query');
-                document.getElementById('suggestPanel').className = 'dropdown open';
-                if (typeof(item.get('category')) !== 'undefined') {
-                    category = item.get('category');
-                }
-                var suggestID = 'SuggestItem' + IDNumCount.toString();
-                var display = (item.get('display') || '');
-                var searchText = $('#searchtext').val().toString();
+                    category = item.attributes.category;
 
-                category = item.attributes.category;
+                    var displaySplit = display.split(new RegExp(searchText, 'i'));
 
-                var displaySplit = display.split(new RegExp(searchText, 'i'));
+                    if (category === 'Spelling Suggestion') {
+                        searchText = '';
+                    }
+                    var $suggestItem = $(me.searchSuggestTemplate({
+                        itemId: suggestID,
+                        category: category,
+                        firstString: displaySplit[0],
+                        boldString: display.indexOf(searchText) > -1 ? searchText : '',
+                        lastString: displaySplit[1],
+                        cleansedSearchResult: display.replace(/<[^>]*>/g, "")
+                    }));
+                    if (IDNumCount === 0) {
+                        $suggestItem.remove('.suggestListCategory');
+                    }
+                    $suggestList.append($suggestItem);
 
-                if (category === 'Spelling Suggestion') {
-                    searchText = '';
-                }
-                var $suggestItem = $(me.searchSuggestTemplate({
-                    itemId: suggestID,
-                    category: category,
-                    firstString: displaySplit[0],
-                    boldString: searchText,
-                    lastString: displaySplit[1],
-                    cleansedSearchResult: display.replace(/<[^>]*>/g, "")
-                }));
-                if (IDNumCount === 0) {
-                    $suggestItem.remove('.suggestListCategory');
-                }
-                $suggestList.append($suggestItem);
+                    $(document).ready(function() {
+                        var query2 = query;
+                        var me1 = me;
+                        $("#" + suggestID).click(function(event) {
+                            var query3 = query2;
+                            var me2 = me1;
+                            me2.searchFromSuggest(query3);
 
-                $(document).ready(function() {
-                    var query2 = query;
-                    var me1 = me;
-                    $("#" + suggestID).click(function(event) {
-                        var query3 = query2;
-                        var me2 = me1;
-                        me2.searchFromSuggest(query3);
-
+                        });
                     });
-                });
 
-                IDNumCount++;
-            });
+                    IDNumCount++;
+                });
+            }
         },
 
         cancelSuggest: function() {
@@ -166,10 +178,16 @@ function onResolveDependencies(Backbone, Marionette, ADK, searchBarAreaTemplate,
             var completedSearchData = {
                 searchTerm: this.searchTerm
             };
-            ADK.SessionStorage.setAppletStorageModel('search', 'searchText', completedSearchData);
-            ADK.Navigation.navigate('record-search');
+            Navigation.navigate('record-search');
             $('#searchtext').val(this.searchTerm);
-            ADK.Messaging.getChannel('search').trigger('newSearch');
+            SessionStorage.setAppletStorageModel('search', 'searchText', completedSearchData);
+
+            var interval = setInterval(function() {
+                if (SessionStorage.getAppletStorageModel('search', 'searchText').searchTerm === completedSearchData.searchTerm) {
+                    clearInterval(interval);
+                    Messaging.getChannel('search').trigger('newSearch');
+                }
+            }, 500);
         },
         onAccessibilityKeydown: function(keyEvent) {
             if (keyEvent.keyCode === 32 || keyEvent.keyCode === 13) { // trigger click on space/enter key for accessibility
@@ -188,7 +206,7 @@ function onResolveDependencies(Backbone, Marionette, ADK, searchBarAreaTemplate,
                 case 13: // enter key
                     // submit real search
                     keyEvent.preventDefault();
-                    this.doSubmitSearch(keyEvent);
+                    this.doSubmitSearch();
                     break;
                 case 27: // escape key
                     // hide suggestion list
@@ -250,4 +268,4 @@ function onResolveDependencies(Backbone, Marionette, ADK, searchBarAreaTemplate,
     });
 
     return SuggestView;
-}
+});

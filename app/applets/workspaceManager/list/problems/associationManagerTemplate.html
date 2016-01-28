@@ -1,0 +1,22 @@
+<div class="association-manager">
+    {{#unless predefined}}
+    <div class="typeahead-wrapper">
+        <div class='form-group form-group-custom'>
+            <input type='text' class='form-control' id='screen-problem-search' placeholder='Search Problems' title="Enter text to search problems">
+            <button class="clear-search-problem" id="clear-search-problem-btn">
+                <i class="fa fa-times-circle"></i>
+                <span class="sr-only">Press enter to clear filter text</span>
+            </button>
+            <div class='problem-loading-container'>
+                <div id='problem-query-status-region' class="tt-dropdown-menu form-control"></div>
+            </div>
+        </div>
+    </div>
+    {{/unless}}
+    <div class='form-group'>
+        <div id='problem-list-region'></div>
+    </div>
+    <div id="association-manager-footer">
+        <button class="btn btn-default navbar-btn" id="association-manager-close-btn">CLOSE</button>
+    </div>
+</div>

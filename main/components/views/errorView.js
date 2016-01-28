@@ -1,14 +1,10 @@
-var dependencies = [
+define([
     "backbone",
     "marionette",
     "underscore",
     "hbs!main/components/views/errorTemplate",
     "api/ErrorMessaging"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, _, ErrorTemplate, ErrorMessaging) {
+], function(Backbone, Marionette, _, ErrorTemplate, ErrorMessaging) {
     'use strict';
     var ErrorView = Backbone.Marionette.ItemView.extend({
         template: ErrorTemplate,
@@ -33,4 +29,4 @@ function onResolveDependencies(Backbone, Marionette, _, ErrorTemplate, ErrorMess
 
     };
     return Error;
-}
+});

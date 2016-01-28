@@ -1,4 +1,4 @@
-var dependencies = [
+define([
     'jquery',
     'underscore',
     'main/Utils',
@@ -12,11 +12,7 @@ var dependencies = [
     'main/components/applets/grid_applet/views/filterDateRangeView',
     'hbs!main/components/applets/grid_applet/templates/containerTemplate',
     'main/components/applets/grid_applet/gists/gistView'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, _, utils, BaseDisplayApplet, DataGrid, CollectionFilter, ResourceService, SessionStorage, LoadingView, ErrorView, FilterDateRangeView, containerTemplate, GistView) {
+], function($, _, utils, BaseDisplayApplet, DataGrid, CollectionFilter, ResourceService, SessionStorage, LoadingView, ErrorView, FilterDateRangeView, containerTemplate, GistView) {
     'use strict';
 
     var SCROLL_TRIGGERPOINT = 40;
@@ -36,11 +32,18 @@ function onResolveDependencies($, _, utils, BaseDisplayApplet, DataGrid, Collect
     //      appletConfig            : {id, instanceId, fullscreen}
     // }
 
+    function markInfobuttonData(that) {
+        if (that.appletOptions.collection.length > 0 && !_.isUndefined(that.appletOptions.tblRowSelector)) {
+            $(that.appletOptions.tblRowSelector).each(function() {
+                $(this).attr("data-infobutton", $(this).find('td:nth-child(2)').text().replace('Panel', ''));
+            });
+        }
+    }
+
     var baseDisplayApplet = BaseDisplayApplet;
 
     var GridView = BaseDisplayApplet.extend({
         initialize: function(options) {
-            console.log("GridView Initialize");
             this._base = baseDisplayApplet.prototype;
             if (!this.options.appletConfig) {
                 this.options.appletConfig = {};
@@ -77,6 +80,11 @@ function onResolveDependencies($, _, utils, BaseDisplayApplet, DataGrid, Collect
             }
             this.appletOptions.AppletView = DataGrid.returnView(this.appletOptions);
             this._base.initialize.apply(this, arguments);
+
+            this.appletOptions.collection.markInfobutton = {
+                'that': this,
+                'func': markInfobuttonData
+            };
         },
         onRender: function() {
             this._base.onRender.apply(this, arguments);
@@ -87,7 +95,6 @@ function onResolveDependencies($, _, utils, BaseDisplayApplet, DataGrid, Collect
                         self.fetchRows(event);
                     });
                 }
-
             }
         },
         fetchRows: function(event) {
@@ -95,21 +102,44 @@ function onResolveDependencies($, _, utils, BaseDisplayApplet, DataGrid, Collect
             if ((e.scrollTop + e.clientHeight + SCROLL_TRIGGERPOINT > e.scrollHeight) && this.appletOptions.collection.hasNextPage()) {
                 event.preventDefault();
                 this.appletOptions.collection.setPageSize(this.appletOptions.collection.state.pageSize + SCROLL_ADDITIONAL_ROWS);
+                var filterText = SessionStorage.getAppletStorageModel(this.appletConfig.instanceId, 'filterText',false);
+                if (this.filterView && (this.filterView.userDefinedFilters.length > 0 || (!_.isUndefined(filterText) && !_.isNull(filterText) && filterText !== ''))) {
+                    this.filterView.doSearch();
+                }
+                if (this.appletOptions.collection.length > 0 && !_.isUndefined(this.appletOptions.tblRowSelector)) {
+                    $(this.appletOptions.tblRowSelector).each(function() {
+                        $(this).attr("data-infobutton", $(this).find('td:nth-child(2)').text().replace('Panel', ''));
+                    });
+                }
             }
         },
-        onSync: function(collection) {
+        onSync: function() {
+            if (this.filterView) {
+                this.filterView.doSearch();
+            }
             this._base.onSync.apply(this, arguments);
             if (this.appletOptions.collection instanceof Backbone.PageableCollection) {
                 if (this.appletConfig.fullScreen || this.appletConfig.fullScreen === true) {
                     var self = this;
-                    this.$el.find('.data-grid').on('scroll', function(event) {
+                    var elementToScroll;
+                    if (!_.isUndefined(this.appletOptions.toolbarView)) {
+                        elementToScroll = this.$el.find('.data-grid');
+                    }else if (this.$el.find('#grid-panel-' + this.appletConfig.instanceId).length > 0) {
+                        elementToScroll = this.$el.find('#grid-panel-' + this.appletConfig.instanceId);
+                    } else {
+                        elementToScroll = this.$el.find('.data-grid-' + this.appletConfig.instanceId);
+                    }
+                    elementToScroll.on('scroll', function(event) {
                         self.fetchRows(event);
                     });
-                    this.$el.find('.data-grid').trigger("scroll");
+                    elementToScroll.trigger("scroll");
                 } else {
-                    this.$el.find('#grid-panel-' + this.appletConfig.instanceId).trigger("scroll");
+                    if (this.$el.find('#grid-panel-' + this.appletConfig.instanceId).length > 0) {
+                        this.$el.find('#grid-panel-' + this.appletConfig.instanceId).trigger("scroll");
+                    } else {
+                        this.$el.find('.data-grid-' + this.appletConfig.instanceId).trigger("scroll");
+                    }
                 }
-
             }
         },
         refresh: function(event) {
@@ -126,8 +156,7 @@ function onResolveDependencies($, _, utils, BaseDisplayApplet, DataGrid, Collect
             }
         },
         dateRangeRefresh: function(filterParameter, options) {
-            this.appletOptions.collection.fetchOptions.criteria.filter =
-                this.buildJdsDateFilter(filterParameter, options);
+            this.appletOptions.collection.fetchOptions.criteria.filter = this.buildJdsDateFilter(filterParameter, options);
 
             var collection = this.appletOptions.collection;
             if (this.appletOptions.collection instanceof Backbone.PageableCollection) {
@@ -149,8 +178,8 @@ function onResolveDependencies($, _, utils, BaseDisplayApplet, DataGrid, Collect
             if (routeParam) {
                 var row = $('#' + routeParam);
                 row.click();
-                windowHeight = $(window).height();
-                scrollPosition = row.offset().top;
+                var windowHeight = $(window).height();
+                var scrollPosition = row.offset().top;
                 if ((scrollPosition + row.next().height() + 50) > windowHeight) {
                     $('html, body').animate({
                         scrollTop: scrollPosition - 100
@@ -161,4 +190,4 @@ function onResolveDependencies($, _, utils, BaseDisplayApplet, DataGrid, Collect
     });
 
     return GridView;
-}
+});

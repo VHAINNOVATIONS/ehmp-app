@@ -1,8 +1,4 @@
-var dependencies = ["underscore", "moment"];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(_, Moment) {
+define(["underscore", "moment"], function(_, Moment) {
 
     function rightPad(num) {
         if (num.length >= 14) {
@@ -110,4 +106,4 @@ function onResolveDependencies(_, Moment) {
 
         return response;
     };
-}
+});

@@ -1,0 +1,1 @@
+define(["app/applets/lab_panels/gistView"],function(e){var i={id:"lab_panels",viewTypes:[{type:"gist",view:e,chromeEnabled:!0}],defaultViewType:"gist"};return i});

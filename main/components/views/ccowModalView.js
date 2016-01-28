@@ -1,16 +1,14 @@
-var dependencies = [
+define([
     "backbone",
     "marionette",
     "jquery",
     "underscore",
     "main/ADK",
+    "api/Messaging",
+    "api/Navigation",
     "hbs!main/components/views/ccowFooterTemplate",
-    'app/screens/ScreensManifest'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, $, _, ADK, ccowFooterTemplate, ScreensManifest) {
+    'main/ScreensManifest'
+], function(Backbone, Marionette, $, _, ADK, Messaging, Navigation, ccowFooterTemplate, ScreensManifest) {
     'use strict';
 
     var CCOWModalView = {
@@ -24,7 +22,11 @@ function onResolveDependencies(Backbone, Marionette, $, _, ADK, ccowFooterTempla
                 'callShow': true
             };
 
-            ADK.showModal(this.getModalView(bodyText), modalOptions);
+            var modal = new ADK.UI.Modal({
+                view: this.getModalView(bodyText),
+                options: modalOptions
+            });
+            modal.show();
 
         },
         getFooterView: function(CCOWService, patient){
@@ -37,23 +39,23 @@ function onResolveDependencies(Backbone, Marionette, $, _, ADK, ccowFooterTempla
                 },
                 cancelContextChange: function(){
                     CCOWService.cancelContextChange(function(){
-                        ADK.hideModal();
+                        ADK.UI.Modal.hide();
                     }, function(){
-                        ADK.hideModal();
+                        ADK.UI.Modal.hide();
                     });
                 },
                 breakContextLink: function(){
                     var callback = function(){
-                        ADK.Messaging.trigger("patient:selected", patient);
-                        ADK.Navigation.navigate(ScreensManifest.defaultScreen);
+                        Messaging.trigger("patient:selected", patient);
+                        Navigation.navigate(ADK.ADKApp.userSelectedDefaultScreen);
                     };
 
                     CCOWService.breakContextLink(callback, callback);
                 },
                 forceContextChange: function(){
                     var callback = function(){
-                        ADK.Messaging.trigger("patient:selected", patient);
-                        ADK.Navigation.navigate(ScreensManifest.defaultScreen);
+                        Messaging.trigger("patient:selected", patient);
+                        Navigation.navigate(ADK.ADKApp.userSelectedDefaultScreen);
                     };
 
                     CCOWService.forceContextChange(callback, callback);
@@ -81,4 +83,4 @@ function onResolveDependencies(Backbone, Marionette, $, _, ADK, ccowFooterTempla
     };
 
     return CCOWModalView;
-}
+});

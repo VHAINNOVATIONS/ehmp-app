@@ -1,21 +1,11 @@
-define(['handlebars', 'main/ADK'], function(Handlebars, ADK) {
+define(['handlebars', 'api/UserService', 'underscore'], function(Handlebars, UserService, _) {
     function hasPermission(args, options) {
         'use strict';
-        var authorized = false;
-        var permission;
-        var permissions = args.split('|');
-        var i = 0;
-        for (permission in permissions) {
-            if (ADK.UserService.hasPermission(permissions[permission])) {
-                authorized = true;
-                break;
-            }
-        }
+        var authorized = UserService.hasPermissions(args);
 
         if (authorized) {
             return options.fn(this);
-        }
-        else {
+        } else {
             return options.inverse(this);
         }
     }
@@ -25,6 +15,11 @@ define(['handlebars', 'main/ADK'], function(Handlebars, ADK) {
 });
 
 //Example:
-//{{#hasPermission 'editRecord|addRecord'}}
+//{{#hasPermission 'editRecord&addRecord'}} => passes if user has both editRecord AND addRecord
+//    test
+//{{/hasPermission}}
+
+//Example:
+//{{#hasPermission 'editRecord|addRecord'}} => passes if user has editRecord OR addRecord
 //    test
 //{{/hasPermission}}

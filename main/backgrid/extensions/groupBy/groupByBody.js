@@ -1,30 +1,9 @@
-var dependencies = [
+define([
     'backbone',
     'backgrid',
     "main/backgrid/extensions/groupBy/groupByHelper",
     "hbs!main/backgrid/extensions/groupBy/groupByCellTemplate"
-];
-
-define(dependencies, onResolveDependencies);
-
-/**
- * This is an implementation of a Backgrid.Body that groups by a given group key.
- *
- * The grouping is done on render, and depends on a collection that is sorted by
- * the group key.
- *
- * For example, if you want to group by kind, the collection must first be sorted by kind. From there
- * the group by logic works properly.
- *
- * The collection is listening for backgrid:groupBy events.  On receiving one, it calls the groupBy function
- *
- * Ultimately, all this function is doing is sorting the collection by kind and then by dateTime. When
- * the collection is sorted, there is a listener that calls the Body.refresh method, which eventually triggers
- * a render of the gird.  During the render is where the grouping behavior actually occurs, but it assumes
- * the collection is sorted properly, otherwise there are issues with pagination.
- *
- */
-function onResolveDependencies(Backbone, Backgrid, GroupByHelper, GroupByCellTemplate) {
+], function(Backbone, Backgrid, GroupByHelper, GroupByCellTemplate) {
 
     var GroupedByRow = Backgrid.Row.extend({
         attributes: {
@@ -38,7 +17,7 @@ function onResolveDependencies(Backbone, Backgrid, GroupByHelper, GroupByCellTem
         className: "groupByHeader",
         toggleRows: function (event) {
             event.preventDefault();
-            this.$el.nextUntil('.groupByHeader').slideToggle(0);
+            this.$el.nextUntil('.groupByHeader').toggle();
         },
         onEnter: function (event) {
             if (event.which == 13 || event.which == 32) {
@@ -68,8 +47,9 @@ function onResolveDependencies(Backbone, Backgrid, GroupByHelper, GroupByCellTem
     var GroupByBody = Backgrid.Body.extend({
         initialize: function (options) {
             //find the primaryColumn
+            this.options = options;
             this.primaryColumn = _.find(this.options.columns.models, function(column) {
-               return column.get("groupableOptions")  && column.get("groupableOptions").primary
+               return column.get("groupableOptions")  && column.get("groupableOptions").primary;
             });
             //set up the initial column to group by (the primary one)
             if(this.primaryColumn && this.primaryColumn.get('groupableOptions'))  {
@@ -80,7 +60,7 @@ function onResolveDependencies(Backbone, Backgrid, GroupByHelper, GroupByCellTem
             //if the groupBy and formatter functions are null, use defaults
             if(!this.groupByFunction) {
                 this.groupByFunction = function(item) {
-                    return item.model.get(column.name);
+                    return item.model.get(primaryColumn.name);
                 };
             }
             if(!this.groupByRowFormatter) {
@@ -158,6 +138,10 @@ function onResolveDependencies(Backbone, Backgrid, GroupByHelper, GroupByCellTem
             //need to sort first by the groupBy category and then by the innerSort
 //            comparator = this.makeComparator(column.get("name"), column.get('groupableOptions').innerSort, order);
             comparator = this.makeComparator(column, order);
+            var refDateComparator = function(model) {
+                var timeCompare = moment(model.get('referenceDateTime'), 'YYYYMMDDHHmmss');
+                return - timeCompare * order;
+            };               
             this.groupByFunction = (column.get('groupableOptions') && column.get('groupableOptions').groupByFunction)  || function(item) {
                 return item.model.get(column.get('name'));
             };
@@ -168,7 +152,12 @@ function onResolveDependencies(Backbone, Backgrid, GroupByHelper, GroupByCellTem
             if (Backbone.PageableCollection && this.collection instanceof Backbone.PageableCollection) {
                 if (this.collection.fullCollection) {
                     //use the updated Comparator
-                    this.collection.fullCollection.comparator = comparator;
+                    if(column.get('groupableOptions').groupByDate){                      
+                        this.collection.fullCollection.comparator = refDateComparator;
+                    }else{
+                        this.collection.fullCollection.comparator = comparator;
+                    }                    
+
                     this.collection.fullCollection.sort();
 
                 }
@@ -179,7 +168,12 @@ function onResolveDependencies(Backbone, Backgrid, GroupByHelper, GroupByCellTem
                 }
             }
             else {
-                this.collection.comparator = comparator;
+
+                if(column.get('groupableOptions').groupByDate){                         
+                    this.collection.comparator = refDateComparator;
+                }else{
+                    this.collection.comparator = comparator;   
+                }
                 //calling the sort function here will automatically trigger a Body.refresh call, which will call the render method which does the grouping.
                 this.collection.sort();
             }
@@ -208,6 +202,14 @@ function onResolveDependencies(Backbone, Backgrid, GroupByHelper, GroupByCellTem
             //For example, if we're grouping by year & month, with an inner sort, if we compare by the column, there won't
             //be any tie, which means the inner sort can't do its thing.
             var secondarySort = column.get('groupableOptions').innerSort;
+
+            // custom innersort comparator
+            var secondarySortValue = column.get('groupableOptions').innerSortValue || function(left,right) {
+                if(left == right) return 0;
+                else if(left > right) return -1;
+                return 1;
+            };
+
             //either the name of the column, or the group by function;
             return function (left, right) {
                 // extract the values from the models
@@ -230,9 +232,7 @@ function onResolveDependencies(Backbone, Backgrid, GroupByHelper, GroupByCellTem
                 if (l === r) {
                     if(secondarySort) {
                         var innerL = modelExtractor(left, secondarySort), innerR = modelExtractor(right, secondarySort);
-                        if(innerL == innerR) return 0;
-                        else if(innerL > innerR) return -1;
-                        return 1;
+                        return secondarySortValue(innerL, innerR);
                     } else return 0;
                 }
                 else if (l < r) return -1;
@@ -253,4 +253,4 @@ function onResolveDependencies(Backbone, Backgrid, GroupByHelper, GroupByCellTem
     });
     return GroupByBody;
 
-}
+});

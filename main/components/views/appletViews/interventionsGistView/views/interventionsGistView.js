@@ -1,4 +1,4 @@
-var dependencies = [
+define([
     "jquery",
     "underscore",
     "main/Utils",
@@ -7,61 +7,18 @@ var dependencies = [
     "hbs!main/components/views/appletViews/interventionsGistView/templates/interventionsGistChild",
     "hbs!main/components/views/appletViews/sharedTemplates/gistPopover",
     "api/ResourceService",
-    "api/Messaging"
-
-
-];
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, _, Utils, Backbone, interventionsGistLayoutTemplate, interventionsGistChildTemplate, PopoverTemplate, ResourceService, Messaging) {
+    "api/UserService",
+    "api/Messaging",
+    'main/components/applets/baseDisplayApplet/baseDisplayAppletItem',
+    'main/components/applets/baseDisplayApplet/baseGistView',
+    "main/components/appletToolbar/appletToolbarView",
+    "main/components/views/appletViews/TileSortManager"
+], function($, _, Utils, Backbone, interventionsGistLayoutTemplate, interventionsGistChildTemplate, popoverTemplate, ResourceService, UserService, Messaging, BaseAppletItem, BaseGistView, ToolbarView, TileSortManager) {
     'use strict';
-    var InterventionsGistItem = Backbone.Marionette.ItemView.extend({
+
+    var InterventionsGistItem = BaseAppletItem.extend({
         template: interventionsGistChildTemplate,
         className: 'gistItem col-sm-12',
-        events: {
-            'click button#closeGist': function(event) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                $(this.el).find('.sub-elements').hide();
-            },
-            'click button.groupItem': function(event) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-            },
-            'hover #gist-main-info': function(event) {
-                var gistID = $(event.target).attr('id');
-                $('#' + gistID).blur();
-            },
-            'focus #gist-main-info': function(event) {
-                var gistItem = $(event.target);
-                gistItem.keypress(function(e) {
-                    if (e.which === 13 || e.which === 32) {
-                        gistItem.trigger('click');
-                    }
-                });
-            },
-            'click #gist-main-info': function(event) {
-
-                $('.gistPopover').popover('hide');
-                //$(this.el).find('[data-toggle="tooltip"]').tooltip('hide');
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                var currentPatient = ResourceService.patientRecordService.getCurrentPatient();
-                var channelObject = {
-                    model: this.model,
-                    uid: this.model.get("uid"),
-                    patient: {
-                        icn: currentPatient.attributes.icn,
-                        pid: currentPatient.attributes.pid
-                    }
-                };
-                Messaging.getChannel(this.AppletID).trigger('getDetailView', channelObject);
-            }
-
-        },
-        initialize: function(options) {
-            this.AppletID = options.AppletID;
-        },
         getGistItemGraphicClass: function(gistGraphicType) {
             switch (gistGraphicType.toUpperCase()) {
                 case 'NONE':
@@ -92,9 +49,37 @@ function onResolveDependencies($, _, Utils, Backbone, interventionsGistLayoutTem
                     return 'lineCorrection';
             }
         },
+        onDestroy: function() {
+            this.ui.popoverEl.popup('destroy');
+        },
+        initialize: function(options) {
+            this.callingView = options.appletOptions.appletId;
+            var buttonTypes = ['infobutton', 'detailsviewbutton', 'quicklookbutton'];
+            if (!Messaging.request('get:current:screen').config.predefined) {
+                buttonTypes.unshift('tilesortbutton');
+            }
+
+            this.toolbarOptions = {
+                targetElement: this,
+                buttonTypes: buttonTypes
+            };
+        },
+        templateHelpers: function() {
+            var self = this;
+            return {
+                isNotActiveMeds: function() {
+                    if (self.callingView.toLowerCase() === 'activemeds') {
+                        return false;
+                    }
+
+                    return true;
+                }
+            };
+        },
         onRender: function() {
-            var severityCheck = $(this.el).find('div[count]');
-            var graphic = $(this.el).find('div[graphic]');
+            //this._base.onRender.apply(this, arguments);
+            var severityCheck = this.$('div[count]');
+            var graphic = this.$('div[graphic]');
             var severity = (this.getInterventionSeverityClass(severityCheck.text()));
             severityCheck.addClass(severity);
             var graphicClass = this.getGistItemGraphicClass(graphic.attr('graphic'));
@@ -113,6 +98,12 @@ function onResolveDependencies($, _, Utils, Backbone, interventionsGistLayoutTem
                     break;
                 case 'fa fa-exclamation-circle discontinuedMed':
                     changeText = 'Discontinued';
+                    graphic[0].setAttribute('data-toggle', 'tooltip');
+                    graphic[0].setAttribute('data-placement', 'auto top');
+                    graphic[0].setAttribute('data-original-title', 'Not Fillable');
+                    graphic[0].setAttribute('data-container', 'body');
+                    graphic[0].setAttribute('data-trigger', 'hover focus');
+                    this.$(graphic).tooltip();
                     break;
                 case 'fa fa-caret-up changeArrow':
                     changeText = 'Increased';
@@ -123,97 +114,36 @@ function onResolveDependencies($, _, Utils, Backbone, interventionsGistLayoutTem
                     break;
             }
             graphic.addClass(graphicClass);
-            var countText = $(this.el).find('#count').text();
+            var countText = this.$('#count').text();
             if (countText === '-1') {
                 countText = 'Unknown';
-                $(this.el).find('#count').text('NA');
+                this.$('#count').text('NA');
             }
-            var infoText = countText + ' refills left. Change: ' + changeText + ', Age: ' + $(this.el).find('#age').attr('title');
-            $(this.el).find('.quickDraw').attr('aria-label', infoText);
-            this.setPopover();
-        },
-        showPopover: function(evt, popoverElement) {
-            evt.stopPropagation();
-            $('[data-toggle=popover]').not(popoverElement).popover('hide');
-            popoverElement.popover('toggle');
-            var selectedGistItem = $(this.el);
-            var leftAdjust = selectedGistItem.offset().left;
-            var widthAdjust = selectedGistItem.width() * 0.75;
-            $('.gistPopover').css('left', leftAdjust.toString() +"px");
-            $('.gistPopover').width(widthAdjust);
-        },
-        setPopover: function() {
-            var self = this;
-            var PopoverView = Backbone.Marionette.ItemView.extend({
-                template: PopoverTemplate
-            });
-            this.$el.find('[data-toggle=popover]').popover({
-                trigger: 'manual',
-                html: 'true',
-                container: 'body',
-                template: (new PopoverView().template()),
-                placement: 'bottom',
-            }).click(function(evt) {
-                self.showPopover(evt, $(this));
-            }).focus(function(evt) {
-                evt.preventDefault();
-                evt.stopImmediatePropagation();
-                $(this).keyup(function(e) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    if (e.keyCode === 13 || e.keyCode === 32) {
-                        self.showPopover(evt, $(this));
-                    }
-                });
-
-            });
-        },
+            var infoText = countText + ' refills left. Change: ' + changeText + ', Age: ' + this.model.get('ageReadText');
+            this.$('.quickDraw').attr('aria-label', infoText);
+            this.createPopover();
+        }
     });
-    var InterventionsGist = Backbone.Marionette.CompositeView.extend({
+
+    var InterventionsGist = BaseGistView.extend({
         template: interventionsGistLayoutTemplate,
         childView: InterventionsGistItem,
-        emptyView: Backbone.Marionette.ItemView.extend({
-            template: _.template('<div class="emptyGistList">No Records Found</div>')
-        }),
-        events: {
-            'click .header': function(event) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                $('[data-toggle=popover]').popover('hide');
-                this.sortCollection($(event.target));
-            },
-            'focus .header': function(event) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                $('[data-toggle=popover]').popover('hide');
-                var currentHeaderFocus = $(event.target);
-                var self = this;
-                currentHeaderFocus.keypress(function(e) {
-                    if (e.which === 13 || e.which === 32) {
-                        console.log("key pressed");
-                        self.sortCollection(currentHeaderFocus);
-                    }
-                });
-            },
-        },
         initialize: function(options) {
-            this._super = Backbone.Marionette.CompositeView.prototype;
-            var appletID = getAppletId(options);
+            this.callingView = options.appletId;
             this.childViewOptions = {
-                AppletID: appletID,
+                AppletID: this.AppletID,
+                appletOptions: options
             };
             this.collectionParser = options.collectionParser || function(collection) {
                 return collection;
             };
-            this.collection.on("filterDone", function() {
-            }, this);
+            this.collection.on("filterDone", function() {}, this);
             this.collection = options.collection;
             this.gistModel = options.gistModel;
 
             //this is the model for the outer part of the composite view
-            this.model = new Backbone.Model({
+            this.model = new Backbone.Model({});
 
-            });
             this.model.set('gistHeaders', options.gistHeaders || {
                 name: 'Medication',
                 description: '',
@@ -221,72 +151,23 @@ function onResolveDependencies($, _, Utils, Backbone, interventionsGistLayoutTem
                 age: 'Age',
                 count: 'Refills'
             });
-            this.model.set('appletID', appletID);
-            this.childViewContainer = "#" + appletID + "-interventions" + "-gist-items";
-            //this._super.initialize.apply(this, arguments);
+
+            this.model.set('appletID', this.AppletID);
+            this.childViewContainer = "#" + this.AppletID + "-interventions" + "-gist-items";
         },
-        onBeforeRender: function() {
-            this.collection.reset(this.collectionParser(this.collection).models);
-            _.each(this.collection.models, function(item) {
-                _.each(this.gistModel, function(object) {
-                    var id = object.id;
-                    item.set(object.id, item.get(object.field));
-                });
-            }, this);
-        },
-        render: function() {
-            this._super.render.apply(this, arguments);
-        },
-        sortCollection: function(headerElement) {
-            /* clear existing collection comparator to allow collection to rerender after sort */
-            this.collection.comparator = null;
-            if (headerElement.attr("sortable") === "true") {
-                var nextSortOrder = '';
-                switch (headerElement.attr("sortDirection")) {
-                    case 'asc':
-                        nextSortOrder = 'desc';
-                        break;
-                    case 'desc':
-                        nextSortOrder = 'none';
-                        break;
-                    case 'none':
-                        nextSortOrder = 'asc';
-                        break;
+        templateHelpers: function() {
+            var self = this;
+            return {
+                isNotActiveMeds: function() {
+                    if (self.callingView.toLowerCase() === 'activemeds') {
+                        return false;
+                    }
+
+                    return true;
                 }
-                this.$el.find('.header').attr("sortDirection", 'none');
-                headerElement.attr("sortDirection", nextSortOrder);
-                this.$el.find('.header').find('[sortArrow=headerDirectionalIndicator]').removeClass('fa-caret-up');
-                this.$el.find('.header').find('[sortArrow=headerDirectionalIndicator]').removeClass('fa-caret-down');
-
-                if (nextSortOrder === "asc") {
-                    headerElement.find('[sortArrow=headerDirectionalIndicator]').addClass('fa-caret-up');
-                } else if (nextSortOrder === "desc") {
-                    headerElement.find('[sortArrow=headerDirectionalIndicator]').addClass('fa-caret-down');
-                }
-
-                if (nextSortOrder === 'none') {
-                    Utils.CollectionTools.resetSort(this.collection);
-                } else {
-                    var sortType = headerElement.attr("sortType");
-                    var key = headerElement.attr("sortKey");
-                    Utils.CollectionTools.sort(this.collection, key, nextSortOrder, sortType);
-                }
-            }
-
-
-        },
-        onStop: function() {
-            $('.gistPopover').popover('hide');
+            };
         }
     });
-
-    function getAppletId(options) {
-        if (_.isUndefined(options.appletConfig.instanceId)) {
-            return options.appletConfig.id;
-        } else {
-            return options.appletConfig.instanceId;
-        }
-    }
 
     var InterventionsGistView = {
         create: function(options) {
@@ -299,4 +180,4 @@ function onResolveDependencies($, _, Utils, Backbone, interventionsGistLayoutTem
     };
 
     return InterventionsGistView;
-}
+});

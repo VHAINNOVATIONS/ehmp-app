@@ -1,12 +1,8 @@
-var dependencies = [
+define([
     "backbone",
     "moment"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, moment) {
-
+], function(Backbone, moment) {
+    'use strict';
 
     var UserModel, PatientModel;
     if (window.sessionStorage.hasOwnProperty('user')) {
@@ -41,9 +37,11 @@ function onResolveDependencies(Backbone, moment) {
         user: new UserModel(),
         patient: new PatientModel(),
         globalDate: new GlobalDateModel(),
-        clearSessionModel: function(key) {
+        clearSessionModel: function(key, setDefault) {
             this[key].clear();
-            this[key].set(this[key].defaults);
+            if (_.isBoolean(setDefault) && setDefault === true) {
+                this[key].set(this[key].defaults);
+            }
         },
         clearAllSessionModels: function() {
             this.user.clear({silent: true});
@@ -53,4 +51,4 @@ function onResolveDependencies(Backbone, moment) {
     };
 
     return Session;
-}
+});

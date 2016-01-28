@@ -1,8 +1,4 @@
-var dependencies = ['jquery', 'moment', 'underscore'];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, Moment, _) {
+define(['jquery', 'moment', 'underscore'], function($, Moment, _) {
 
     var DateUtils = {};
 
@@ -26,20 +22,27 @@ function onResolveDependencies($, Moment, _) {
             };
         }();
 
-    DateUtils.datepicker = function(el, options) {
-        var datePickerConfig = config,
-            opts = options || {};
+    DateUtils.datepicker = function(el, options, eventOptions) {
+        var datePickerConfig = _.clone(config, true);
+        var opts = options || {};
+        eventOptions = eventOptions || {};
 
         _.extend(datePickerConfig, opts);
 
-        el.datepicker(datePickerConfig).data({
+        var datepickerElement = el.datepicker(datePickerConfig).data({
             //Set the data against the DOM element
             value: datePickerConfig.initialDate,
             regex: datePickerConfig.regex,
             format: datePickerConfig.format,
             autoclose: datePickerConfig.autoclose,
             dateUtilsOptions: datePickerConfig
-        }).inputmask(datePickerConfig.inputmask, datePickerConfig).prop('placeholder', datePickerConfig.placeholder);
+        });
+
+        _.each(eventOptions, function(anEvent) {
+            datepickerElement.on(anEvent.type, anEvent.handler);
+        });
+
+        datepickerElement.inputmask(datePickerConfig.inputmask, datePickerConfig).prop('placeholder', datePickerConfig.placeholder);
     };
 
     DateUtils.defaultOptions = function() {
@@ -76,4 +79,4 @@ function onResolveDependencies($, Moment, _) {
     };
 
     return DateUtils;
-}
+});

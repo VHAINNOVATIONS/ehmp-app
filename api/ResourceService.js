@@ -1,4 +1,4 @@
-var dependencies = [
+define([
     "backbone",
     "jquery",
     "api/UrlBuilder",
@@ -7,13 +7,10 @@ var dependencies = [
     "api/SessionStorage",
     "api/UserService",
     "api/Navigation",
+    "api/Enrichment",
     "backbone.paginator",
     "backbone.fetch-cache"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, $, UrlBuilder, session, utils, SessionStorage, UserService, Nav) {
+], function(Backbone, $, UrlBuilder, session, utils, SessionStorage, UserService, Nav, Enrichment) {
     'use strict';
 
     var DEFAULT_CACHE = false;
@@ -21,7 +18,12 @@ function onResolveDependencies(Backbone, $, UrlBuilder, session, utils, SessionS
     var DEFAULT_CACHE_EXPIRATION = 600; //false - never expires
     Backbone.fetchCache.localStorage = false;
 
-    var Domain = Backbone.Model.extend({});
+    var Domain = Backbone.Model.extend({
+        parse: function(response) {
+            Enrichment.addFacilityMoniker(response);
+            return response;
+        }
+    });
 
     Backbone.Collection.prototype.next = function(model) {
         return this.at(this.index(model) + 1) || model;
@@ -66,7 +68,11 @@ function onResolveDependencies(Backbone, $, UrlBuilder, session, utils, SessionS
     Backbone.Collection.prototype.parse = function(response) {
         var parsedResponse;
         if (response.data) {
-            parsedResponse = response.data.items;
+            if (response.data.items) {
+                parsedResponse = response.data.items;
+            } else {
+                parsedResponse = response.data;
+            }
         } else {
             parsedResponse = response;
         }
@@ -89,7 +95,11 @@ function onResolveDependencies(Backbone, $, UrlBuilder, session, utils, SessionS
     Backbone.PageableCollection.prototype.parse = function(response) {
         var parsedResponse;
         if (response.data) {
-            parsedResponse = response.data.items;
+            if (response.data.items) {
+                parsedResponse = response.data.items;
+            } else {
+                parsedResponse = response.data;
+            }
         } else {
             parsedResponse = response;
         }
@@ -165,14 +175,20 @@ function onResolveDependencies(Backbone, $, UrlBuilder, session, utils, SessionS
                     _.extend(collectionConfig, options.collectionConfig);
                     createdCollection = new DomainCollection([], collectionConfig);
                 }
+
+                createdCollection.url = collectionConfig.url;
             }
             if (viewModel !== undefined) {
+                if (_.isFunction(viewModel.parse) && _.isFunction(Domain.prototype.parse)) {
+                    viewModel.parse = _.compose(Domain.prototype.parse, viewModel.parse);
+                }
                 var ExtendedDomain = Domain.extend(viewModel);
                 createdCollection.model = ExtendedDomain;
             }
             createdCollection.fetchOptions = options;
 
-            var data = '', contentType = '';
+            var data = '',
+                contentType = '';
             if (options.fetchType === 'POST') {
                 data = JSON.stringify(options.criteria);
                 contentType = 'application/json';
@@ -193,6 +209,7 @@ function onResolveDependencies(Backbone, $, UrlBuilder, session, utils, SessionS
                         }
 
                         if (typeof onSuccess == "function") {
+                            collection.trigger('fetchSuccessfull', collection);
                             onSuccess(collection, resp);
                         }
                     },
@@ -200,9 +217,6 @@ function onResolveDependencies(Backbone, $, UrlBuilder, session, utils, SessionS
                         if (typeof onError == "function") {
                             onError(collection, resp);
                         }
-                    },
-                    complete: function() {
-                        utils.resize.dw();
                     }
                 });
 
@@ -233,11 +247,17 @@ function onResolveDependencies(Backbone, $, UrlBuilder, session, utils, SessionS
 
             DomainModel = Backbone.Model.extend({
                 parse: function(response) {
+                    var parsedResponse;
                     if (response.data) {
-                        return response.data.items[0];
+                        if (response.data.items) {
+                            parsedResponse = response.data.items[0];
+                        } else {
+                            parsedResponse = response.data;
+                        }
                     } else {
-                        return response;
+                        parsedResponse = response;
                     }
+                    return parsedResponse;
                 }
             });
 
@@ -267,10 +287,22 @@ function onResolveDependencies(Backbone, $, UrlBuilder, session, utils, SessionS
                 }
             }
             Backbone.fetchCache.setLocalStorage();
-            console.log(Backbone.fetchCache);
         },
         buildUrl: function(resourceTitle, criteria) {
             return UrlBuilder.buildUrl(resourceTitle, criteria);
+        },
+        /**
+         * Takes an url with :params and replaces them with their matching values. Parameters without a
+         * matching value will be replaced with 'undefined'. Parameters are identified by a colon followed
+         * by the name of the parameter. The parameter name must start with a letter and can be followed
+         * by characters from the word class (e.g. a-z, A-Z, 0-9, _).
+         *
+         * @param url {string} Source URL. Follows the following form: http://somedomain/path/:param1/some/:param2/...
+         * @param params {object} Object containing the key/values. Property names are the keys. (e.g. { param1: 'value1', param2: 'value2 })
+         * @returns {string} An URL with all params replaced (e.g. http://somedomain/path/value1/some/value2/...).
+         */
+        replaceURLRouteParams: function(url, params) {
+            return UrlBuilder.replaceURLRouteParams(url, params);
         },
         fetchResponseStatus: function(options) {
             var resourceTitle = options.resourceTitle;
@@ -288,6 +320,8 @@ function onResolveDependencies(Backbone, $, UrlBuilder, session, utils, SessionS
             }
             _.extend(collectionConfig, options.collectionConfig);
             createdCollection = new DomainCollection([], collectionConfig);
+
+            createdCollection.url = collectionConfig.url;
 
             createdCollection.fetchOptions = options;
             if (options.resourceTitle) {
@@ -438,12 +472,50 @@ function onResolveDependencies(Backbone, $, UrlBuilder, session, utils, SessionS
         getCurrentPatient: function() {
             return SessionStorage.get.sessionModel('patient');
         },
+        refreshCurrentPatient: function() {
+            var that = this;
+            var options = {
+                resourceTitle: 'patient-record-patient',
+            };
+            options.success = function(collection, resp) {
+                var modelIndex = _.indexOf(collection.pluck('pid'), that.getCurrentPatient().get('pid')) || 0;
+                var patient = that.setPatientStatusClass(collection.models[modelIndex]);
+                SessionStorage.set.sessionModel('patient', patient);
+            };
+            this.fetchCollection(options).fetch(options);
+        },
+        setPatientStatusClass: function(model) {
+            var patient = model || this.getCurrentPatient();
+            var patientType = 'Outpatient';
+            if (patient.get('admissionUid') && patient.get('admissionUid') !== null) {
+                patientType = 'Inpatient';
+            }
+            patient.set('patientStatusClass', patientType);
+            return patient;
+        },
         fetchDateFilteredCollection: function(collection, filterOptions) {
             return resourceService.fetchDateFilteredCollection(collection, filterOptions);
+        },
+        isPatientInPrimaryVista: function() {
+            var domainModel = SessionStorage.get.sessionModel('patient-domain'),
+                domainData = domainModel.get('data'),
+                vistaSites = domainModel.get('sites'),
+                inVista = false;
+
+            _.each(domainData, function(item) {
+                var pidSite = item.pid.split(';')[0];
+                var match = vistaSites.filter(function(a) {
+                    return a.siteCode === pidSite;
+                });
+                if (match.length) {
+                    inVista = true;
+                }
+            });
+            return inVista;
         }
     };
 
 
 
     return resourceService;
-}
+});

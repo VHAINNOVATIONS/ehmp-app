@@ -1,14 +1,9 @@
-var dependencies = [
+define([
     "backbone",
     "marionette",
     "underscore",
     "hbs!main/layouts/templates/columnTwo"
-];
-
-define(dependencies, onResolveDependencies);
-
-
-function onResolveDependencies(Backbone, Marionette, _, Template) {
+], function(Backbone, Marionette, _, Template) {
     layoutView = Backbone.Marionette.LayoutView.extend({
         template: Template,
         regions: {
@@ -29,4 +24,4 @@ function onResolveDependencies(Backbone, Marionette, _, Template) {
     });
 
     return layoutView;
-}
+});

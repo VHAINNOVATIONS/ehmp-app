@@ -1,5 +1,4 @@
-var dependencies = [
-    "main/ADK",
+define([
     "jquery",
     "underscore",
     "hbs!main/components/applets/grid_applet/gists/templates/interventions",
@@ -8,11 +7,7 @@ var dependencies = [
     "hbs!main/components/applets/grid_applet/gists/templates/observations",
     "api/ResourceService",
     "api/Messaging"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(ADK, $, _, interventionTemplate, problemTemplate, pillTemplate, observationTemplate, ResourceService, Messaging) {
+], function($, _, interventionTemplate, problemTemplate, pillTemplate, observationTemplate, ResourceService, Messaging) {
     'use strict';
     var gistHelper = {
         getGistItemGraphicClass: function(gistGraphicType) {
@@ -73,6 +68,7 @@ function onResolveDependencies(ADK, $, _, interventionTemplate, problemTemplate,
                         });
                     },
                     'click div.gistItem': function(event) {
+                        console.log('=-=-=-=');
                         if (hover) {
                             $('.customPopover').popover('hide');
                         }
@@ -87,6 +83,7 @@ function onResolveDependencies(ADK, $, _, interventionTemplate, problemTemplate,
                                 pid: currentPatient.attributes.pid
                             }
                         };
+                        console.log('++++++', channelObject);
                         Messaging.getChannel(gistItemConfig.AppletID).trigger(gistItemConfig.detailTrigger, channelObject);
                     }
                 },
@@ -127,4 +124,4 @@ function onResolveDependencies(ADK, $, _, interventionTemplate, problemTemplate,
     };
     return gistHelper;
 
-}
+});

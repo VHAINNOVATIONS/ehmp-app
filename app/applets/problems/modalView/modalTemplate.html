@@ -1,58 +1,63 @@
 <div class="row">
-  <div class="col-md-4 text-right text-muted">Primary ICD-9-CM:</div>
-  <div class="col-md-8 text-left">{{icdCode}}</div>
+  <div class="col-md-4 text-right text-muted" id="Primary_ICD-9-CM_Label">Primary ICD-9-CM:</div>
+  <div class="col-md-8 text-left" id="Primary_ICD-9-CM">{{icdCode}}</div>
 </div>
 <div class="row">
-  <div class="col-md-4 text-right text-muted">SNOMED CT:</div>
-  <div class="col-md-8 text-left">{{snomedCode}}</div>
+  <div class="col-md-4 text-right text-muted" id="Snomed_Label">SNOMED CT:</div>
+  <div class="col-md-8 text-left" id="Snomed">{{snomedCode}}</div>
 </div>
 &nbsp;
 <div class="row">
-  <div class="col-md-4 text-right text-muted">Onset:</div>
-  <div class="col-md-8 text-left">{{onsetFormatted}}</div>
+  <div class="col-md-4 text-right text-muted" id="problem_onset_label">Onset:</div>
+  <div class="col-md-8 text-left" id="problem_onset">{{onsetFormatted}}</div>
 </div>
 <div class="row">
-  <div class="col-md-4 text-right text-muted">Acuity:</div>
-  <div class="col-md-8 text-left">{{acuityName}}</div>
+  <div class="col-md-4 text-right text-muted" id="problem_acuity_label">Acuity:</div>
+  <div class="col-md-8 text-left" id="problem_acuity">{{acuityName}}</div>
 </div>
 <div class="row">
-  <div class="col-md-4 text-right text-muted">Provider:</div>
-  <div class="col-md-8 text-left">{{providerDisplayName}}</div>
+  <div class="col-md-4 text-right text-muted" id="problem_provider_label">Provider:</div>
+  <div class="col-md-8 text-left" id="problem_provider">{{providerDisplayName}}</div>
 </div>
 <div class="row">
-  <div class="col-md-4 text-right text-muted">Facility:</div>
-  <div class="col-md-8 text-left">{{facilityName}}</div>
+  <div class="col-md-4 text-right text-muted" id="problem_facility_label">Facility:</div>
+  <div class="col-md-8 text-left" id="problem_facility">{{facilityName}}</div>
 </div>
 <div class="row">
-  <div class="col-md-4 text-right text-muted">Location:</div>
-  <div class="col-md-8 text-left">{{locationDisplayName}}</div>
+  <div class="col-md-4 text-right text-muted" id="problem_location_label">Location:</div>
+  <div class="col-md-8 text-left" id="problem_location">{{locationDisplayName}}</div>
+</div>
+<div class="row">
+  <div class="col-md-4 text-right text-muted" id="problem_status_label">Status:</div>
+  <div class="col-md-8 text-left" id="problem_status">{{statusName}}</div>
 </div>
 &nbsp;
+
 <!--<div class="row">
   <div class="col-md-4 text-right text-muted">Recorded:</div>
   <div class="col-md-8 text-left"><strong>&lt;Data not available&gt; by &lt;Data not available&gt;</strong></div>
 </div>-->
 <div class="row">
-  <div class="col-md-4 text-right text-muted">Entered:</div>
-  <div class="col-md-8 text-left">{{formatDate entered}}</div>
+  <div class="col-md-4 text-right text-muted" id="problem_entered_label">Entered:</div>
+  <div class="col-md-8 text-left" id="problem_entered">{{formatDate entered}}</div>
 </div>
 <div class="row">
-  <div class="col-md-4 text-right text-muted">Updated:</div>
-  <div class="col-md-8 text-left">{{formatDate updated}}</div>
+  <div class="col-md-4 text-right text-muted" id="problem_updated_label">Updated:</div>
+  <div class="col-md-8 text-left" id="problem_updated">{{formatDate updated}}</div>
 </div>
 &nbsp;
 <div class="row">
-  <div class="col-md-12"><hr/><h4>Comments:</h4></div>
+  <div class="col-md-12"><hr/><h4 id="problem_comments_label">Comments:</h4></div>
 </div>
 <div class="row">
   <div class="col-md-12">
     {{#comments}}
     <div class="row">
-      <div class="col-md-2 col-md-offset-2">{{formatDate entered}}</div>
-      <div class="col-md-7">{{enteredByName}}</div>
+      <div class="col-md-2 col-md-offset-2" id="problem_comment_date">{{formatDate entered}}</div>
+      <div class="col-md-7" id="problem_comment_enteredby">{{enteredByName}}</div>
     </div>
     <div class="row">
-      <div class="col-md-9 col-md-offset-2">{{comment}}<br/></div>
+      <div class="col-md-9 col-md-offset-2" id="problem_comment">{{comment}}<br/></div>
     </div>
     &nbsp;
     {{/comments}}

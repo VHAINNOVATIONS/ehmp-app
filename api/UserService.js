@@ -1,4 +1,4 @@
-var dependencies = [
+define([
     "backbone",
     "jquery",
     "api/UrlBuilder",
@@ -6,11 +6,7 @@ var dependencies = [
     'moment',
     'api/Messaging',
     'api/SessionStorage'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, $, UrlBuilder, sessionStorage, moment, Messaging, SessionStorage) {
+], function(Backbone, $, UrlBuilder, sessionStorage, moment, Messaging, SessionStorage) {
     'use strict';
 
     //in minutes
@@ -50,7 +46,6 @@ function onResolveDependencies(Backbone, $, UrlBuilder, sessionStorage, moment, 
          * TODO: the nonLegacy if/else can be removed after a couple days once people have caught up in both repos
          */
         authenticate: function(userName, password, facility) {
-            this.clearUserSession();
             var resourceTitle = "authentication-authentication";
             var userSession = this.getUserSession();
             userSession.url = UrlBuilder.buildUrl(resourceTitle);
@@ -64,12 +59,22 @@ function onResolveDependencies(Backbone, $, UrlBuilder, sessionStorage, moment, 
                 type: 'POST',
                 contentType: 'application/json',
                 success: function(response, xhr) {
-                    userSession = new Backbone.Model(xhr);
+                    if (xhr.data) {
+                        userSession = new Backbone.Model(xhr.data);
+                    } else {
+                        userSession = new Backbone.Model(xhr);
+                    }
                     userSession.set('expires', moment.utc().add(logofftime, 'minutes'));
                     userSession.set('status', UserService.STATUS.LOGGEDIN);
-                    userSession.set('infoButtonPanorama', '1.3.6.1.4.1.3768');
-                    userSession.set('infoButtonKodak', '1.3.6.1.4.1.2000');
-                    userSession.set('infoButtonSite', 'www.somesite.com');
+                    //for demo purposes
+                    if (userSession.get('facility') === 'PANORAMA') {
+                        userSession.set('infobutton-oid', '1.3.6.1.4.1.3768.86'); //Portland
+                    } else if (userSession.get('facility') === 'KODAK') {
+                        userSession.set('infobutton-oid', '1.3.6.1.4.1.3768.97'); //Utah
+                    } else {
+                        userSession.set('infobutton-oid', '1.3.6.1.4.1.3768'); //default
+                    }
+                    userSession.set('infobutton-site', 'http://service.oib.utah.edu:8080/infobutton-service/infoRequest?');
                     SessionStorage.delete.sessionModel('user');
                     UserService.setUserSession(userSession);
                     Messaging.trigger('app:logged-in');
@@ -102,7 +107,7 @@ function onResolveDependencies(Backbone, $, UrlBuilder, sessionStorage, moment, 
 
             if (status && status !== UserService.STATUS.LOGGEDOUT) {
 
-                userSession.fetch({
+                userSession.sync('delete', userSession, {
                     success: function(model, response, options) {
                         console.log('Successfully cleared user session on server.');
                     },
@@ -173,9 +178,16 @@ function onResolveDependencies(Backbone, $, UrlBuilder, sessionStorage, moment, 
 
             userSession.fetch({
                 success: function(model, response, options) {
+                    if (model.data) {
+                        model = model.data;
+                    }
                     userSession = model;
-                    userSession.set('expires', moment.utc().add(logofftime, 'minutes'), {silent:true});
-                    userSession.set('status', UserService.STATUS.LOGGEDIN, {silent:true});
+                    userSession.set('expires', moment.utc().add(logofftime, 'minutes'), {
+                        silent: true
+                    });
+                    userSession.set('status', UserService.STATUS.LOGGEDIN, {
+                        silent: true
+                    });
                     UserService.setUserSession(userSession);
                 },
                 error: function(model, response, options) {
@@ -216,10 +228,28 @@ function onResolveDependencies(Backbone, $, UrlBuilder, sessionStorage, moment, 
             var user = this.getUserSession();
             var permissions = user.get('permissions') || [];
             return _.contains(permissions, permission);
+        },
+
+        /**
+         * A method to check a user permission given a string of permissions
+         * @return {boolean}
+         */
+        hasPermissions: function(args) {
+            var permissions = args.split(/[|&]/);
+
+            if (args.match(/&/)) {
+                return _.all(permissions, function(permission) {
+                    return this.hasPermission(permission);
+                }, this);
+            } else {
+                return _.any(permissions, function(permission) {
+                    return this.hasPermission(permission);
+                }, this);
+            }
         }
     };
 
     Messaging.on('app:logout', UserService.clearUserSession);
 
     return UserService;
-}
+});

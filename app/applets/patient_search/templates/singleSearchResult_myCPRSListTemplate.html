@@ -1,0 +1,41 @@
+<div class="list-group-item-text row" style="cursor:pointer;cursor:hand">
+	<div class="col0 data col-md-2 no-padding-right">
+		<span class="sr-only">. Appointment Date and Time</span>
+		{{formatDate appointment "MM/DD/YYYY HH:mm"}}
+	</div>
+	<div class="col1 data col-md-3 no-padding-right">
+		<span class="sr-only">. Location</span>
+		{{locationName}}
+	</div>
+	<div class="col2 data col-md-2 no-padding-right patientDisplayName">
+		<span class="sr-only">Patient record, name</span>
+		{{fullName}}
+	</div>
+	<div class="col3 data col-md-1 no-padding-right ">
+		<span class="sr-only">. Social security number</span>
+		{{#if sensitive}}
+			*SENSITIVE*
+		{{else}}
+			{{formatSSN ssn}}
+		{{/if}}
+	</div>
+	<div class="col4 data col-md-2 no-padding-right">
+		<span class="sr-only">. Date of birth</span>
+		{{#if sensitive}}
+			*SENSITIVE*
+		{{else}}
+			{{formatDate birthDate "MM/DD/YYYY"}}
+			<span class="sr-only">. Age</span>
+			({{getAge birthDate}}y)
+		{{/if}}
+	</div>
+	<div class="col5 data col-md-1 no-padding-right">
+		<span class="sr-only">. Gender</span>
+		{{genderName}}
+	</div>
+	<div class="col6 data col-md-1 no-padding-right">
+		<span class="sr-only">. Room-Bed</span>
+		{{roomBed}}
+	</div>
+	<span class="sr-only">. Press enter to select this patient.</span>
+</div>

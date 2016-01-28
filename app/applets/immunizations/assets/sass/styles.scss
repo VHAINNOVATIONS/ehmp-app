@@ -2,23 +2,21 @@
     span.header-hover:hover{
         cursor: pointer;
     }
-       
     div.immunGist {
-        color: #666666;
         box-shadow: 0px 1px 1px #999999;
         padding: 2px 5px 2px 5px;
         border-radius: 5px;
         float: left;
         margin: 5px;
-        display:inline;        
+        display:inline;
     }
     div.immunGist:hover {
-        color: #000000;
-        background-color: #F0F0F0;
+        color: $primary;
+        background-color: $secondary-lighter;
     }
     div.gistItem:hover {
-        color: #000000;
-        background-color: #F0F0F0;
+        color: $primary;
+        background-color: $secondary-lighter;
     }     
     .gistList {
         padding: 5px;
@@ -40,7 +38,7 @@
     }
     
     .changecolor + .tooltip > .tooltip-inner {
-    border: 2px solid #CCCCCC;
+    border: 2px solid $grey;
     text-align:left;
     max-width: 650px;
         .row{
@@ -49,9 +47,23 @@
         }
     }
     
+    .badge {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 5px;
+    }
+    
     .immunizations-modal-footer {
         .btn,[role="button"] {
             display:inline-block;
         }
-}    
+    }
+}
+table#data-grid-immunizations-modalView {
+    .selectable {
+        cursor: default;
+        &:focus {
+            outline: none;
+        }
+    }
 }

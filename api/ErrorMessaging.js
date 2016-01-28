@@ -1,12 +1,8 @@
 'use strict';
-var dependencies = [
+define([
     'jquery',
     'underscore'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, _) {
+], function($, _) {
 
     var ErrorMessaging = {};
     ErrorMessaging.statusCodeMessages = {
@@ -24,4 +20,4 @@ function onResolveDependencies($, _) {
     };
 
     return ErrorMessaging;
-}
+});

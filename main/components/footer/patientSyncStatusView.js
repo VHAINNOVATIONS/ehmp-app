@@ -1,170 +1,221 @@
-
-'use strict';
-var dependencies = [
+define([
     "backbone",
     "marionette",
     "underscore",
-    "main/ADK",
     'moment',
     "hbs!main/components/footer/patientSyncStatusTemplate",
     "main/components/footer/views/syncModalView",
-    "hbs!main/components/footer/views/syncModalTemplate"
-];
+    "hbs!main/components/footer/views/syncModalTemplate",
+    'main/components/footer/views/syncModalFooterView',
+    "api/ResourceService",
+    "api/Messaging",
+    "api/SessionStorage",
+    "_assets/js/tooltipMappings"
+], function(Backbone, Marionette, _, moment, PatientSyncStatusTemplate, SyncModalView, SyncModalTemplate, SyncModalFooterView, ResourceService, Messaging, SessionStorage, tooltipMappings) {
+    'use strict';
 
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, _, ADK, moment, PatientSyncStatusTemplate, SyncModalView, SyncModalTemplate) {
     return Backbone.Marionette.ItemView.extend({
         template: PatientSyncStatusTemplate,
+        ui: {
+            'refreshButton': '#refresh-patient-data',
+            'syncDetailsButton': '#open-sync-modal',
+            'syncIcons': '.patient-status-icon'
+        },
+    // According to DE1442, now the format is anything within hours are going to be displayed as one day ago
+        getSecondarySiteTimeSince: function(dateString) {
+            var maxTimeZoneOffset = 3; // 3 hours
+            var startDate = moment(dateString, 'YYYYMMDDHHmmssSSS');
+            var isDataValid = startDate.isValid();
+            if (!isDataValid) {
+                return "";
+            }
+            //var endDate = moment(dateString, 'YYYYMMDDHHmmssSSS');
+            //var startDate  = moment();
+            var endDate = moment().subtract(maxTimeZoneOffset, 'hours');
+            if (startDate.isAfter(endDate)){
+                return '< 1 day';
+            }
+
+            var duration = moment.duration(endDate.diff(startDate));
+
+            var years = parseFloat(duration.asYears());
+            var days = parseFloat(duration.asDays());
+            var months = parseFloat(duration.asMonths());
+            var hours = parseFloat(duration.asHours());
+            var min = parseFloat(duration.asMinutes());
+
+            var lYear = 'y';
+            var lMonth = 'm';
+            var lDay = 'd';
+            var lHour = 'h';
+            var lMin = '\'';
+            var finalResult = '';
+            var finalResultText = '<';
+            var count = 1;
+            var timeUnits = 'h';
+            if (months >= 24) {
+                count = Math.round(years);
+                timeUnits = lYear;
+                finalResult = count + lYear;
+                finalResultText = count.toString() + ' Year';
+            } else if ((months < 24) && (days > 60)) {
+                count = Math.round(months);
+                timeUnits = lMonth;
+                finalResult = count + lMonth;
+                finalResultText = count.toString() + ' Month';
+            } else if ((days >= 2) && (days <= 60)) {
+                count = Math.round(days);
+                timeUnits = lDay;
+                finalResult = count + lDay;
+                finalResultText = count.toString() + ' Day';
+            } else if (days < 2) {
+                finalResultText += ' 1 Day';
+            }
+            if (count >= 2) {
+                finalResultText = finalResultText + 's';
+            }
+            return finalResult;
+        },
         initialize: function() {
             this.model = new Backbone.Model();
-
-            if (ADK.ADKApp.currentScreen.patientRequired === true) {
-                this.fetchDataStatus();
-            }
+            this.initInterval = 5000; // 5 seconds
+            this.syncCompInterval = 1000 * 60 * 10; // every 10 minutes after sync is completed
+            this.syncCompleted = false;
+            this.syncStatusDetail = undefined;
+            this.diffDetail = undefined;
         },
-        onRender: function() {
-            this.$el.find('.patient-status-icon').tooltip({
-                'delay': 500
+
+        onDomRefresh: function() {
+            this.ui.syncIcons.tooltip({
+                'delay': {
+                    'show': 500,
+                },
+                'trigger': 'hover focus'
             });
         },
-        events: {
-            'click #refresh-patient-data': 'refreshStatus',
-            'keypress #refresh-patient-data': 'refreshStatus',
-            'click #open-sync-modal': 'showSyncModal'
+        onShow: function() {
+            // console.log("patientSyncView onShow is called!");
+            this.startAutoPolling();
         },
-
+        onDestroy: function() {
+            // console.log("patientSyncView onDestroy is called!");
+            this.stopAutoPolling();
+        },
+        startAutoPolling: function() {
+            this.resetTimeInterval();
+        },
+        resetTimeInterval: function(timeInterval) {
+            /** do not restart the interval if the same **/
+            if (timeInterval && this.timeInterval && timeInterval === this.timeInterval && this.handle) {
+                return;
+            }
+            if (!timeInterval || timeInterval <= this.initInterval) {
+                this.timeInterval = this.initInterval;
+            } else {
+                this.timeInterval = timeInterval;
+            }
+            this.stopAutoPolling();
+            this.handle = setInterval(_.bind(this.updatePatientSyncStatus, this), this.timeInterval);
+        },
+        stopAutoPolling: function() {
+            if (this.handle) {
+                clearInterval(this.handle);
+                this.handle = undefined;
+            }
+        },
+        modelEvents: {
+            'change:syncStatus': 'render',
+        },
+        events: {
+            'click @ui.refreshButton': 'refreshStatus',
+            'keypress @ui.refreshButton': 'refreshStatus',
+            'click @ui.syncDetailsButton': 'showSyncModal'
+        },
         // New Modal Event that opens on the click of the calendar icon in the bottom right of the footer.
         // Calls a new JSON that determines the new model of all the items.
         // this model is CURRENTLY NOT DONE.
         // IT IS MOCKED ONLY.
         showSyncModal: function(event) {
             event.preventDefault(); //prevent the page from jumping back to the top
-
-            var view = new SyncModalView();
-
-            // According to Roph and the wireframes there should be no footer on this modal.
-            // However according to Josh Bell we should use the ADK.modal.
-            // This seems conflicting.
-            // This template part was an attempt to pass in an empty footer.  Did not work.
-            // Not sure what to do to remove the footer.  Maybe if we can get an ID on the whole modal window and use CSS to hide the footer??
-            // template: _.template(""),
-
-            var buttonView = Backbone.Marionette.ItemView.extend({
-                template: _.template(""),
-                events: {
-                    'click #hideModal':'hideAllModals'
-                },
-                hideAllModals : function(){
-                    ADK.hideModal();
-                }
+            var self = this;
+            var view = new SyncModalView({
+                parentView: self
             });
-            // This is the currently mocked sync data.
-            // It's totally made up on my end.
-            // 100% chance this will change.
-/*            view.model.set('syncStatus', [
-                {
-                    'domains': [
-                        {
-                            'title': 'Active Medications',
-                            'mySite': {
-                                'status': 'Up to Date',
-                                'lastSynced': '1d ago',
-                                'current': true
-                            },
-                            'allVa': {
-                                'status': 'Problem Detected',
-                                'lastSynced': '1d ago',
-                                'problem': true
-                            },
-                            'dod': {
-                                'status': 'Up to Date',
-                                'lastSynced': '1d ago',
-                                'current': true
-                            },
-                            'communities': {
-                                'status': 'New Data Available',
-                                'lastSynced': '1d ago',
-                                'newData': true
-                            }
-                        }, {
-                            'title': 'Active Problems',
-                            'mySite': {
-                                'status': 'Sync in Progress',
-                                'lastSynced': '1d ago',
-                                'inProgress': true
-                            },
-                            'allVa': {
-                                'status': 'Up to Date',
-                                'lastSynced': '1d ago',
-                                'current': true
-                            },
-                            'dod': {
-                                'status': 'Up to Date',
-                                'lastSynced': '1d ago',
-                                'current': true
-                            },
-                            'communities': {
-                                'status': 'Up to Date',
-                                'lastSynced': '1d ago',
-                                'current': true
-                            }
-                        }, {
-                            'title': 'Allergies',
-                            'mySite': {
-                                'status': 'Up to Date',
-                                'lastSynced': '1d ago',
-                                'current': true
-                            },
-                            'allVa': {
-                                'status': 'Up to Date',
-                                'lastSynced': '1d ago',
-                                'current': true
-                            },
-                            'dod': {
-                                'status': 'Up to Date',
-                                'lastSynced': '1d ago',
-                                'current': true
-                            },
-                            'communities': {
-                                'status': 'Up to Date',
-                                'lastSynced': '1d ago',
-                                'current': true
-                            }
-                        }
-                    ]
-                }
-            ]);*/
             var modalOptions = {
-                'title': 'Data Refresh Status by Domains',
-                'size': "large"
+                'title': 'eHMP Data Sources',
+                'size': 'large',
+                'footerView': SyncModalFooterView.getFooterView(view, self)
             };
-            ADK.showModal(view, modalOptions);
+            var modal = new ADK.UI.Modal({
+                view: view,
+                options: modalOptions
+            });
+            modal.show();
         },
-
-
+        syncAllData: function(refresh) {
+            // console.log('syncAllData is called!');
+            var self = this;
+            var fetchOptions = {
+                resourceTitle: 'synchronization-loadForced',
+                criteria: {
+                    forcedSite: true
+                },
+                cache: false,
+                onSuccess: function(collection, resp) {
+                    self.updatePatientSyncStatus(refresh);
+                    return;
+                },
+                onError: function(collection, resp) {
+                    self.updatePatientSyncStatus(refresh);
+                    return;
+                }
+            };
+            ADK.PatientRecordService.fetchCollection(fetchOptions);
+        },
+        updatePatientSyncStatus: function(refresh) {
+            if (SessionStorage.get.sessionModel('patient') && ADK.ADKApp.currentScreen.patientRequired === true) {
+                var curPatient = SessionStorage.get.sessionModel('patient').get('icn');
+                if (curPatient != this.curPatient) {
+                    this.curPatient = curPatient;
+                    this.clearCache();
+                }
+                this.fetchDataStatus(refresh);
+            } else {
+                this.model.unset('syncStatus');
+            }
+        },
         refreshStatus: function() {
-            this.fetchDataStatus(true);
+            this.refreshPage();
+            this.syncAllData(true);
         },
         refreshPage: function() {
-            ADK.ResourceService.clearAllCache();
-            ADK.ADKApp.execute('screen:display', ADK.ADKApp.currentScreen.id);
+            ResourceService.clearAllCache();
+            ADK.ADKApp.execute('screen:display', Messaging.request('get:current:screen').id);
+        },
+        clearCache: function() {
+            this.syncStatusDetail = undefined;
+            this.diffDetail = {};
         },
         fetchDataStatus: function(refresh) {
             if (!refresh) {
                 refresh = false;
+            } else {
+                this.clearCache();
             }
             var oldStats = this.model.get('syncStatus');
             this.model.set('syncStatus', [{
                 'title': 'My Site',
+                'hoverTip': tooltipMappings.patientSync_mySite
             }, {
                 'title': 'All VA',
-            }, {
-                'title': 'External',
+                'hoverTip': tooltipMappings.patientSync_allVA
             }, {
                 'title': 'DoD',
+                'hoverTip': tooltipMappings.patientSync_DoD
+            }, {
+                'title': 'Communities',
+                'hoverTip': tooltipMappings.patientSync_community
             }]);
-            this.render();
             var fetchOptions = {
                 resourceTitle: 'synchronization-datastatus',
                 cache: false
@@ -173,56 +224,252 @@ function onResolveDependencies(Backbone, Marionette, _, ADK, moment, PatientSync
             fetchOptions.onError = function(collection, resp) {
                 var stats = [{
                     'title': 'My Site',
-                    'completed': 'error'
+                    'completed': 'error',
+                    'hoverTip': tooltipMappings.patientSync_mySite
                 }, {
                     'title': 'All VA',
-                    'completed': 'error'
-                }, {
-                    'title': 'External',
-                    'completed': 'error'
+                    'completed': 'error',
+                    'hoverTip': tooltipMappings.patientSync_allVA
                 }, {
                     'title': 'DoD',
-                    'completed': 'error'
+                    'completed': 'error',
+                    'hoverTip': tooltipMappings.patientSync_DoD
+                }, {
+                    'title': 'Communities',
+                    'completed': 'error',
+                    'hoverTip': tooltipMappings.patientSync_community
                 }];
+                this.$('.tooltip').tooltip('hide');
                 self.model.set('syncStatus', stats);
-                self.render();
             };
             fetchOptions.onSuccess = function(collection, resp) {
-                var currentSiteCode = ADK.SessionStorage.get.sessionModel('user').get('site');
-                var statusObject = self.status.models[0].attributes;
-                if (_.isUndefined(statusObject.DOD)) {
-                    statusObject.DOD = true;
+                // console.log('fetchOptions::onSucess is called!');
+                var currentSiteCode = SessionStorage.get.sessionModel('user').get('site');
+                var statusObject = resp.data;
+                var stats = [];
+                if (statusObject.VISTA) {
+                    if (statusObject.VISTA[currentSiteCode]) {
+                        var curSite = statusObject.VISTA[currentSiteCode];
+                        var completedStatus = curSite.hasError ? 'error' : curSite.isSyncCompleted;
+                        var statInfo = {
+                            title: 'My Site'
+                        };
+                        statInfo.completed = completedStatus;
+                        // if (statInfo.completed === true && curSite.completedStamp) {
+                        //     statInfo.timeStamp = ADK.utils.getTimeSince(curSite.completedStamp.toString(), false).timeSince;
+                        // }
+                        statInfo.hoverTip = tooltipMappings.patientSync_mySite;
+                        stats.push(statInfo);
+                    }
                 }
-                if (_.isUndefined(statusObject.CDS)) {
-                    statusObject.CDS = true;
+                if (statusObject.VISTA || statusObject.CDS || statusObject.HDR) {
+                    var allVASite = {};
+                    if (statusObject.VISTA) {
+                        allVASite = _.clone(statusObject.VISTA);
+                    }
+                    if (statusObject.HDR) {
+                        allVASite.HDR = statusObject.HDR;
+                    }
+                    // push All VA
+                    var allVA = {
+                        title: 'All VA'
+                    };
+                    var hasError = _.find(allVASite, function(elem) {
+                        return elem.hasError && elem.hasError === true;
+                    });
+                    if (hasError) {
+                        allVA.completed = 'error';
+                        allVA.timeStamp = moment().format('MM/DD/YYYY HH:mm');
+                    } else {
+                        allVA.completed = _.every(_.pluck(allVASite, 'isSyncCompleted'));
+                        if (allVA.completed && statusObject.HDR) {
+                            allVA.timeStamp = self.getSecondarySiteTimeSince(statusObject.HDR.completedStamp.toString());
+                        }
+                    }
+                    allVA.hoverTip = tooltipMappings.patientSync_allVA;
+                    stats.push(allVA);
                 }
-                var stats = [{
-                    'title': 'My Site',
-                    'completed': statusObject.VISTA && statusObject.VISTA[currentSiteCode] || false,
-                    'timeStamp': moment().format('MM/DD/YYYY HH:mm')
-                }, {
-                    'title': 'All VA',
-                    'completed': statusObject.VISTA && _.every(_.values(statusObject.VISTA)) && statusObject.CDS || false,
-                    'timeStamp': moment().format('MM/DD/YYYY HH:mm')
-                }, {
-                    'title': 'External',
-                    'completed': _.every(_.values(_.omit(statusObject, 'VISTA', 'DOD', 'allSites', 'CDS'))),
-                    'timeStamp': moment().format('MM/DD/YYYY HH:mm')
-                }, {
-                    'title': 'DoD',
-                    'completed': statusObject.DOD,
-                    'timeStamp': moment().format('MM/DD/YYYY HH:mm')
-                }];
-                if (refresh && (_.pluck(oldStats, 'completed').equals(_.pluck(stats, 'completed')) === false)) {
-                    self.refreshPage();
+                if (statusObject.DOD) {
+                    var dodStat = statusObject.DOD;
+                    var isComplete = dodStat.hasError ? 'error' : dodStat.isSyncCompleted;
+                    var timeStamp = dodStat.completedStamp ? self.getSecondarySiteTimeSince(dodStat.completedStamp.toString()) :
+                        moment().format('MM/DD/YYYY HH:mm');
+                    stats.push({
+                        title: 'DoD',
+                        completed: isComplete,
+                        timeStamp: timeStamp,
+                        hoverTip: tooltipMappings.patientSync_DoD
+                    });
+                }
+                if (statusObject.VLER) {
+                    var vlerStat = statusObject.VLER;
+                    var isVlerComplete = vlerStat.hasError ? 'error' : vlerStat.isSyncCompleted;
+                    var vlerTimeStamp = vlerStat.completedStamp ? self.getSecondarySiteTimeSince(vlerStat.completedStamp.toString()) :
+                        moment().format('MM/DD/YYYY HH:mm');
+                    stats.push({
+                        title: 'Communities',
+                        completed: isVlerComplete,
+                        timeStamp: vlerTimeStamp,
+                        hoverTip: tooltipMappings.patientSync_community
+                    });
+                }
+
+                if (statusObject.allSites != self.syncCompleted) {
+                    var newInterval = statusObject.allSites ? self.syncCompInterval : self.initInterval;
+                    console.log('new interval: ' + newInterval);
+                    self.resetTimeInterval(newInterval);
+                }
+                self.syncCompleted = statusObject.allSites;
+                if (statusObject.allSites) {
+                    self.fetchSyncStatusDetail(refresh, stats);
                 } else {
-                    setTimeout(function() {
-                        self.model.set('syncStatus', stats);
-                        self.render();
-                    }, 500);
+                    self.updateSyncStats(stats);
                 }
             };
-            this.status = ADK.PatientRecordService.fetchCollection(fetchOptions);
+            ADK.PatientRecordService.fetchCollection(fetchOptions);
+        },
+        updateSyncStats: function(stats) {
+            var self = this;
+            setTimeout(function() {
+                if (!_.isEmpty(self.diffDetail)) {
+                    self.addNewDataSince(stats);
+                }
+                self.model.set('syncStatus', stats);
+                if (!self.isDestroyed) {
+                    self.render();
+                }
+            }, 500);
+        },
+        fetchSyncStatusDetail: function(refresh, stats) {
+            // console.log('fetchSyncStatusDetail called');
+            var fetchOptions = {
+                resourceTitle: 'synchronization-syncStatusDetail',
+                cache: false
+            };
+            var self = this;
+            fetchOptions.onError = function(collection, resp) {
+                var stats = [{
+                    'title': 'My Site',
+                    'completed': 'error',
+                    'hoverTip': tooltipMappings.patientSync_mySite
+                }, {
+                    'title': 'All VA',
+                    'completed': 'error',
+                    'hoverTip': tooltipMappings.patientSync_allVA
+                }, {
+                    'title': 'DoD',
+                    'completed': 'error',
+                    'hoverTip': tooltipMappings.patientSync_DoD
+                }, {
+                    'title': 'Communities',
+                    'completed': 'error',
+                    'hoverTip': tooltipMappings.patientSync_community
+                }];
+                self.model.set('syncStatus', stats);
+            };
+            fetchOptions.onSuccess = function(collection, resp) {
+                // console.log('fetchSyncStatusDetail: Success!');
+                var newSyncStatus = resp.data;
+                if (_.isUndefined(self.syncStatusDetail)) {
+                    self.syncStatusDetail = newSyncStatus;
+                } else {
+                    // found out the difference for VistA site only
+                    self.generateSyncDetailDiff(newSyncStatus);
+                }
+                self.updateSyncStats(stats);
+            };
+            ADK.PatientRecordService.fetchCollection(fetchOptions);
+        },
+        generateSyncDetailDiff: function(newSyncStatus) {
+            // assumption, all status is sync completed
+            var self = this;
+            self.diffDetail = {};
+            var oldSources = self.syncStatusDetail.completedStamp.sourceMetaStamp;
+            var newSources = newSyncStatus.completedStamp.sourceMetaStamp;
+            _.each(newSources, function(value, site) {
+                // ignore all secondary sites
+                if (site.toUpperCase() === 'DOD' ||
+                    site.toUpperCase() === 'VLER' ||
+                    site.toUpperCase() === 'HDR') {
+                    return;
+                }
+                // check domains
+                if (_.isUndefined(oldSources[site])) {
+                    self.diffDetail[site] = self.diffDetail[site] || {};
+                    self.diffDetail[site].newDataSince = value.domainMetaStamp.stampTime;
+                    return;
+                }
+                var newDomains = value.domainMetaStamp;
+                var oldDomains = oldSources[site].domainMetaStamp;
+                _.each(newDomains, function(val, domain) {
+                    if (_.isUndefined(oldDomains[domain])) {
+                        self.diffDetail[site] = self.diffDetail[site] || {};
+                        self.diffDetail[site].domain = self.diffDetail[site].domain || {};
+                        self.diffDetail[site].domain[domain] = val.eventMetaStamp.stampTime;
+                        return;
+                    }
+                    self.compareIndividualDomain(oldDomains[domain].eventMetaStamp, val.eventMetaStamp, site, domain);
+                });
+            });
+            self.updateDiffDetails();
+        },
+        compareIndividualDomain: function(oldDomainData, newDomainData, site, domain) {
+            //console.log(unionKeys);
+            var self = this;
+            _.each(newDomainData, function(value, key) {
+                if (_.isUndefined(oldDomainData[key])) {
+                    // console.log('key ' + key + ' added!');
+                    self.diffDetail[site] = self.diffDetail[site] || {};
+                    self.diffDetail[site].domain = self.diffDetail[site].domain || {};
+                    self.diffDetail[site].domain[domain] = value.stampTime;
+                } else if (newDomainData[key].stampTime != oldDomainData[key].stampTime) {
+                    // console.log('key ' + key + " changed");
+                    self.diffDetail[site] = self.diffDetail[site] || {};
+                    self.diffDetail[site].domain = self.diffDetail[site].domain || {};
+                    if (_.isUndefined(self.diffDetail[site].domain[domain])) {
+                        self.diffDetail[site].domain[domain] = value.stampTime;
+                    } else if (self.diffDetail[site].domain[domain] > value.stampTime) {
+                        self.diffDetail[site].domain[domain] = value.stampTime;
+                    }
+                }
+            });
+        },
+        updateDiffDetails: function() { // update the diffDetail information.
+            // console.log(this.diffDetail);
+            if (this.diffDetail) {
+                var self = this;
+                _.each(self.diffDetail, function(siteVal, site) {
+                    if (siteVal.domain) {
+                        var newDataSince = _.min(_.values(siteVal.domain));
+                        if (siteVal.newDataSince) {
+                            siteVal.newDataSince = _.min([newDataSince, siteVal.newDataSince]);
+                        } else {
+                            siteVal.newDataSince = newDataSince;
+                        }
+                    }
+                });
+            }
+        },
+        addNewDataSince: function(stats) {
+            if (_.isArray(stats) && stats.length === 0) {
+                return;
+            }
+            if (stats[0].title != 'My Site' && stats[0].title != 'All VA') { //return if no VistA sites
+                return;
+            }
+            // console.log(stats);
+            var vistASitesDiff = _.omit(this.diffDetail, ['DOD', 'VLER', 'HDR']);
+            var currentSiteCode = SessionStorage.get.sessionModel('user').get('site');
+            var allVATimeSince = _.min(_.map(vistASitesDiff, function(val, key) {
+                return val.newDataSince;
+            }));
+            if (vistASitesDiff[currentSiteCode]) {
+                stats[0].newDataSince = ADK.utils.getTimeSince(vistASitesDiff[currentSiteCode].newDataSince).timeSince;
+                stats[1].newDataSince = ADK.utils.getTimeSince(allVATimeSince).timeSince;
+            } else {
+                stats[0].newDataSince = ADK.utils.getTimeSince(allVATimeSince).timeSince;
+            }
+            // console.log(stats);
         }
     });
-};
+});

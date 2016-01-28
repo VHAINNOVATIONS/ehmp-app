@@ -1,4 +1,4 @@
-var dependencies = [
+define([
     'jquery',
     'underscore',
     'jquery.inputmask',
@@ -6,11 +6,7 @@ var dependencies = [
     'moment',
     'hbs!main/components/applets/grid_applet/templates/dateRangePickerTemplate',
     "api/SessionStorage"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, _, InputMask, DatePicker, moment, dateRangePickerTemplate, SessionStorage) {
+], function($, _, InputMask, DatePicker, moment, dateRangePickerTemplate, SessionStorage) {
     'use strict';
 
 
@@ -32,6 +28,16 @@ function onResolveDependencies($, _, InputMask, DatePicker, moment, dateRangePic
             }
         },
         monitorCustomDateRange: function(event) {
+
+            if(event.currentTarget.id === 'filter-from-date-' + this.options.appletId){
+                var customFromDateStr = this.$el.find('#filter-from-date-' + this.options.appletId).val();
+                var customFromDate = moment(customFromDateStr, 'MM/DD/YYYY', true);    
+
+                if (customFromDate.isValid()) {
+                    this.$('.input-group.date#custom-date-range2-' + this.options.appletId).datepicker('setStartDate', customFromDateStr);                                
+                }                
+            }
+
             if (this.checkCustomRangeCondition()) {
                 this.$el.find('#custom-range-apply-' + this.options.appletId).removeAttr('disabled');
             } else {
@@ -40,21 +46,31 @@ function onResolveDependencies($, _, InputMask, DatePicker, moment, dateRangePic
         },
         checkCustomRangeCondition: function() {
             var hasCustomRangeValuesBeenSetCorrectly = false;
-            var filterFromDate = this.$el.find('#filter-from-date-' + this.options.appletId).val();
-            var filterToDate = this.$el.find('#filter-to-date-' + this.options.appletId).val();
+            var filterFromDateStr = this.$el.find('#filter-from-date-' + this.options.appletId).val();
+            var filterToDateStr = this.$el.find('#filter-to-date-' + this.options.appletId).val();
+            var filterFromDate = moment(filterFromDateStr, 'MM/DD/YYYY', true);
+            var filterToDate = moment(filterToDateStr, 'MM/DD/YYYY', true);                    
 
-            if (moment(filterFromDate, 'MM/DD/YYYY', true).isValid() && moment(filterToDate, 'MM/DD/YYYY', true).isValid()) {
-                hasCustomRangeValuesBeenSetCorrectly = true;
+            if(filterFromDate.isValid() && filterToDate.isValid()) {
+                if (filterToDate < filterFromDate) {
+                    this.$el.find('#filter-to-date-' + this.options.appletId).tooltip({placement: 'bottom'}).tooltip('show').val('');
+                    hasCustomRangeValuesBeenSetCorrectly = false;
+                }else{
+                    $('#filter-to-date-' + this.options.appletId).tooltip('destroy');                                        
+                    hasCustomRangeValuesBeenSetCorrectly = true;
+                }
             }
 
             return hasCustomRangeValuesBeenSetCorrectly;
         },
         enableDatePickers: function() {
             this.$('.input-group.date#custom-date-range1-' + this.options.appletId).datepicker({
-                format: 'mm/dd/yyyy'
+                format: 'mm/dd/yyyy',
+                autoclose: true
             });
             this.$('.input-group.date#custom-date-range2-' + this.options.appletId).datepicker({
-                format: 'mm/dd/yyyy'
+                format: 'mm/dd/yyyy',
+                autoclose: true
             });
             this.$('#filter-from-date-' + this.options.appletId).datepicker('remove');
             this.$('#filter-to-date-' + this.options.appletId).datepicker('remove');
@@ -184,4 +200,4 @@ function onResolveDependencies($, _, InputMask, DatePicker, moment, dateRangePic
     });
 
     return FilterDateRangeView;
-}
+});

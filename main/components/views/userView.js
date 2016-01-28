@@ -1,17 +1,13 @@
-var dependencies = [
+define([
     "backbone",
     "marionette",
     "underscore",
     "hbs!main/components/views/userTemplate",
-    "main/ADK"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, _, userTemplate, ADK) {
+    "api/UserService"
+], function(Backbone, Marionette, _, userTemplate, UserService) {
     'use strict';
     var userView = Backbone.Marionette.ItemView.extend({
-        model: ADK.UserService.getUserSession(),
+        model: UserService.getUserSession(),
         template: userTemplate,
         tagName: 'a',
         className: 'dropdown-toggle',
@@ -20,4 +16,4 @@ function onResolveDependencies(Backbone, Marionette, _, userTemplate, ADK) {
         }
     });
     return userView;
-}
+});

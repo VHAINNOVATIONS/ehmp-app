@@ -1,0 +1,1 @@
+define(["app/applets/medication_review_v2/views/appletView","app/applets/medication_review_v2/detailController/detailController"],function(e,i){var a={id:"medication_review_v2",hasCSS:!0,viewTypes:[{type:"expanded",view:e,chromeEnabled:!0}],defaultViewType:"expanded"};return i.initialize(a.id),a});

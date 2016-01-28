@@ -1,7 +1,6 @@
-var dependencies = [
+define([
     "jquery",
     "underscore",
-    "main/ADK",
     "backbone",
     "hbs!main/components/views/appletViews/pillsGistView/templates/pillGistLayout",
     "hbs!main/components/views/appletViews/pillsGistView/templates/pillGistChild",
@@ -10,10 +9,7 @@ var dependencies = [
     "api/Messaging"
 
 
-];
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, _, ADK, Backbone, pillGistLayoutTemplate, pillGistChildTemplate, PopoverTemplate, ResourceService, Messaging) {
+], function($, _, Backbone, pillGistLayoutTemplate, pillGistChildTemplate, popoverTemplate, ResourceService, Messaging) {
     'use strict';
     var PillGistItem = Backbone.Marionette.ItemView.extend({
         template: pillGistChildTemplate,
@@ -22,41 +18,43 @@ function onResolveDependencies($, _, ADK, Backbone, pillGistLayoutTemplate, pill
             'click button#closeGist': function(event) {
                 event.preventDefault();
                 event.stopImmediatePropagation();
-                $(this.el).find('.sub-elements').hide();
+                this.$('.sub-elements').hide();
             },
             'click button.groupItem': function(event) {
                 event.preventDefault();
                 event.stopImmediatePropagation();
             },
             'hover div.gistItem': function(event) {
-                var gistID = $(event.target).attr('id');
-                $('#' + gistID).blur();
+                this.$(event.target).blur();
             },
             'focus div.gistItem': function(event) {
-                var gistItem = $(document.activeElement);
-                gistItem.keypress(function(e) {
+                this.$('[data-toggle=popover]').keypress(function(e) {
                     if (e.which === 13 || e.which === 32) {
                         gistItem.trigger('click');
                     }
                 });
             },
             'click div.gistItem': function(event) {
-                $('[data-toggle=popover]').popover('hide');
-                //$(this.el).find('[data-toggle="tooltip"]').tooltip('hide');
-                console.log(this.collection);
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                var currentPatient = ResourceService.patientRecordService.getCurrentPatient();
-                var channelObject = {
-                    collection: this.collection,
-                    model: this.model,
-                    uid: this.model.get("uid"),
-                    patient: {
-                        icn: currentPatient.attributes.icn,
-                        pid: currentPatient.attributes.pid
+                this.$('[data-toggle=popover]').popover('hide');
+
+                ADK.utils.infoButtonUtils.onClickFunc(this, event, baseClickGistItem);
+
+                function baseClickGistItem(that, event) {
+                        console.log(that.collection);
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                        var currentPatient = ResourceService.patientRecordService.getCurrentPatient();
+                        var channelObject = {
+                            collection: that.collection,
+                            model: that.model,
+                            uid: that.model.get("uid"),
+                            patient: {
+                                icn: currentPatient.attributes.icn,
+                                pid: currentPatient.attributes.pid
+                            }
+                        };
+                        Messaging.getChannel(that.AppletID).trigger('getDetailView', channelObject);
                     }
-                };
-                Messaging.getChannel(this.AppletID).trigger('getDetailView', channelObject);
             }
 
         },
@@ -64,21 +62,19 @@ function onResolveDependencies($, _, ADK, Backbone, pillGistLayoutTemplate, pill
             this.AppletID = options.AppletID;
         },
         setPopover: function() {
-            var PopoverView = Backbone.Marionette.ItemView.extend({
-                template: PopoverTemplate
-            });
-            this.$el.find('[data-toggle=popover]').popover({
+            this.$('[data-toggle=popover]').popover({
                 trigger: 'hover',
                 html: 'true',
                 container: 'body',
-                template: (new PopoverView().template()),
+                template: popoverTemplate(this.model),
                 placement: 'bottom',
-            }).hover(function() {
-                $('[data-toggle=popover]').not(this).popover('hide');
             });
         },
         onRender: function() {
             this.setPopover();
+        },
+        onDestroy: function(){
+            this.$('[data-toggle=popover]').popover('destroy');
         }
     });
     var PillGist = Backbone.Marionette.CompositeView.extend({
@@ -88,7 +84,6 @@ function onResolveDependencies($, _, ADK, Backbone, pillGistLayoutTemplate, pill
             template: _.template('<div class="emptyGistList">No Records Found</div>')
         }),
         initialize: function(options) {
-            this._super = Backbone.Marionette.CompositeView.prototype;
             var appletID = getAppletId(options);
             this.childViewOptions = {
                 AppletID: appletID,
@@ -105,7 +100,6 @@ function onResolveDependencies($, _, ADK, Backbone, pillGistLayoutTemplate, pill
             this.model = new Backbone.Model();
             this.model.set('appletID', appletID);
             this.childViewContainer = "#" + appletID + "-pill" + "-gist-items";
-            this._super = Backbone.Marionette.CompositeView.prototype;
         },
         onBeforeRender: function() {
             this.collection.reset(this.collectionParser(this.collection).models);
@@ -116,12 +110,6 @@ function onResolveDependencies($, _, ADK, Backbone, pillGistLayoutTemplate, pill
                     item.set(object.id, item.get(object.field));
                 });
             }, this);
-        },
-        render: function() {
-            this._super.render.apply(this, arguments);
-        },
-        onStop: function() {
-            $('.pillPopover').popover('hide');
         }
     });
 
@@ -140,4 +128,4 @@ function onResolveDependencies($, _, ADK, Backbone, pillGistLayoutTemplate, pill
     };
 
     return PillGistView;
-}
+});

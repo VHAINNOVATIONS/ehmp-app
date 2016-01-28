@@ -1,21 +1,18 @@
-var dependencies = [
+define([
     'backbone',
     'marionette',
     'moment',
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Marionette, moment) {
+], function(Backbone, Marionette, moment) {
 
 
     return {
 
         allEventsChartStyles: {
             chart: {
-                backgroundColor: '#263238',
-                height: 90,
+                backgroundColor: '#001924',
+                height: 125,
                 width: 682,
+                marginTop: 35,
                 marginBottom: 25,
                 events: {
                     selection: $.noop
@@ -26,67 +23,57 @@ function onResolveDependencies(Backbone, Marionette, moment) {
                 spacingRight: 20
 
             },
+            legend: {
+                align: 'left',
+                verticalAlign: 'top',
+                reversed: true,
+                floating: true,
+                width: 0,
+                y: -12,
+                color: '#FFFFFF'
+            },
+            series: [{
+                color: '#9acf09'
+            }, {
+                color: '#8ADDFF'
+
+                /**{
+                    pattern: '_assets/img//outpatient-diag-pat.svg',
+                    width: 5,
+                    height: 5
+                }**/
+            }],
             title: {
                 text: null
             },
             xAxis: {
-                lineWidth: 1,
-                lineColor: '#BFCAD0',
+                labels: {
+                    style: {
+                        color: '#FFFFFF'
+                    }
+                },
+                lineWidth: 2,
+                lineColor: '#888888',
                 plotLines: [{
                     color: '#FF0000',
                     width: 2,
                     value: moment().valueOf(),
                     zIndex: 99
                 }]
-            }
-        },
-
-        selectedEventsChartStyles: {
-            chart: {
-                backgroundColor: '#F2F2F2',
-                events: {
-                    selection: $.noop,
-                    redraw: function() {
-                        var self = this;
-
-                        $('.selectedActivitiesTitle ').html('Selected Events');
-                    }
-                },
-                height: 90,
-                width: 682,
-                marginBottom: 25,
-                zoomType: '',
-            },
-            title: {
-                text: null
-            },
-            series: [{
-                color: '#A28CD1'
-            }, {
-                color: '#2270C3'
-            }],
-            xAxis: {
-                lineWidth: 1,
-                lineColor: '#616161',
-                labels: {
-                    style: {
-                        "color": "#616161"
-                    }
-                }
-
             },
             plotOptions: {
                 column: {
-                    stacking: 'normal',
                     borderColor: '#000000',
-                    pointWidth: 20 //default, changes dynamically
+                    borderWidth: 1,
+                    pointWidth: 4
                 },
-                series: {}
-            },
-            tooltip: {
-                enabled: true,
-                xDateFormat: '%b %Y',
-                shared: true
+                series: {
+                    events: {
+                        legendItemClick: function(){
+                            return false;
+                        }
+                    }
+                }
             }
         },
 
@@ -97,22 +84,32 @@ function onResolveDependencies(Backbone, Marionette, moment) {
                     selection: $.noop
                 },
                 margin: [0, 0, 0, 0],
-                backgroundColor: '#182024',
-                height: 34,
+                backgroundColor: '#001924',
+                height: 25,
                 width: 400
+            },
+            legend: {
+                enabled: false,
             },
             plotOptions: {
                 column: {
                     stacking: 'normal',
-                    pointWidth: 8, //default, changes dynamically
-                    borderWidth: 0
+                    pointWidth: 6, //default, changes dynamically
+                    borderWidth: 1,
+                    borderColor: '#000000'
                 }
             },
 
             series: [{
-                color: '#A28CD1'
+                color: '#9acf09'
             }, {
-                color: '#2270C3'
+                color: '#8ADDFF'
+
+                /**{
+                    pattern: '_assets/img//outpatient-diag-pat.svg',
+                    width: 5,
+                    height: 5
+                }**/
             }],
             xAxis: {
                 labels: {
@@ -134,8 +131,16 @@ function onResolveDependencies(Backbone, Marionette, moment) {
                 }
             },
             tooltip: {
-                enabled: false
+                positioner: function() {
+                    return {
+                        y: 40
+                    };
+                },
+                dateTimeLabelFormats: {
+                    year: '%Y'
+                },
+                shared: true
             }
         }
     };
-}
+});

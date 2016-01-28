@@ -1,0 +1,67 @@
+<div id='note-preview-body' class='container-fluid'>
+	<div class='row'>
+		<div class='col-sm-10'></div>
+		<div class='col-sm-2'>
+			<button id="note-preview-edit-btn" type="button" title="Edit" role="button" class="btn btn-default btn-sm">
+				<span class="sr-only">Edit</span>
+				<i class="fa fa-pencil"></i>
+			</button>
+		</div>
+	</div>
+	<div class='row'>
+		<div class='col-sm-12' id='note-preview-title'>
+			{{#if localTitle}}
+				{{localTitle}}
+			{{else}}
+				&lt;No Title&gt;
+			{{/if}}
+		</div>
+	</div>
+	<div class='row'>
+		<div class='col-sm-12' id='note-preview-datetime'>
+			{{#if referenceDateTime}}
+				{{formatDateTime referenceDateTime 'YYYYMMDDHHmmssSSS' 'datetime'}}
+			{{else}}
+				&lt;No Date&gt;
+			{{/if}}
+		</div>
+	</div>
+	<div class='row'>
+		<div class='col-sm-12' id='note-preview-encounter'>{{encounterDisplayName}}</div>
+	</div>
+	<div class='row'>
+		<div class='col-sm-9' id='note-preview-author'>{{author}}</div>
+		<div class='col-sm-3' id='note-preview-status'>{{statusDisplayName}}</div>
+	</div>
+
+	<hr>
+
+	{{#compare app "vista"}}
+	<div class='row'>
+		{{#compare status "UNSIGNED"}}
+		<div class='col-sm-12 label-danger'>This is an Unsigned note created in CPRS.  Please edit the note in CPRS.</div>
+		{{/compare}}
+		{{#compare status "UNCOSIGNED"}}
+		<div class='col-sm-12 label-danger'>This is an Uncosigned note created in CPRS.  Please edit the note in CPRS.</div>
+		{{/compare}}
+	</div>
+	{{/compare}}
+
+	{{#if text}}
+	<div class='row'>
+		<pre class='col-sm-12 note-preview-content'>{{text.[0].content}}</pre>
+	</div>
+	{{/if}}
+
+	{{#if signedDateTime}}
+	<hr>
+	<div class='row'>
+		<div class='col-sm-12' id='note-preview-signature-date'>
+			Signed: {{formatDateTime signedDateTime 'YYYYMMDDHHmmssSSS' 'datetime'}}
+		</div>
+		<div class='col-sm-12' id='note-preview-signer'>
+			By: {{signerDisplayName}}
+		</div>
+	</div>
+	{{/if}}
+</div>

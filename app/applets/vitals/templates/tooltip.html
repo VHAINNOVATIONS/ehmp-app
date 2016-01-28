@@ -1,63 +1,58 @@
 <table id='{{uid}}' class='table table-condensed'>
     <thead>
         <tr class='row'>
-            <th>Name</th>
-            <th>Value</th>
+            <th>Date</th>
+            <th>Result</th>
             <th>Ref. Range</th>
-            <th>Observed</th>
+            <th>Facility</th>
         </tr>
     </thead>
-    <tbody><tr class='row'>
-        {{#if vitalsTypeName}}
-            <td>{{vitalsTypeName}}</td>
-            {{else}}
-                {{#if typeName}}
-                <td>{{typeName}}</td>
+    <tbody>
+        <tr class='row'>
+                {{#if observedFormatted}}
+                    <td>{{observedFormatted}}</td>
                 {{else}}
-                <td>{{displayName}}</td>
+                    <td>N/A</td>
                 {{/if}}
-        {{/if}}
-        {{#if resultUnitsMetricResultUnits}}
-            <td>{{resultUnitsMetricResultUnits}}</td>
-            {{else}}
-            <td>N/A</td>
-            {{/if}}
-        {{#ifExp this.low '===' 0}}
-            <td>{{low}} {{units}} {{#if high}} - {{high}} {{units}} {{/if}}</td>
-            {{else}}
-            {{#if low}}
-                <td>{{low}}{{units}} {{#if high}} - {{high}}{{units}} {{/if}}</td>
+                {{#if result}}
+                    <td>{{result}}{{#if units}} {{units}}{{/if}}{{#if metricResult}} ({{metricResult}}{{#if metricUnits}} {{metricUnits}}{{/if}}){{/if}}</td>
                 {{else}}
-                <td>N/A</td>
-            {{/if}}
-        {{/ifExp}}
-        {{#if observedFormatted}}
-            <td>{{observedFormatted}}</td>
-            {{else}}
-            <td>N/A</td>
-        {{/if}}
-    </tr>
-    {{#if isWT}}
-    <tr class='row'>
-        {{#if bmiTypeName}}
-            <td>{{bmiTypeName}}</td>
-            {{else}}
-            <td>{{bmiDisplayName}}</td>
-        {{/if}}
-        <td>
-        {{bmiValue}} {{bmiUnits}} {{#if bmiMetricUnits}} / {{bmiMetricUnits}} {{/if}}
-        </td>
-        {{#if bmiReferenceRange}}
-            <td>{{bmiReferenceRange}}</td>
-            {{else}}
-            <td>N/A</td>
-            {{/if}}
-        {{#if bmiObservedFormatted}}
-            <td>{{bmiObservedFormatted}}</td>
-            {{else}}
-            <td>N/A</td>
-        {{/if}}
-    </tr>
-    {{/if}}
+                    <td>N/A</td>
+                {{/if}}
+                {{#ifExp low '===' 0}}
+                    <td>{{low}} {{units}} {{#if high}} - {{high}} {{units}} {{/if}}</td>
+                {{else}}
+                    {{#if low}}
+                        <td>{{low}}{{units}} {{#if high}} - {{high}}{{units}} {{/if}}</td>
+                        {{else}}
+                        <td>N/A</td>
+                    {{/if}}
+                {{/ifExp}}
+                <td>{{facilityMoniker}}</td>
+        </tr>
+    {{#each limitedoldValues}}
+        <tr class='row'>
+                {{#if attributes.observedFormatted}}
+                    <td>{{attributes.observedFormatted}}</td>
+                {{else}}
+                    <td>N/A</td>
+                {{/if}}
+                {{#if attributes.result}}
+                    <td>{{attributes.result}}{{#if attributes.units}} {{attributes.units}}{{/if}}{{#if attributes.metricResult}} ({{attributes.metricResult}}{{#if attributes.metricUnits}} {{attributes.metricUnits}}{{/if}}){{/if}}</td>
+                {{else}}
+                    <td>N/A</td>
+                {{/if}}
+                {{#ifExp attributes.low '===' 0}}
+                    <td>{{attributes.low}} {{attributes.units}} {{#if attributes.high}} - {{attributes.high}} {{attributes.units}} {{/if}}</td>
+                {{else}}
+                    {{#if attributes.low}}
+                        <td>{{attributes.low}}{{attributes.units}} {{#if attributes.high}} - {{attributes.high}}{{attributes.units}} {{/if}}</td>
+                        {{else}}
+                        <td>N/A</td>
+                    {{/if}}
+                {{/ifExp}}
+                <td>{{attributes.facilityMoniker}}</td>
+        </tr>
+    {{/each}}
     </tbody>
 </table>

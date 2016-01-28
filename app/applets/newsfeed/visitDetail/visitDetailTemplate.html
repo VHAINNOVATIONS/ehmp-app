@@ -1,4 +1,11 @@
 <div class="container-fluid">
+ {{#if fError}}
+    <div class="row">
+      <div class="dataValue" tabindex="0" id="errorMsg">
+        {{errorMsg}}
+      </div>
+    </div> 
+  {{else}}
     <div class="row">
         <div class="col-xs-4 dataLabel" tabindex="0">Date</div>
         <div class="col-xs-8 dataValue" tabindex="0" id="dateTime">{{formatDate dateTime "MM/DD/YYYY - HH:mm"}}</div>
@@ -79,7 +86,25 @@
         {{/each}}
     </div>
     {{/if}}
-
+    
+    {{#if dischargeDiagnosis}}
+    <div class="row">
+        <div tabindex="0" class="sectionHeader" id="diagnosisSection">Discharge Diagnosis</div>
+        {{#each dischargeDiagnosis}}
+            <div class="row">
+                <div class="col-xs-offset-4">
+                    <div class="col-xs-6 dataValue" tabindex="0" id="diagnosisIcdName">
+                        {{#if icdName}}
+                            {{icdName}}
+                        {{else}}
+                            Unknown
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+        {{/each}}        
+    </div>      
+    {{/if}}
 
     {{#if movements}}
     <br/>
@@ -102,6 +127,47 @@
         {{/each}}
     </div>
     {{/if}}
-
+  
+    {{#if reasonName }}
+    <br/>
+    <div class="row">
+        <div tabindex="0" class="sectionHeader" id="movementSection">Reason</div>
+            <div class="row">
+                <div class="col-xs-offset-3">
+                    <div class="col-xs-9 dataValue" tabindex="0" id="reasonName">{{reasonName}}</div>
+                </div>
+            </div>
+    </div>  
+    {{/if}}
+   
+    {{#if cptInfo}}
+    <br/>
+    <div class="row">
+        <div tabindex="0" class="sectionHeader" id="cptSection">Procedures</div>
+            <div class="row">
+              <div class="col-xs-offset-1">
+                <div class="col-xs-2 dataLabelTable" tabindex="0">Date</div>
+                <div class="col-xs-5 dataLabelTable" tabindex="0">Name</div> 
+                <div class="col-xs-1 dataLabelTable" tabindex="0">Quantity</div> 
+                <div class="col-xs-3 dataLabelTable" tabindex="0">Comment</div>
+              </div>  
+            </div>      
+        {{#each cptInfo}}
+            <div class="row">
+              <div class="col-xs-offset-1">
+                <div class="col-xs-2 dataValue" tabindex="0" id="cptDateTime">{{formatDate entered}}</div>
+                <div class="col-xs-5 dataValue" tabindex="0" id="cptName">{{name}}</div> 
+                <div class="col-xs-1 dataValue" tabindex="0" id="cptQuantity">{{quantity}}</div> 
+                {{#if comment}}
+                 <div class="col-xs-3 dataValue" tabindex="0" id="cptComment">{{comment}}</div>
+                {{else}}
+                 <a class="sr-only">Blank</a>
+               {{/if}}
+              </div>  
+            </div>
+        {{/each}}
+    </div>
+    {{/if}}
+{{/if}}
 </div>
 

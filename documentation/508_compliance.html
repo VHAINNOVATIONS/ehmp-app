@@ -57,6 +57,7 @@
 			<li role="listitem"><a href="#alert" aria-hidden="true">Alerts<span class="sr-only">jump to alerts</span></a></li>
 			<li role="listitem"><a href="#accord" aria-hidden="true">Accordion<span class="sr-only">jump to accordion</span></a></li>
 			<li role="listitem"><a href="#other" aria-hidden="true">Other Components<span class="sr-only">jump to other components</span></a></li>
+			<li role="listitem"><a href="#custom" aria-hidden="true">Custom Components<span class="sr-only">jump to custom components</span></a></li>
 			<li role="listitem"><a href="#external" aria-hidden="true">External Links<span class="sr-only">jump to external links</span></a></li>
 		</ul>
 		<ul role="list" aria-label="Component examples">
@@ -123,11 +124,13 @@
 							</li>
 						</ul>
 					</p>
-					<div> <!-- this element is unecessary but all folowing elements need to maintain the proper order -->
+					<div id="normalTab">
+						<h5>STANDARD TAB</h5>
 						<!-- BEGIN TAB EXAMPLE -->
 						<!--
 							href="#tab[#]" and classes are required.  Contents of each tab div is not important.
 							No custom event or key handling should be used.
+							Order of this structure should be maintained.
 						-->
 						<ul id="myTab" class="nav nav-tabs">
 			        		<li class="active"><a href="#tab1" data-toggle="tab">TAB1</a></li>
@@ -145,6 +148,35 @@
 			          			<p>Contents of Tab #3</p>
 			        		</div>
 			    		</div>
+						<!-- END TAB EXAMPLE -->
+					</div>
+					<br/>
+					<div id="upsidedownTab">
+						<h5>REVERSED TAB</h5>
+						<p>
+							This is meant to demonstrate that the placemenet is not important.  However, it should be noted that this format is discouraged since the DOM order is illogical for keyboard navigation.  In general, actionable elements should be in the DOM before dynamic content.
+						</p>
+						<!-- BEGIN TAB EXAMPLE -->
+						<!--
+							href="#tab[#]" and classes are required.  Contents of each tab div is not important.
+							No custom event or key handling should be used.
+						-->
+						<div id="myUTabContent" class="tab-content">
+			        		<div class="tab-pane active" id="utab1">
+			          			<p><input role="search"/> Search for something</p>
+			        		</div>
+			    	    	<div class="tab-pane" id="utab2">
+			          			<p><button role="button" class="btn btn-default">DO SOMETHING</button></p>
+				        	</div>
+			    	    	<div class="tab-pane" id="utab3">
+			          			<p>Display something</p>
+			        		</div>
+			    		</div>
+						<ul id="myUTab" class="nav nav-tabs">
+			        		<li class="active"><a href="#utab1" data-toggle="tab">TAB 1</a></li>
+			    	    	<li><a href="#utab2" data-toggle="tab">TAB 2</a></li>
+				        	<li><a href="#utab3" data-toggle="tab">TAB 3</a></li>
+			    		</ul>
 						<!-- END TAB EXAMPLE -->
 					</div>
 					<br/><br/>
@@ -168,48 +200,47 @@
 							</li>
 						</ul>
 					</p>
-					<ul>
-						<li id="navdropdown">
-							<h5>DROPDOWN FOR NAV</h5>
-							<!-- BEGIN NAVIGATION DROPDOWN EXAMPLE -->
-							<div class="dropdown">
-	      						<a id="drop1" href="#" role="button" class="dropdown-toggle btn btn-default" data-toggle="dropdown" aria-expanded="true">Dropdown <b class="caret"></b></a> <!-- role, and data-toggle are crucial -->
-			      				<ul class="dropdown-menu" role="menu" aria-labelledby="drop1">
-						            <li><a href="#">Action</a></li> <!-- need to follow the structure -->
-						            <li><a href="#">Another action</a></li>
-						            <li><a href="#">And another action</a></li>
-						        </ul>
-			    			</div>
-							<!-- END NAVIGATION DROPDOWN EXAMPLE -->
-	    				</li>
-						<li id="mediadropdown">
-							<h5>MEDIA DROPDOWN</h5>
-							<!-- BEGIN MEDIA DROPDOWN EXAMPLE -->
-					        <div id="myDropDownId" class="dropdown">
-					            <div id="myDropdownButtonId" role="button" data-toggle="dropdown" tabindex="0">
-					                <!-- role and data-toggle are required if an anchor is used;
-					                if a div, tabindex must be applied as well -->
-					                <!-- if this is NOT an anchor, enter will not trigger the drop down and this must be handled manually (see scripts) -->
-					                <div class="btn btn-default">
-					                    THIS IS PART OF THE BUTTON THAT OPENS MY DROPDOWN (style is irrelevant on this element)
-					                </div>
-					            </div>
-			      				<ul class="dropdown-menu" role="menu" aria-labelledby="myDropdownButtonId">
-					                <li>
-					                    <a href="#" class="container-fluid"> 
-					                    <!-- This must be an anchor in order for autoselect into the first element to work -->
-					                    <!-- Note that AT might override this functionality -->
-					                        <ul>
-					                        	<li>Some stuff to display</li>
-					                        	<li>Some more stuff to display</li>
-					                        </ul>
-					                    </a>
-					                </li>
-					            </ul>
-					        </div>
-							<!-- END MEDIA DROPDOWN EXAMPLE -->
-	    				</li>
-	    			</ul>
+					<div id="navdropdown">
+						<h5>DROPDOWN FOR NAV</h5>
+						<!-- BEGIN NAVIGATION DROPDOWN EXAMPLE -->
+						<div class="dropdown">
+      						<a id="drop1" href="#" role="button" class="dropdown-toggle btn btn-default" data-toggle="dropdown" aria-expanded="true">Dropdown <b class="caret"></b></a> <!-- role, and data-toggle are crucial -->
+		      				<ul class="dropdown-menu" role="menu" aria-labelledby="drop1">
+					            <li><a href="#">Action</a></li> <!-- need to follow the structure -->
+					            <li><a href="#">Another action</a></li>
+					            <li><a href="#">And another action</a></li>
+					        </ul>
+		    			</div>
+						<!-- END NAVIGATION DROPDOWN EXAMPLE -->
+    				</div>
+    				<br/>
+					<div id="mediadropdown">
+						<h5>MEDIA DROPDOWN</h5>
+						<!-- BEGIN MEDIA DROPDOWN EXAMPLE -->
+				        <div id="myDropDownId" class="dropdown">
+				            <div id="myDropdownButtonId" role="button" data-toggle="dropdown" tabindex="0">
+				                <!-- role and data-toggle are required if an anchor is used;
+				                if a div, tabindex must be applied as well -->
+				                <!-- if this is NOT an anchor, enter will not trigger the drop down and this must be handled manually (see scripts) -->
+				                <div class="btn btn-default">
+				                    THIS IS PART OF THE BUTTON THAT OPENS MY DROPDOWN (style is irrelevant on this element)
+				                </div>
+				            </div>
+		      				<ul class="dropdown-menu" role="menu" aria-labelledby="myDropdownButtonId">
+				                <li>
+				                    <a href="#" class="container-fluid"> 
+				                    <!-- This must be an anchor in order for autoselect into the first element to work -->
+				                    <!-- Note that AT might override this functionality -->
+				                        <ul>
+				                        	<li>Some stuff to display</li>
+				                        	<li>Some more stuff to display</li>
+				                        </ul>
+				                    </a>
+				                </li>
+				            </ul>
+				        </div>
+						<!-- END MEDIA DROPDOWN EXAMPLE -->
+    				</div>
 	    			<br/><br/>
 	    		</div>
 			</li>
@@ -223,46 +254,52 @@
 							<li role="listitem">
 								An alert is a simple component that requires some custom handling of focus events.  See this source code for examples on how to handle this.  In this example, when the alert is dismissed, the page will need to be reloaded to trigger it again.  Data-dismiss on an alert destroys the DOM element, but custom code may be required to destroy the Backbone view.
 							</li>
+							<li role="listitem">
+								Dismissable alerts should be used for server side error handling and fixed alerts should be used for client side validation.
+							</li>
+							<li role="listitem">
+								A Dismissable alert takes focus when it is made visible, and when dismissed focus returns to the actionable element that triggered the alert
+							</li>
+							<li role="listitem">
+								Fixed alerts take focus when a validation error occurs.  The actual alert should be an actionable element which returns focus to the element that failed validation.
+							</li>
 						</ul>
 					</p>
-
-					<ul>
-						<li>
-							<h5>DISMISSABLE ALERT</h5>
-							<button id="alertTriggerButton" role="button" data-toggle="alert" data-target="#myAlert">This action triggers an alert</button>
-							<!-- BEGIN DISMISSABLE ALERT EXAMPLE -->
-							<div id="myAlert" class="alert alert-danger fade" style="width:800px" tabindex="0" hidden>
-			        			<button type="button" class="close" data-dismiss="alert" aria-description="dismiss error">
-			        				<span aria-hidden="true">&times;</span>
-			        				<span class="sr-only">dismiss error</span>
-			        			</button>
-			        			<span class="sr-only">Error:</span>
-			        			<strong>Something is busted!</strong> This thing is broken
-			            		<p>
-			            			<strong>Focus Management : </strong>
-			            			<p>
-			            			    When the alert is dismissed with keyboard make sure the focus is transferred back to the element which fired this alert.  This is not handled by default and requires custom event handling.  See the source code for this page.
-			            			</p>
-			            			<p>
-			            			    Note that this element is not dyanmically generated in this example so when dismiss is triggered the element is automatically destroyed.  In typical use we would generated this element and inject it into a region which would avoid the first concern and allow us to reopen this alert once closed since the DOM elements would be generated again.
-			            			 </p>
-			            		</p>
-			      			</div>
-			      			<!-- END DIMISSABLE ALERT EXAMPLE -->
-		      			</li>
-						<li>
-							<h5>FIXED ALERT</h5>
-							<!-- BEGIN ALERT EXAMPLE -->
-							<!--
-								Most of this is handled with the JS at the bottom
-								The error message takes focus when the validation error is thrown
-								Note that the message is actually a trigger which navigates to the erroneous field
-							-->
-			      			<div id="fixedAlertContainer" style="width:600px" hidden></div>
-			      			<input id="alertInput" role="search"><span>  enter some text and press enter (requires more than 3 characters)</span>
-			      			<!-- END ALERT EXAMPLE -->
-		      			</li>
-	      			</ul>
+					<div id="dismissableAlert">
+						<h5>DISMISSABLE ALERT</h5>
+						<button id="alertTriggerButton" role="button" data-toggle="alert" data-target="#myAlert">This action triggers an alert</button>
+						<!-- BEGIN DISMISSABLE ALERT EXAMPLE -->
+						<div id="myAlert" class="alert alert-danger fade" style="width:800px" tabindex="0" hidden>
+		        			<button type="button" class="close" data-dismiss="alert" aria-description="dismiss error">
+		        				<span aria-hidden="true">&times;</span>
+		        				<span class="sr-only">dismiss error</span>
+		        			</button>
+		        			<span class="sr-only">Error:</span>
+		        			<strong>Something is busted!</strong> This thing is broken
+		            		<p>
+		            			<strong>Focus Management : </strong>
+		            			<p>
+		            			    When the alert is dismissed with keyboard make sure the focus is transferred back to the element which fired this alert.  This is not handled by default and requires custom event handling.  See the source code for this page.
+		            			</p>
+		            			<p>
+		            			    Note that this element is not dyanmically generated in this example so when dismiss is triggered the element is automatically destroyed.  In typical use we would generated this element and inject it into a region which would avoid the first concern and allow us to reopen this alert once closed since the DOM elements would be generated again.
+		            			 </p>
+		            		</p>
+		      			</div>
+		      			<!-- END DIMISSABLE ALERT EXAMPLE -->
+	      			</div>
+					<div id="fixedAlert">
+						<h5>FIXED ALERT</h5>
+						<!-- BEGIN ALERT EXAMPLE -->
+						<!--
+							Most of this is handled with the JS at the bottom
+							The error message takes focus when the validation error is thrown
+							Note that the message is actually a trigger which navigates to the erroneous field
+						-->
+		      			<div id="fixedAlertContainer" style="width:600px" hidden></div>
+		      			<input id="alertInput" role="search"><span>  enter some text and press enter (requires more than 3 characters)</span>
+		      			<!-- END ALERT EXAMPLE -->
+	      			</div>
 					<br/><br/>
 				</div>
       		</li>
@@ -284,55 +321,56 @@
 							</li>
 						</ul>
 					</p>
+					<h5>ACCORDION</h5>
 					<!-- BEGIN ACCORDION EXAMPLE -->
 					<!-- the class hierarchy is important as well as the href and data-parent -->
 					<div class="panel-group" id="accordion"> <!-- this is the actual accordion object.  Ensure the id is unique -->
-					  <div class="panel panel-default">
-					    <div class="panel-heading">
-					      <h4 class="panel-title">
-					        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-					          Collapsible Group Item #1
-					        </a>
-					      </h4>
-					    </div>
-					    <div id="collapseOne" class="panel-collapse collapse in">
-					      <div class="panel-body">
-					        We apply the class 'in' to the div, which contains the collapse field to default to an accordion item being rendered by default.
-					      </div>
-					    </div>
-					  </div>
-					  <div class="panel panel-default">
-					    <div class="panel-heading">
-					      <h4 class="panel-title">
-					        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
-					          Collapsible Group Item #2
-					        </a>
-					      </h4>
-					    </div>
-					    <div id="collapseTwo" class="panel-collapse collapse">
-					      <div class="panel-body">
-					        The class 'in' is automatically applied to my ancestor which contains the 'collapse' class when we toggle the accorion item.
-					      </div>
-					    </div>
-					  </div>
-					  <div class="panel panel-default">
-					    <div class="panel-heading">
-					      <h4 class="panel-title">
-					        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
-					          Collapsible Group Item #3
-					        </a>
-					      </h4>
-					    </div>
-					    <div id="collapseThree" class="panel-collapse collapse">
-					      <div class="panel-body">
-					        Note that these are aggregated as a group and with this implementation only one accordion item will be visible at a time.  Functionally this item is handled as a sort of horizontal tab structure.
-					      </div>
-					    </div>
-					  </div>
+						<div class="panel panel-default">
+						    <div class="panel-heading">
+						      <h4 class="panel-title">
+						        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+						          Collapsible Group Item #1
+						        </a>
+						      </h4>
+						    </div>
+						    <div id="collapseOne" class="panel-collapse collapse in">
+						    <div class="panel-body">
+						        We apply the class 'in' to the div, which contains the collapse field to default to an accordion item being rendered by default.
+						      </div>
+						    </div>
+						  </div>
+						<div class="panel panel-default">
+						    <div class="panel-heading">
+						      <h4 class="panel-title">
+						        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+						          Collapsible Group Item #2
+						        </a>
+						      </h4>
+						    </div>
+						    <div id="collapseTwo" class="panel-collapse collapse">
+						      <div class="panel-body">
+						        The class 'in' is automatically applied to my ancestor which contains the 'collapse' class when we toggle the accorion item.
+						      </div>
+						    </div>
+						  </div>
+						<div class="panel panel-default">
+						    <div class="panel-heading">
+						      <h4 class="panel-title">
+						        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+						          Collapsible Group Item #3
+						        </a>
+						      </h4>
+						    </div>
+						    <div id="collapseThree" class="panel-collapse collapse">
+						      <div class="panel-body">
+						        Note that these are aggregated as a group and with this implementation only one accordion item will be visible at a time.  Functionally this item is handled as a sort of horizontal tab structure.
+						      </div>
+						    </div>
+						</div>
 					</div>
 					<!-- END ACCORDION EXAMPLE -->
-					<br/><br/>
 				</div>
+				<br/><br/>
       		</li>
 
 
@@ -378,9 +416,64 @@
 							</ul>
 						</li>
 					</ul>
-					<br/><br/>
 				<div>
+				<br/><br/>
       		</li>
+
+
+			<li role="listitem">
+				<div role="region" id="custom" aria-labelledby="customComponents">
+					<h4 id="customComponents">CUSTOM COMPONENTS</h4>
+					<p>
+						There will be times when no Bootstrap object satisfies the needs of the design.  In these cases, it will be entirely up to the developer to implement an adequate solution.  The following is one of these cases.  There is a grid that when an item within the grid is clicked information in a box to the right will be updated dynamically.  To satisfy 508, when this click happen, focus needs to shift to the box that was updated.  Shift+tab needs to return focus to the row that triggered the change.  Arrow key navigation will be used in the grid itself.
+					</p>
+					<!-- BEGIN CUSTOM COMPONENTS EXAMPLE -->
+					<div style="width:100%; height:20%">
+						<div style="width:50%; float:left;"> <!-- a container to keep the "grid" -->
+							<div class="panel-group" id="maccordion"> <!-- this is the actual accordion object.  Ensure the id is unique -->
+								<div class="panel panel-default">
+								    <div class="panel-heading">
+								      <h4 class="panel-title">
+								        <a id="mCollapseA1" class="accordion-toggle" data-toggle="collapse" data-parent="#maccordion" href="#mcollapseOne">
+								          Collapsible Group Item #1
+								        </a>
+								      </h4>
+								    </div>
+								  </div>
+								<div class="panel panel-default">
+								    <div class="panel-heading">
+								      <h4 class="panel-title">
+								        <a id="mCollapseA2" class="accordion-toggle" data-toggle="collapse" data-parent="#maccordion" href="#mcollapseOne">
+								          Collapsible Group Item #2
+								        </a>
+								      </h4>
+								    </div>
+								</div>
+								<div class="panel panel-default">
+								    <div class="panel-heading">
+								      <h4 class="panel-title">
+								        <a id="mCollapseA3" class="accordion-toggle" data-toggle="collapse" data-parent="#maccordion" href="#mcollapseOne">
+								          Collapsible Group Item #3
+								        </a>
+								      </h4>
+								    </div>
+								</div>
+							</div>
+						</div>
+						<div style="width:50%; float:right"> <!-- a container to hold the contents -->
+							<div id="mcollapseOne" class="panel-collapse collapse in">
+						      <div class="panel-body" tabindex="0">
+						        Everyone is pointing to me!  I'm going to swap out some content dyanmically when you click the links
+						        <pre id="mcollapseContents" class="row"></pre>
+						      </div>
+						    </div>
+						</div>
+					</div>
+					<!-- END CUSTOM COMPONENTS EXAMPLE -->
+				</div>
+				<br/><br/>
+			</li>
+
 
 			<li role="listitem">
 				<div role="region" id="external" aria-labelledby="externalReferences">
@@ -392,6 +485,8 @@
 					<li><a href="http://www.section508.va.gov/">VA Section 508</a></li>
       			</ul>
       		</li>
+
+
 		</ul>
 		<script src="http://paypal.github.io/bootstrap-accessibility-plugin/bs3.1.1/js/jquery.min.js"></script>
 		<script src="http://paypal.github.io/bootstrap-accessibility-plugin/bs3/dist/js/bootstrap.min.js"></script>
@@ -402,26 +497,36 @@
 				//Sets our regions so that we can tab to them.
 				//Not a requirement but it makes navigation easier when testing this page and is meant to show how this could be done globally
 
+  				$('[data-toggle="tooltip"]').tooltip(); //initialize tooltip
+  				$('[data-toggle="popover"]').popover(); //initialize popup
+
 				//create new events so we don't have to check all the time
-				$(document).on('keypress', function(e) {
+				$(document).on('keydown', function(e) {
 					var code = e.keyCode || e.which;
 					switch(code) {
 						case 13:
-							e.preventDefault();
-							$(e.target).trigger('enterkeypress').trigger('actionkeypress');
+							$(e.target).trigger('enterkeypress').trigger('submitkeypress');
 							break;
 						case 32:
-							e.preventDefault();
-							$(e.target).trigger('spacekeypress').trigger('actionkeypress');
+							$(e.target).trigger('spacekeypress').trigger('submitkeypress');
+							break;
+						case 37:
+							$(e.target).trigger('leftarrowpress').trigger('previousitempress');
+							break;
+						case 38:
+							$(e.target).trigger('uparrowpress').trigger('previousitempress');
+							break;
+						case 39:
+							$(e.target).trigger('rightarrowpress').trigger('nextitempress');
+							break;
+						case 40:
+							$(e.target).trigger('downarrowpress').trigger('nextitempress');
 							break;
 					}
 				});
 
-  				$('[data-toggle="tooltip"]').tooltip(); //initialize tooltip
-  				$('[data-toggle="popover"]').popover(); //initialize popup
-
   				//custom code to make enter key work for dropdown with DIV element
-  				$('#myDropdownButtonId').on('actionkeypress', function(e) {
+  				$('#myDropdownButtonId').on('submitkeypress', function(e) {
   					$('#myDropDownId .dropdown-menu').dropdown('toggle');
   				});
 
@@ -440,7 +545,7 @@
   				});
 
   				//custom code for fixed alert
-  				$('#alertInput').on('actionkeypress', function(e) {
+  				$('#alertInput').on('submitkeypress', function(e) {
   					var code = e.keyCode || e.which;
   					var self = $(this),
 				        charCount = self.val().length,
@@ -450,7 +555,7 @@
 					if(charCount <= 3) {
 						alert.show().html(alertText);
 						msgContainer = $("#alertMessage");
-						msgContainer.focus().on('actionkeypress', function(e) {
+						msgContainer.focus().on('submitkeypress', function(e) {
 							$('#'+msgContainer.attr('target')).focus();
 						});
 						self.attr('aria-invalid', true);
@@ -462,6 +567,30 @@
 						self.attr('aria-invalid', false);
 					}
   				});
+
+  				//Custom event handling for modified accordion example
+  				/*
+				$('[data-parent="#maccordion"]').on('click submitkeypress', function(e) {
+					$('#mcollapseOne').one('hidden.bs.collapse', function(e){
+						$(this).collapse('show');
+					});
+				});
+*/
+				$("#mCollapseA1").on('click submitkeypress', function(e) {
+					$('#mcollapseOne').one('hidden.bs.collapse', function(e){
+						$(this).find('#mcollapseContents').text("YOU CLICKED ON THE FIRST ONE!");
+					});
+				});
+				$("#mCollapseA2").on('click submitkeypress', function(e) {
+					$('#mcollapseOne').one('hidden.bs.collapse', function(e){
+						$(this).find('#mcollapseContents').text("YOU CLICKED ON THE SECOND ONE!");
+					});
+				});
+				$("#mCollapseA3").on('click submitkeypress', function(e) {
+					$('#mcollapseOne').one('hidden.bs.collapse', function(e){
+						$(this).find('#mcollapseContents').text("YOU CLICKED ON THE LAST ONE!");
+					});
+				});
 
 			});
 		</script>

@@ -1,0 +1,1 @@
+define(["main/ADK","app/applets/medication_review_v2/medicationCollectionFormatHelper","app/applets/medication_review_v2/charts/chartBuilder","app/applets/medication_review_v2/medicationCollectionHandler"],function(e,i,t,a){return{fetchAllMeds:a.fetchAllMeds,chartBuilder:t,getMedicationGroupNames:i.getMedicationGroupNames,getMedicationGroup:i.getMedicationGroup}});

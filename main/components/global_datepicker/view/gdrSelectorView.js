@@ -1,4 +1,4 @@
-var dependencies = [
+define([
     'jquery',
     'jquery.inputmask',
     'bootstrap-datepicker',
@@ -8,13 +8,11 @@ var dependencies = [
     'underscore',
     'main/components/global_datepicker/view/trendHistoryView',
     'hbs!main/components/global_datepicker/template/gdrSelectorTemplate',
+    'api/Messaging',
     'api/SessionStorage',
-    'main/ADK'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Marionette, _, TrendHistoryView, gdrSelectorTemplate, SessionStorage, ADK) {
+    'api/ResourceService',
+    'main/components/global_datepicker/util/parseEvents'
+], function($, InputMask, DatePicker, moment, Backbone, Marionette, _, TrendHistoryView, gdrSelectorTemplate, Messaging, SessionStorage, ResourceService, parseEvents) {
 
     var DateRangeModel = Backbone.Model.extend({
         defaults: {
@@ -38,47 +36,100 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
             'click .gdt-btn': 'clickButton',
             'keydown .gdt-btn': 'handleEnterOrSpaceBar',
             'keyup .gdt-input': 'keyUpCustomDateRange',
-            'blur .gdt-input': 'blurCustomDateRange',
-            // 'change input': 'changeCustomDateRange'
+            'blur .gdt-input': 'blurCustomDateRange'
         },
         initialize: function() {
-            var sessionGlobalDate = ADK.SessionStorage.getModel_SessionStoragePreference('globalDate');
-            this.model = sessionGlobalDate.clone();
-
             var self = this;
-            ADK.Messaging.on('updateGlobalTimelineDateRange', function(dateRange) {
-                self.$el.find('button').removeClass('active-range');
+            var sessionGlobalDate = SessionStorage.getModel_SessionStoragePreference('globalDate');
+            this.model = sessionGlobalDate.clone();
+            this.firstEvent = null;
+            this.trendHistoryView = new TrendHistoryView({dateModel:this.model});
 
-                var newCustomFromDate = moment(dateRange.from).format('MM/DD/YYYY'),
-                    newCustomToDate = moment(dateRange.to).format('MM/DD/YYYY'),
-                    formattedDateRange = {
-                        from: newCustomFromDate,
-                        to: newCustomToDate
-                    };
+            var fetchOptions = {
+                resourceTitle: 'global-timeline-getTimeline',
+                pageable: false,
+                cache: true,
+                viewModel: {
+                    parse: parseEvents
+                }
+            };
 
-                self.model.set({
-                    customFromDate: newCustomFromDate,
-                    customToDate: newCustomToDate,
-                    selectedId: 'custom-range-apply-global'
+            fetchOptions.onSuccess = function(collection) {
+                var inpatient = null,
+                    outpatient = null;
+                if (collection.at(0).has('inpatient')) {
+                    inpatient = collection.at(0).get('inpatient')[0].dateTime;
+                }
+
+                if (collection.at(0).has('outpatient')) {
+                    outpatient = collection.at(0).get('outpatient')[0].dateTime;
+                }
+
+                if (!inpatient && !outpatient) {
+                    self.firstEvent = moment(ResourceService.patientRecordService.getCurrentPatient().get('birthDate'));
+                }
+
+                if (inpatient) {
+                    if (outpatient) {
+                        self.firstEvent = moment(inpatient, 'YYYYMMDDHHmm').valueOf() < moment(outpatient, 'YYYYMMDDHHmm').valueOf() ? moment(inpatient, 'YYYYMMDDHHmm').format('MM/DD/YYYY') : moment(outpatient, 'YYYYMMDDHHmm').format('MM/DD/YYYY');
+                    } else {
+                        self.firstEvent = moment(inpatient, 'YYYYMMDDHHmm').format('MM/DD/YYYY');
+                    }
+                } else if(outpatient){
+                    self.firstEvent = moment(outpatient, 'YYYYMMDDHHmm').format('MM/DD/YYYY');
+                }
+
+                self.listenTo(Messaging, 'updateGlobalTimelineDateRange', function(dateRange) {
+                    var selectedId = self.model.get('selectedId');
+                    var formattedDateRange;
+
+                    if (selectedId !== 'all-range-global') {
+                        var newCustomFromDate = moment(dateRange.from).format('MM/DD/YYYY'),
+                            newCustomToDate = moment(dateRange.to).format('MM/DD/YYYY');
+
+                        formattedDateRange = {
+                            from: newCustomFromDate,
+                            to: newCustomToDate,
+                            selectedId: selectedId
+                        };
+
+                        self.model.set({
+                            customFromDate: newCustomFromDate,
+                            customToDate: newCustomToDate
+                        });
+
+                        self.$el.find('.input-group.date#custom-date-from-global').datepicker('update', newCustomFromDate);
+                        self.$el.find('.input-group.date#custom-date-to-global').datepicker('update', newCustomToDate);
+                        self.$el.find('#custom-range-apply-global').removeAttr('disabled');
+                    } else { // all-range-global case
+                        var firstEventDate = self.firstEvent,
+                            lastEventDate = moment(dateRange.to).format('MM/DD/YYYY');
+
+                        formattedDateRange = {
+                            from: firstEventDate,
+                            to: lastEventDate,
+                            selectedId: selectedId
+                        };
+
+                        self.model.set({
+                            toDate: lastEventDate,
+                            customToDate: lastEventDate,
+                            firstEventDate: firstEventDate
+                        });
+                    }
+
+                    Messaging.trigger('globalDate:updateTimelineSummaryViewOnly', formattedDateRange);
                 });
 
-                self.$el.find('.input-group.date#custom-date-from-global').datepicker('update', newCustomFromDate);
-                self.$el.find('.input-group.date#custom-date-to-global').datepicker('update', newCustomToDate);
-                self.$el.find('#custom-range-apply-global').removeAttr('disabled');
+            };
 
-                ADK.Messaging.trigger('globalDate:updateTimelineSummaryViewOnly', formattedDateRange);
-            });
-            ADK.Messaging.on('globalDate:customAllDateRangeDefined', function(dateModel) {
-                var firstEventDate = dateModel.get('firstEventDate'),
-                    lastEventDate = dateModel.get('lastEventDate');
+            ResourceService.patientRecordService.fetchCollection(fetchOptions);
 
-                self.setCustomDateRange(firstEventDate, lastEventDate, false);
-            });
         },
         getTimelineSummaryView: function() {
             var self = this,
-            channel = ADK.Messaging.getChannel('timelineSummary'),
-            deferredResponse = channel.request('createTimelineSummary');
+                channel = Messaging.getChannel('timelineSummary'),
+                deferredResponse = channel.request('createTimelineSummary');
 
             deferredResponse.done(function(response) {
                 var timelineSummaryApplet = response.view;
@@ -87,7 +138,7 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
         },
         keyUpCustomDateRange: function(event) {
             this.model.set('selectedId', 'custom-range-apply-global');
-            this.$el.find('button').removeClass('active-range');
+            //this.$el.find('button').removeClass('active-range');
             this.monitorCustomDateRange(false);
         },
         blurCustomDateRange: function(event) {
@@ -97,7 +148,6 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
             if (this.model.get('customFromDate') !== this.$el.find('#filter-from-date-global').val() ||
                 this.model.get('customToDate') !== this.$el.find('#filter-to-date-global').val()) {
                 this.$el.find('button').removeClass('active-range');
-                this.model.set('selectedId', 'custom-range-apply-global');
 
                 if (this.checkCustomRangeCondition(triggerUpdateFlag)) {
                     this.$el.find('#custom-range-apply-global').removeAttr('disabled');
@@ -111,13 +161,13 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
         },
         checkCustomRangeCondition: function(triggerUpdateFlag) {
             var hasCustomRangeValuesBeenSetCorrectly = true,
-            customFromDateStr = this.$el.find('#filter-from-date-global').val(),
-            customToDateStr = this.$el.find('#filter-to-date-global').val(),
-            customFromDate = moment(customFromDateStr, 'MM/DD/YYYY', true),
-            customToDate = moment(customToDateStr, 'MM/DD/YYYY', true),
-            todayStr = moment().format('MM/DD/YYYY'),
-            today = moment(todayStr, 'MM/DD/YYYY'),
-            isDateRangeChanged = false;
+                customFromDateStr = this.$el.find('#filter-from-date-global').val(),
+                customToDateStr = this.$el.find('#filter-to-date-global').val(),
+                customFromDate = moment(customFromDateStr, 'MM/DD/YYYY', true),
+                customToDate = moment(customToDateStr, 'MM/DD/YYYY', true),
+                todayStr = moment().format('MM/DD/YYYY'),
+                today = moment(todayStr, 'MM/DD/YYYY'),
+                isDateRangeChanged = false;
 
             if (customFromDate.isValid()) {
                 if (customFromDateStr !== this.model.get('customFromDate')) {
@@ -130,7 +180,6 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
 
                         if (triggerUpdateFlag) {
                             this.model.set('customFromDate', customFromDateStr);
-                            // ADK.SessionStorage.addModel('globalDate', this.model);
                         }
                     }
                 }
@@ -159,7 +208,7 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
             }
 
             if (triggerUpdateFlag && isDateRangeChanged) {
-                ADK.Messaging.trigger('globalDate:customDateRangeSelected', this.model);
+                Messaging.trigger('globalDate:customDateRangeSelected', this.model);
             }
 
             return hasCustomRangeValuesBeenSetCorrectly;
@@ -170,12 +219,14 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
                 fromDatePicker = this.$('.input-group.date#custom-date-from-global')
                 .datepicker({
                     format: 'mm/dd/yyyy',
-                    endDate: '-1d'
+                    endDate: '-1d',
+                    showOnFocus: false
                 }),
                 toDatePicker = this.$('.input-group.date#custom-date-to-global')
                 .datepicker({
                     format: 'mm/dd/yyyy',
-                    startDate: today
+                    startDate: today,
+                    showOnFocus: false
                 });
 
             fromDatePicker
@@ -190,10 +241,6 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
                         evt.preventDefault();
                         evt.stopPropagation();
                     });
-                })
-                .on('changeDate', function(ev) {
-                    $(this).datepicker('hide');
-                    self.$el.find('#filter-from-date-global').focus();
                 });
 
             toDatePicker
@@ -203,10 +250,6 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
                         evt.preventDefault();
                         evt.stopPropagation();
                     });
-                })
-                .on('changeDate', function(ev) {
-                    $(this).datepicker('hide');
-                    self.$el.find('#filter-to-date-global').focus();
                 });
 
             this.$('#filter-from-date-global, #filter-to-date-global').datepicker('remove');
@@ -222,7 +265,9 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
             }
         },
         clickButton: function(event) {
+            var self = this;
             var selectedId = event.target.id;
+            var sessionGlobalDate;
 
             if (selectedId === '') {
                 return;
@@ -230,16 +275,17 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
 
             if (selectedId === 'cancel-global') {
                 this.closeExpandedGDT();
+                $('globalDatePickerButton').blur();
                 return;
             }
 
-            this.$el.find('button').removeClass('active-range');
-
+            var lastSelectedId = this.model.get('selectedId');
             var isApplyButtonClicked = true;
+
             if (selectedId !== 'custom-range-apply-global') {
+                this.$el.find('#' + selectedId).siblings().removeClass('active-range');
                 this.$el.find('#' + selectedId).addClass('active-range');
                 this.model.set('selectedId', selectedId);
-
                 isApplyButtonClicked = false;
             }
 
@@ -255,13 +301,17 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
 
             switch (selectedId) {
                 case 'custom-range-apply-global':
-                    if (this.model.get('selectedId') === 'all-range-global') {
-                        fromDate = null;
-                        toDate = moment('12/31/2099').format('MM/DD/YYYY');
+                    if (lastSelectedId === 'all-range-global') {
+                        sessionGlobalDate = SessionStorage.getModel_SessionStoragePreference('globalDate');
+                        fromDate = self.firstEvent;
+                        toDate = this.$el.find('#filter-to-date-global').val();
                     } else {
                         fromDate = this.$el.find('#filter-from-date-global').val();
                         toDate = this.$el.find('#filter-to-date-global').val();
                     }
+                    break;
+                case '5yr-range-global':
+                    fromDate = moment().subtract('years', 5).format('MM/DD/YYYY');
                     break;
                 case '2yr-range-global':
                     fromDate = moment().subtract('years', 2).format('MM/DD/YYYY');
@@ -285,11 +335,8 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
                     fromDate = moment().subtract('days', 1).format('MM/DD/YYYY');
                     break;
                 case 'all-range-global':
-                    var sessionGlobalDate = ADK.SessionStorage.getModel_SessionStoragePreference('globalDate');
-                    fromDate = sessionGlobalDate.get('firstEventDate');
-                    if (fromDate === undefined) {
-                        fromDate = null;
-                    }
+                    sessionGlobalDate = SessionStorage.getModel_SessionStoragePreference('globalDate');
+                    fromDate = self.firstEvent;
 
                     var lastEventDate = sessionGlobalDate.get('lastEventDate');
                     if ((lastEventDate !== undefined) && (lastEventDate !== null)) {
@@ -310,20 +357,21 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
                         fromDate: fromDate,
                         toDate: toDate
                     });
-                    ADK.SessionStorage.addModel('globalDate', this.model);
-                    ADK.Messaging.trigger('globalDate:selected', this.model);
+                    SessionStorage.addModel('globalDate', this.model);
+                    Messaging.trigger('globalDate:selected', this.model);
                 }
+                $('globalDatePickerButton').blur();
             } else {
                 this.setCustomDateRange(fromDate, toDate, true);
-                // this.model.set('selectedId', selectedId);
-                ADK.Messaging.trigger('globalDate:customDateRangeSelected', this.model);
+                this.model.set('selectedId', selectedId);
+                Messaging.trigger('globalDate:customDateRangeSelected', this.model);
             }
         },
         closeExpandedGDT: function() {
             $('#navigation-date #hiddenDiv').toggleClass('hidden');
             $('#navigation-date #date-region-minimized').focus();
         },
-        setCustomDateRange: function(customFromDate, customToDate, isTrigger) {
+        setCustomDateRange: function(customFromDate, customToDate) {
             this.model.set({
                 customFromDate: customFromDate,
                 customToDate: customToDate
@@ -334,26 +382,27 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
             this.$el.find('#custom-range-apply-global').removeAttr('disabled');
         },
         resetToCurrentGlbalDate: function() {
-            var globalDate = ADK.SessionStorage.getModel('globalDate'),
-            selectedId = globalDate.get('selectedId');
+            var globalDate = SessionStorage.getModel('globalDate'),
+                selectedId = globalDate.get('selectedId');
 
             this.model.set({
                 fromDate: globalDate.get('fromDate'),
                 toDate: globalDate.get('toDate'),
                 customFromDate: globalDate.get('customFromDate'),
                 customToDate: globalDate.get('customToDate'),
-                selectedId: globalDate.get('selectedId'),
+                selectedId: selectedId,
+                firstEventDate: globalDate.get('firstEventDate')
             });
 
             var fromDate, toDate;
 
             if (selectedId === 'all-range-global') {
                 fromDate = globalDate.get('firstEventDate');
-                toDate = globalDate.get('lastEventDate');
             } else {
                 fromDate = globalDate.get('fromDate');
-                toDate = globalDate.get('toDate');
             }
+
+            toDate = globalDate.get('toDate');
 
             if (fromDate !== undefined && fromDate !== null) {
                 this.$('#custom-date-from-global').datepicker('update', fromDate);
@@ -368,7 +417,10 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
             }
 
             if (fromDate !== undefined && fromDate !== null && toDate !== undefined && toDate !== null) {
-                ADK.Messaging.trigger('resetDateSliderPosition', {from: moment(fromDate).valueOf(), to: moment(toDate).valueOf()});
+                Messaging.trigger('resetDateSliderPosition', {
+                    from: moment(fromDate).valueOf(),
+                    to: moment(toDate).valueOf()
+                });
             }
         },
         onRender: function(event) {
@@ -380,13 +432,9 @@ function onResolveDependencies($, InputMask, DatePicker, moment, Backbone, Mario
             this.$el.find('#filter-from-date-global, #filter-to-date-global').on('blur', function() {
                 $('.input-group.date#custom-date-from-global').datepicker('hide');
             });
-            this.trendHistoryChart.show(new TrendHistoryView());
-        },
-        onBeforeDestroy: function() {
-            ADK.Messaging.off('updateGlobalTimelineDateRange');
-            ADK.Messaging.off('globalDate:customAllDateRangeDefined');
+            this.trendHistoryChart.show(this.trendHistoryView);
         }
     });
 
     return FilterDateRangeView;
-}
+});

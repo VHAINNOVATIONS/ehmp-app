@@ -1,6 +1,6 @@
 <div id="error-container" />
 <div id="medication-form" class="container-fluid">
-<h5 id='edit-meds-loading-indicator'><i class="fa fa-spinner fa-spin"></i> Loading...</h5>
+<p id='edit-meds-loading-indicator'><i class="fa fa-spinner fa-spin"></i> Loading...</p>
     <form role="form">
         <div class="form-group" id="top-row-table">
             <div class="row row-buffer" id="visit-region"></div>
@@ -126,7 +126,7 @@
         	<div id="date-gp" class="input-group date third-width">
                 {{#hasPermission 'edit-patient-med'}}
                 {{#if isLocal}}
-                <input type="text" autocomplete="off" id="startDate" name="startDate" class="datepicker form-control input-sm"><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                <input type="text" autocomplete="off" id="startDate" name="startDate" class="datepicker form-control input-sm"><span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                 {{else}}
                 <input type="text" autocomplete="off" id="startDate" name="startDate" class="datepicker form-control input-sm" disabled>
                 {{/if}}

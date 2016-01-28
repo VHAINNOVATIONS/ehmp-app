@@ -1,17 +1,11 @@
-var dependencies = [
+define([
     "backbone",
     "jquery",
     "marionette",
     "underscore",
     'api/Messaging',
     "hbs!main/components/views/popupTemplate"
-];
-
-'use strict';
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, $, Marionette, _, Messaging, PopupTemplate) {
+], function(Backbone, $, Marionette, _, Messaging, PopupTemplate) {
 
     var defaultPopup = {
         title: '',
@@ -42,9 +36,15 @@ function onResolveDependencies(Backbone, $, Marionette, _, Messaging, PopupTempl
         },
         events: {
             "shown.bs.modal": "focus",
-            "hide.bs.modal": "triggerContinue",
             "click #ContBtn": "continue",
-            "click #LgtBtn": "logoff"
+            "click #LgtBtn": "logoff",
+            'show.bs.modal': function() {
+                this.isVisible = true;
+            },
+            'hide.bs.modal': function() {
+                this.isVisible = false;
+                this.triggerContinue();
+            }
         },
 
         modelEvents: {
@@ -63,9 +63,13 @@ function onResolveDependencies(Backbone, $, Marionette, _, Messaging, PopupTempl
         continue: function(e) {
             e.preventDefault();
             //reset the model
-            this.setModel(defaultPopup, true);
+            this.resetModel();
             //hide it
             this.hide();
+        },
+
+        resetModel: function() {
+            this.setModel(defaultPopup, true);
         },
 
         show: function() {
@@ -79,7 +83,7 @@ function onResolveDependencies(Backbone, $, Marionette, _, Messaging, PopupTempl
             this.$el.modal('hide');
         },
 
-        dialogReset: function(){
+        dialogReset: function() {
             $(this.dialog).blur();
             this.dialog.reset();
         },
@@ -101,14 +105,21 @@ function onResolveDependencies(Backbone, $, Marionette, _, Messaging, PopupTempl
             //be sure to logoff
             clearsession = true;
             this.hide();
-            this.setModel(defaultPopup);
+            this.setModel(defaultPopup, true);
             Messaging.trigger('app:logout');
         },
 
         logout: function(popup) {
-            this.setModel(popup);
+            this.setModel(popup, true);
+            if (this.isVisible) {
+                this.render();
+            } else {
+                this.show();
+            }
+            clearsession = true;
             // be sure logoff gets called
             Messaging.trigger('app:logout');
+            this.resetModel();
         },
 
         setModel: function(popup, silent) {
@@ -121,7 +132,7 @@ function onResolveDependencies(Backbone, $, Marionette, _, Messaging, PopupTempl
         },
 
         getDefaultModel: function() {
-            return defaultPopup;
+            return _.clone(defaultPopup);
         }
 
 
@@ -132,4 +143,4 @@ function onResolveDependencies(Backbone, $, Marionette, _, Messaging, PopupTempl
     });
 
     return popup;
-}
+});

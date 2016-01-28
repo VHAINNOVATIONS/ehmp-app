@@ -1,352 +1,275 @@
-<div class="panel panel-default no-margin bg-info">
-    <div class="panel-heading container-fluid">
-        <div id="patientDemographic-patientInfo" class="dropdown col-md-3 borderRight {{#if useCcow}}{{#unless ccowConnected}}warning{{/unless}}{{/if}}">
-            <div id="patientDemographic-patientInfo-detail" class="media" role="button" data-toggle="dropdown" tabindex="0">
-                <div class="pull-left default-patient-male">
-                     <img src='{{patientImage}}' class="center-block" width="55" height="55">
-                     <span class="sr-only">Patient Image</span>
-                </div>
-                <div class="media-body">
-                    <i class="fa fa-caret-down pull-right text-muted"></i>
-                    <h6 class="media-heading">{{displayName}}</h6>
-                    <span class="paddingRight">
-                        <span class="text-muted">DOB:</span> <span id="patientDemographic-patientInfo-dob">{{formatDate birthDate}} ({{getAge birthDate}})y</span></span>
-                    <span class="text-muted">SSN:</span> <span id="patientDemographic-patientInfo-ssn">{{formatSSN ssn false}}<span>
-                    <br>
-                    <span class="text-muted">Gender:</span><span id="patientDemographic-patientInfo-gender"> {{genderName}}<span>
-                    {{#if useCcow}}
-                        <span id="ccowStatus" class="pull-right">
-                            {{#if ccowConnected}}
-                                <i class="fa fa-chain"></i>
-                           {{else}}
-                                <i class="fa fa-chain-broken"></i>
-                            {{/if}}
-                        </span>
-                    {{/if}}
-                </div>
-            </div>
-            <div class="dropdown-menu well well-sm patient-info-dropdown" role="menu" aria-labelledby="patientDemographic-patientInfo-detail">
-                <div role="presentation">
-                    <div role="menuitem" tabindex="0" class="container-fluid">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <h5>Patient Information</h5>
-                            </div>
-                            <div class="span5 col-md-4">
-                                <div class="text-muted">Home Address</div>
-                                <div>
-                                    {{#each address}} {{#compare use "H"}} {{line1}}
-                                    <br/>{{#if line2}}{{line2}}
-                                    <br/>{{/if}} {{#if line3}}{{line3}}
-                                    <br/>{{/if}} {{city}}, {{state}} {{zip}} {{/compare}} {{/each}}
+<div class="panel panel-default bg-info">
+    <div class="panel-heading">
+        <div id="patientDemographic-patientInfo" class="dropdown {{#if useCcow}}{{#unless ccowConnected}}warning{{/unless}}{{/if}}">
+            <form>
+                <div id="patientDemographic-patientInfo-detail" class="media" role="button" data-toggle="dropdown" tabindex="0" title="Press enter to display extended patient information">
+                    <div class="default-patient-male">
+                        <img src='{{patientImage}}' class="center-block" width="52" height="52" title="{{displayName}} Image">
+                    </div>
+                    <div class="media-body">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                     <h4 class="media-heading">
+                                        <span class="sr-only">Patient Name: </span><span class="pull-left">{{displayName}}</span>
+                                        <span class="sr-only">Patient Status: </span><span class="pull-right bold">{{patientStatusClass}}</span>
+                                    </h4>
                                 </div>
-                                <br/>
-                                <div class="text-muted">Home Phone</div>
-                                {{#each telecom}} {{#compare use "H"}}
-                                <div>{{value}}</div>
-                                {{/compare}} {{/each}}
-                                <br/>
-                                <div class="text-muted">Cell Phone</div>
-                                {{#each telecom}} {{#compare use "MC"}}
-                                <div>{{value}}</div>
-                                {{/compare}} {{/each}}
-                                <br/>
-                                <div class="text-muted">Work Phone</div>
-                                {{#each telecom}} {{#compare use "WP"}}
-                                <div>{{value}}</div>
-                                {{/compare}} {{/each}}
-                                <br/>
-                                <div class="text-muted">Marital Status</div>
-                                <div>{{maritalStatusName}}</div>
                             </div>
-                            <div class="span3 col-md-4">
-                                <div class="text-muted">SSN</div>
-                                <div>{{formatSSN ssn false}}</div>
-                                <br/>
-                                <div class="text-muted">Veteran</div>
-                                {{#if veteran}}
-                                <div>Yes</div>
-                                {{else}}
-                                <div>No</div>
-                                {{/if}}
-                                <br/>
-                                <div class="text-muted">Service Connected</div>
-                                {{#if serviceConnected}}
-                                <div>Yes</div>
-                                {{else}}
-                                <div>No</div>
-                                {{/if}}
-                                <br/>
-                                <div class="text-muted">Sevice Connected Conditions</div>
-                                {{#each disability}} {{#if serviceConnected}}
-                                <div>{{name}} ({{disPercent}}%)</div>
-                                {{/if}} {{/each}}
-                                <br/>
-                                <div class="text-muted">Emergency Contact</div>
-                                {{#each contact}} {{#compare typeName "Emergency Contact"}}
-                                <div>{{name}}</div>
-                                <br/>
-                                <div class="text-muted">Emergency Contact Phone</div>
-                                {{#each telecom}}
-                                <div>{{value}}</div>
-                                {{/each}} {{/compare}} {{/each}}
+                            <div class="row">
+                                <div class="col-lg-6 patient-data">
+                                    <span class="sr-only">Date Of Birth: </span><span id="patientDemographic-dob-label" class="text-muted" aria-hidden="true">DOB:</span> <span id="patientDemographic-patientInfo-dob">{{formatDate birthDate}} ({{getAge birthDate}}y)</span>
+                                </div>
+                                <div class="col-lg-6 patient-data">
+                                    <span class="sr-only">Social Security Number: </span><span id="patientDemographic-ssn-label" class="text-muted" aria-hidden="true">SSN:</span> <span id="patientDemographic-patientInfo-ssn">{{formatSSN ssn false}}</span>
+                                </div>
                             </div>
-                            <div class="span4 col-md-4">
-                                <div class="text-muted">Next of Kin</div>
-                                {{#each contact}} {{#compare typeName "Next of Kin"}}
-                                <div>{{name}}</div>
-                                <br/>
-                                <div class="text-muted">Next of Kin Phone</div>
-                                {{#each telecom}}
-                                <div>{{value}}</div>
-                                {{/each}} {{/compare}} {{/each}}
-                                <br/>
-                                <div class="text-muted">Preliminary Cause of Death</div>
-                                <div></div>
-                                <br/>
-                                <div class="text-muted">Date of Death</div>
-                                <div>{{deceased}}</div>
-                                <br/>
-                                <div class="text-muted">Other Insurance</div>
-                                {{#each insurance}}
-                                <div>{{companyName}}</div>
-                                {{/each}}
-                                <br/>
-                                <!-- this element has no VPR representation -->
-                                <div class="text-muted">Co-Pay</div>
-                                <div></div>
-                                <br/>
-                                <div class="text-muted">Smoking Status</div>
-                                <div>{{smokingStatus}}</div>
+                            <div class="row">
+                                <div class="col-sm-10 patient-data">
+                                    <span id="patientDemographic-gender-label" class="text-muted">Gender:</span><span id="patientDemographic-patientInfo-gender"> {{genderName}}</span>
+                                </div>
+                                <div class="col-sm-2 text-right">
+                                    {{#if useCcow}}
+                                    <span id="ccowStatus" aria-hidden="true">
+                                        {{#if ccowConnected}}<i class="fa fa-chain"></i>{{else}}<i class="fa fa-chain-broken"></i>{{/if}}
+                                    </span>
+                                    {{/if}}
+                                    <i class="fa fa-caret-right text-muted" aria-hidden="true"></i>
+                                </div>
                             </div>
                         </div>
-                        {{#if useCcow}}
-                                {{#compare ccowStatus 'Connected'}}
-                                    <h4>Patient Context</h4>
-                                    <div id="ccowActions">
-                                        <button id="leaveContext" class="btn btn-default">Leave Context</button>
-                                    </div>
-                                {{/compare}}
-                                {{#compare ccowStatus 'Suspended'}}
-                                    <h4>Patient Context</h4>
-                                    <div id="ccowActions">
-                                        <button id="joinContext" class="btn btn-default">Rejoin Context</button>
-                                    </div>
-                                {{/compare}}
-                       {{/if}}
-                   </div>
+                    </div>
                 </div>
-            </div>
+                <div class="dropdown-menu well well-sm patient-info-dropdown" role="menu" aria-labelledby="patientDemographic-patientInfo-detail">
+                    <div role="presentation">
+                        <div role="menuitem" tabindex="0">
+                            <div id="patient-header-demographic-details" class="container-fluid"></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
-        <div id="patientDemographic-cwad" class="col-md-1 borderRight">
-            <h6>Postings</h6>
-
-            <span class="cwadfToolTip" data-toggle="tooltip" data-html="true" data-placement="bottom" title="Crisis Notes">
-            {{#if crisisNotes}}
-                <span class="label label-danger cwadLabel" data-cwadIdentifier="C" aria-label="Crisis Notes" tabindex="0">C</span>
-            {{else}}
+        <div id="patientDemographic-cwad">
+            <h4 tooltip-data-key='postings'>Postings</h4>
+            <span class="cwadfToolTip" data-toggle="tooltip" data-html="true" data-placement="left" title="Crisis Notes">
+                {{#if crisisNotes}}
+                <span class="label label-danger cwadLabel" data-cwadIdentifier="C" aria-expanded="false" aria-label="Crisis Notes button, 1 of 5, press enter for details," role="button" tabindex="0">C</span>
+                {{else}}
                 <span class="label label-default cwadLabel" data-cwadIdentifier="disabled">C</span>
-            {{/if}}
+                {{/if}}
             </span>
-
             <span class="cwadfToolTip" data-toggle="tooltip" data-html="true" data-placement="bottom" title="Warnings">
-            {{#if flags}}
-                <span class="label label-danger cwadLabel" data-cwadIdentifier="W" aria-label="Warnings" tabindex="0">W</span>
-            {{else}}
+                {{#if flags}}
+                <span class="label label-danger cwadLabel" data-cwadIdentifier="W" aria-expanded="false" aria-label="Warnings button, 2 of 5, press enter for details," role="button" tabindex="0">W</span>
+                {{else}}
                 <span class="label label-default cwadLabel" data-cwadIdentifier="disabled">W</span>
-            {{/if}}
+                {{/if}}
             </span>
-
-            <span class="cwadfToolTip" data-toggle="tooltip" data-html="true" data-placement="bottom" title="Allergies">
-            {{#if allergies}}
-                <span class="label label-danger cwadLabel" data-cwadIdentifier="A" aria-label="Allergies" tabindex="0">A</span>
-            {{else}}
+            <span class="cwadfToolTip" data-toggle="tooltip" data-html="true" data-placement="top" title="Allergies">
+                {{#if allergies}}
+                <span class="label label-danger cwadLabel" data-cwadIdentifier="A" aria-expanded="false" aria-label="Allergies button, 3 of 5, press enter for details," role="button" tabindex="0">A</span>
+                {{else}}
                 <span class="label label-default cwadLabel" data-cwadIdentifier="disabled">A</span>
-            {{/if}}
+                {{/if}}
             </span>
-
             <span class="cwadfToolTip" data-toggle="tooltip" data-html="true" data-placement="bottom" title="Directives">
-            {{#if directives}}
-                <span class="label label-danger cwadLabel" data-cwadIdentifier="D" aria-label="Directives"tabindex="0">D</span>
-            {{else}}
+                {{#if directives}}
+                <span class="label label-danger cwadLabel" data-cwadIdentifier="D" aria-expanded="false" aria-label="Directives button, 4 of 5, press enter for details," role="button" tabindex="0">D</span>
+                {{else}}
                 <span class="label label-default cwadLabel" data-cwadIdentifier="disabled">D</span>
-            {{/if}}
+                {{/if}}
             </span>
-
-            <span class="cwadfToolTip" data-toggle="tooltip" data-html="true" data-placement="bottom" title="Patient Flags">
-            {{#if patientflags}}
-                <span class="label label-danger cwadLabel" data-cwadIdentifier="F" aria-label="Patient Flags" tabindex="0">F</span>
-            {{else}}
+            <span class="cwadfToolTip" data-toggle="tooltip" data-html="true" data-placement="right" title="Patient Flags">
+                {{#if patientflags}}
+                <span class="label label-danger cwadLabel" data-cwadIdentifier="F" aria-expanded="false" aria-label="Patient Flags button, 5 of 5, press enter for details," role="button" tabindex="0">F</span>
+                {{else}}
                 <span class="label label-default cwadLabel" data-cwadIdentifier="disabled">F</span>
-            {{/if}}
+                {{/if}}
             </span>
             <div id="cwad-details" class="well well-sm hidden" data-current-cwad="none"></div>
         </div>
-        {{#hasPermission 'patient-visit'}}
-        <div id="patientDemographic-visitInfo" class="col-md-2 borderRight">
-            <div class="row" type="button" id="setVisitContextBtn" tabindex="0">
-                <div class="col-md-12">
-                    <i class="fa fa-map-marker pull-right text-muted"></i>
-                    <h6>Visit Information</h6>
+        {{#hasPermission 'edit-patient-visit'}}
+        <div id="patientDemographic-visitInfo">
+            <div type="button" id="setVisitContextBtn" tabindex="0" title="Press enter to edit visit information">
+                <div>
+                    <i class="fa fa-map-marker text-muted" aria-hidden="true"></i>
+                    <h4>Current Encounter</h4>
                     <div>
-                        <span class="text-muted">Location:</span> {{ifnull visit.locationDisplayName 'No visit set'}}
+                        <span class="text-muted">Location:</span>
+                        <span class="visit-info">{{ifnull visit.locationDisplayName 'No visit set'}}</span>
                     </div>
                     <div>
-                        <span class="text-muted">Provider:</span> {{ifnull visit.selectedProvider.displayName 'unassigned'}}
+                        <span class="text-muted">Provider:</span>
+                        <span class="visit-info">{{ifnull visit.selectedProvider.name 'unassigned'}}</span>
                     </div>
                 </div>
             </div>
         </div>
         {{/hasPermission}}
-        <div id="patientDemographic-providerInfo" class="col-md-3 dropdown">
-            <div class="row" role="button" data-toggle="dropdown" tabindex="0" id="patientDemographic-providerInfoSummary">
-                <div class="col-md-12">
-                    <i class="fa fa-caret-down pull-right text-muted"></i>
-                    <h6>Care Team Information</h6>
-                    <div>
-                        <span class="text-muted">Primary Care Team:</span> {{ifnull teamInfo.team.name 'unassigned'}}
-                    </div>
-                    <div>
-                        <span class="text-muted">Attending Provider:</span> {{ifnull teamInfo.attendingProvider.name 'unassigned'}}
+        <div id="patientDemographic-providerInfo" class="dropdown">
+            <div data-toggle="dropdown" class="providerInfo-container">
+                <div role="button" tabindex="0" id="patientDemographic-providerInfoSummary" title="Press enter to display extended provider information">
+                    <h4 class="sr-only">Basic provider information</h4>
+                    <div class="provider-info-initial-data">
+                        <div class="primaryProvider-summary">
+                            <div id="primaryCareTeam">
+                                <span class="text-muted">Primary Care:</span> {{toTitleCase teamInfo.team.name true 'Unassigned'}}
+                            </div>
+                            <div id="pimaryCareProviders">{{toTitleCase teamInfo.primaryProvider.name true 'Unassigned'}} / {{toTitleCase teamInfo.associateProvider.name true 'Unassigned'}}</div>
+                            <div id="primaryCarePhone">{{formatPhone teamInfo.team.phone 'Unassigned'}}</div>
+                        </div>
+                        {{#if inPatient}}
+                        <div class="inpatient" id="inpatientProviders">
+                            <div id="inpatientHeading">
+                                <span class="inpatientAttending-summary"><span class="text-muted">Inpatient Attending / Provider:</span></span>
+                            </div>
+                            <div>{{toTitleCase teamInfo.attendingProvider.name true 'Unassigned'}} / {{toTitleCase teamInfo.inpatientProvider.name true 'Unassigned'}}</div>
+                            <div></div>
+                        </div>
+                        {{/if}} {{#if hasMhInfo}}
+                        <div class="mhTreatment-summary row-display border-top-thin">
+                            <div id="mhTeam">
+                                <span class="text-muted">Mental Health:</span> {{toTitleCase teamInfo.mhCoordinator.mhTeam true 'Unassigned'}}
+                            </div>
+                            <div id="mhProvider">{{toTitleCase teamInfo.mhCoordinator.name true 'Unassigned'}}</div>
+                            <div></div>
+                        </div>
+                        {{/if}}
                     </div>
                 </div>
+                <i class="fa fa-caret-right text-muted"></i>
             </div>
-            <div class="dropdown-menu well well-sm patient-info-dropdown" role="menu" aria-labelledby="patientDemographic-providerInfoSummary">
-                <div role="presentation">
+            <div class="dropdown-menu well well-sm patient-info-dropdown" aria-labelledby="patientDemographic-providerInfoSummary">
+                <form role="presentation">
                     <div class="container-fluid" tabindex="0" role="menuitem">
                         <div class="row">
-                            <div class="col-xs-12">
-                                <h5>Care Team Information</h5>
-                            </div>
-                            <div class="span5 col-md-12">
-                                <!--<div class="text-muted">Location</div>
-                                <div>{{#if visit.locationDisplayName}} {{visit.locationDisplayName}} {{else}}No visit set {{/if}}</div>-->
-                                <div class="col-md-6"><span class="text-muted">Primary Care Team: </span> {{ifnull teamInfo.team.name 'unassigned'}}</div>
-                                <div class="col-md-6"><span class="text-muted">Phone:</span> {{ifnull teamInfo.team.phone 'not specified'}}</div>
-                                <br/><br/>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <table class="table table-condensed backgrid renderable">
+                            <table class="table renderable">
+                                <caption class="sr-only">Extended provider information</caption>
                                 <thead>
                                     <tr>
-                                        <th class="renderable">Provider</th>
-                                        <th class="renderable">Name</th>
-                                        <th class="renderable">Analog Pager</th>
-                                        <th class="renderable">Digital Pager</th>
-                                        <th class="renderable">Office Phone</th>
+                                        <th class="renderable" scope="column">Provider Title</th>
+                                        <th class="renderable" scope="column">Name</th>
+                                        <th class="renderable" scope="column">Analog Pager</th>
+                                        <th class="renderable" scope="column">Digital Pager</th>
+                                        <th class="renderable" scope="column">Office Phone</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td class="renderable">Primary</td>
-                                        <td class="renderable">{{ifnull teamInfo.primaryProvider.name  'unassigned'}}</td>
-                                        <td class="renderable">{{ifnull teamInfo.primaryProvider.analogPager 'not specified'}}</td>
-                                        <td class="renderable">{{ifnull teamInfo.primaryProvider.digitalPager 'not specified'}}</td>
-                                        <td class="renderable">{{ifnull teamInfo.primaryProvider.officePhone 'not specified'}}</td>
+                                    <tr class="primary-provider">
+                                        <td class="renderable">Primary Care Provider</td>
+                                        <td class="renderable">{{toTitleCase teamInfo.primaryProvider.name true 'Unassigned'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.primaryProvider.analogPager 'not specified'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.primaryProvider.digitalPager 'not specified'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.primaryProvider.officePhone 'not specified'}}</td>
                                     </tr>
-                                    <tr>
-                                        <td class="renderable">Attending</td>
-                                        <td class="renderable">{{ifnull teamInfo.attendingProvider.name  'unassigned'}}</td>
-                                        <td class="renderable">{{ifnull teamInfo.attendingProvider.analogPager 'not specified'}}</td>
-                                        <td class="renderable">{{ifnull teamInfo.attendingProvider.digitalPager 'not specified'}}</td>
-                                        <td class="renderable">{{ifnull teamInfo.attendingProvider.officePhone 'not specified'}}</td>
+                                    <tr class="primary-assoc-provider">
+                                        <td class="renderable">Primary Care Assoc Provider</td>
+                                        <td class="renderable">{{toTitleCase teamInfo.associateProvider.name true 'Unassigned'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.associateProvider.analogPager 'not specified'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.associateProvider.digitalPager 'not specified'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.associateProvider.officePhone 'not specified'}}</td>
                                     </tr>
-                                    <tr>
-                                        <td class="renderable">Inpatient</td>
-                                        <td class="renderable">{{ifnull teamInfo.inpatientProvider.name  'unassigned'}}</td>
-                                        <td class="renderable">{{ifnull teamInfo.inpatientProvider.analogPager 'not specified'}}</td>
-                                        <td class="renderable">{{ifnull teamInfo.inpatientProvider.digitalPager 'not specified'}}</td>
-                                        <td class="renderable">{{ifnull teamInfo.inpatientProvider.officePhone 'not specified'}}</td>
+                                    {{#if inPatient}}
+                                    <tr class="inpatient-attending-provider">
+                                        <td class="renderable">Inpatient Attending Provider</td>
+                                        <td class="renderable">{{toTitleCase teamInfo.attendingProvider.name true 'Unassigned'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.attendingProvider.analogPager 'not specified'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.attendingProvider.digitalPager 'not specified'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.attendingProvider.officePhone 'not specified'}}</td>
+                                    </tr>
+                                    <tr class="inpatient-provider">
+                                        <td class="renderable">Inpatient Provider</td>
+                                        <td class="renderable">{{toTitleCase teamInfo.inpatientProvider.name true 'Unassigned'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.inpatientProvider.analogPager 'not specified'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.inpatientProvider.digitalPager 'not specified'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.inpatientProvider.officePhone 'not specified'}}</td>
+                                    </tr>
+                                    {{/if}}
+                                    <tr class="mh-treatment-team">
+                                        <td class="renderable">MH Treatment Team</td>
+                                        <td class="renderable">{{toTitleCase teamInfo.mhCoordinator.mhTeam true 'Unassigned'}}</td>
+                                        <!-- Mh teams don't have pagers-->
+                                        <td class="renderable">not specified</td>
+                                        <td class="renderable">not specified</td>
+                                        <td class="renderable">{{formatPhone teamInfo.mhCoordinator.mhTeamOfficePhone 'not specified'}}</td>
+                                    </tr>
+                                    <tr class="mh-coordinator">
+                                        <td class="renderable">MH Treatment Coordinator</td>
+                                        <td class="renderable">{{toTitleCase teamInfo.mhCoordinator.name true 'Unassigned'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.mhCoordinator.analogPager 'not specified'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.mhCoordinator.digitalPager 'not specified'}}</td>
+                                        <td class="renderable">{{formatPhone teamInfo.mhCoordinator.officePhone 'not specified'}}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
+                </form>
+            </div>
+        </div>
+        {{#if isInVista}} 
+        {{#hasPermission 'add-patient-problem|add-patient-allergy|add-patient-vital'}}
+        <div id="patientDemographic-newObservation">
+            <button id="new-observation" type="button" class="btn patient-header-button" data-toggle="dropdown" title="Press enter to open observations panel, press enter again to close it">
+                <i class="fa fa-plus-circle"></i> Observation
+            </button>
+            <div class="dropdown-menu new-order-dropdown">
+                <div id="sidebar-wrapper">
+                    <ul class="sidebar-nav">
+                        <li class="panel-close">
+                            <div class="toggle" data-toggle="collapse" data-target="#toggle" aria-expanded="false" aria-controls="toggle">
+                                <i class="fa fa-remove"></i>
+                            </div>
+                        </li>
+                        <div class="clearfix"></div>
+                        {{#hasPermission 'add-patient-problem'}}
+                        <li type="button" id="addActiveProblem" class="applet-add-button" tabindex="0" title="Add Item">
+                            <div class="center-block text-center panel-title">Active Problem</div>
+                            <span class="fa fa-frown-o">
+                                <span class="sr-only">Add Active Problem</span>
+                            </span>
+                        </li>
+                        {{/hasPermission}} {{#hasPermission 'add-patient-allergy'}}
+                        <li type="button" id="addAllergy" class="applet-add-button" tabindex="0" title="Add Item">
+                            <div class="center-block text-center panel-title">Allergy</div>
+                            <span class="fa fa-pagelines">
+                                <span class="sr-only">Add Allergy</span>
+                            </span>
+                        </li>
+                        {{/hasPermission}} {{#hasPermission 'add-patient-vital'}}
+                        <li type="button" id="addVitals" class="applet-add-button" tabindex="0" title="Add Item">
+                            <div class="center-block text-center panel-title">Vitals</div>
+                            <span class="fa fa-heart">
+                                <span class="sr-only">Add Vitals</span>
+                            </span>
+                        </li>
+                        {{/hasPermission}}
+                        <li type="button" id="addSignature" class="applet-add-button" tabindex="0" title="Add Signature">
+                            <div class="center-block text-center panel-title">Sign</div>
+                            <span class="fa fa-edit">
+                                <span class="sr-only">Add Signature</span>
+                            </span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
-        <div id="patientDemographic-btn" class="col-md-2">
-            <!--<div id="new-order" type="button" class="btn" data-toggle="dropdown">
-                + New Order
-            </div>-->
-            <div class="dropdown-menu new-order-dropdown">
-                    <div id="sidebar-wrapper">
-                        <ul class="sidebar-nav">
-                            <li class="panel-close">
-                                <div class="toggle" data-toggle="collapse" data-target="#toggle" aria-expanded="false" aria-controls="toggle">
-                                <i class="fa fa-remove"></i>
-                                </div>
-                            </li>
-                                <div style="clear:both;"></div>
-                            <li type="button" class="applet-add-button" tabindex="0" title="Add Item">
-                                    Inpatient Medication
-                            </li>
-                            <li type="button" onlick="addAllergy" id="addAllergy" class="applet-add-button" tabindex="0" title="Add Item">
-                                    Outpatient Medication
-                            </li>
-                            <li type="button" class="applet-add-button" tabindex="0" title="Add Item">
-                                    Imaging
-                            </li>
-                            <li type="button" class="applet-add-button" tabindex="0" title="Add Item">
-                                    Lab
-                            </li>
-                        </ul>
-                    </div>
+        {{/hasPermission}}
+        <div id="patientDemographic-notes" class="dropdown">
+            <button id="notes-list-btn" type="button" class="btn patient-header-button" data-toggle="dropdown" title="Press enter to open notes panel, press enter again to close it">
+                Notes
+            </button>
+            <div id="notes-tray-dropdown-menu" class="dropdown-menu notes-slider">
+                <form id="notes-tray" tabIndex="1" class="note-form-height" data-toggle="popover"></form>
             </div>
         </div>
-        <div id="patientDemographic-btn" class="col-md-2">
-            <div id="new-observation" type="button" class="btn" data-toggle="dropdown">
-            + New Observation
-            </div>
-            <div class="dropdown-menu new-order-dropdown">
-                    <div id="sidebar-wrapper">
-                        <ul class="sidebar-nav">
-                            <li class="panel-close">
-                               <div class="toggle" data-toggle="collapse" data-target="#toggle" aria-expanded="false" aria-controls="toggle">
-                                <i class="fa fa-remove"></i>
-                                </div>
-                            </li>
-                                <div style="clear:both;"></div>
-                            {{#hasPermission 'add-patient-problem'}}
-                            <li type="button" id="addActiveProblem" class="applet-add-button" tabindex="0" title="Add Item">
-                                            <div class="center-block text-center panel-title">Active Problem</div>
-                                            <span class="fa fa-frown-o">
-                                            <span class="sr-only">Add Active Problem</span>
-                                            </span>
-                            </li>
-                            {{/hasPermission}}
-                            {{#hasPermission 'add-patient-allergy'}}
-                            <li type="button" id="addAllergy" class="applet-add-button" tabindex="0" title="Add Item">
-                                    <div class="center-block text-center panel-title">Allergy</div>
-                                            <span class="fa fa-pagelines">
-                                            <span class="sr-only">Add Allergy</span>
-                                            </span>
-                            </li>
-                            {{/hasPermission}}
-
-                            <!--<li type="button" class="applet-add-button" tabindex="0" title="Add Item">
-                                    <div class="center-block text-center panel-title">Non-VA Med</div>
-                                            <span class="fa fa-cog">
-                                            <span class="sr-only">Add Non-VA Med</span>
-                                            </span>
-                            </li>-->
-                            {{#hasPermission 'add-patient-vital'}}
-                            <li type="button" id="addVitals" class="applet-add-button" tabindex="0" title="Add Item">
-                                    <div class="center-block text-center panel-title">Vitals</div>
-                                            <span class="fa fa-heart">
-                                            <span class="sr-only">Add Vitals</span>
-                                            </span>
-                            </li>
-                            {{/hasPermission}}
-                            <!--<li type="button" class="applet-add-button" tabindex="0" title="Add Item">
-                                    Smoking Status
-                            </li>-->
-                        </ul>
-                    </div>
-            </div>
-
+        {{/if}}
+        <!--
+        <div id="patientDemographic-tasks" class="flex-stretch">
+            <button id="notes-list-btn" type="button" class="btn patient-header-button">
+                Tasks
+            </button>
         </div>
-        
+        -->
     </div>
 </div>

@@ -1,5 +1,5 @@
 /*jslint node: true, nomen: true, unparam: true */
-/*global jquery, $, _, define, Marionette, jqm, describe, it, expect, beforeEach, spyOn */
+/*global jquery, $, _, define, Marionette, describe, it, expect, beforeEach, spyOn */
 
 'use strict';
 

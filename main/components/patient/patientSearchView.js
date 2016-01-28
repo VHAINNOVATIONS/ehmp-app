@@ -1,22 +1,17 @@
-var dependencies = [
+define([
     "backbone",
     "marionette",
     "underscore",
     "hbs!main/components/patient/patientSearchResultTemplate",
     "hbs!main/components/patient/patientSearchTemplate",
-    "main/ADK"
-];
-
-define(dependencies, onResolveDependencies);
-
-
-function onResolveDependencies(Backbone, Marionette, _, PatientSearchResultTemplate, PatientSearchTemplate, ADK) {
+    "api/Messaging",
+    "api/ResourceService",
+    "main/Utils"
+], function(Backbone, Marionette, _, PatientSearchResultTemplate, PatientSearchTemplate, Messaging, ResourceService, Utils) {
+    'use strict';
 
     var PatientSearchResultView = Backbone.Marionette.ItemView.extend({
         tagName: "a",
-        attributes: {
-            "href": "javascript:void(0)"
-        },
         className: "list-group-item row-layout",
         template: PatientSearchResultTemplate,
         events: {
@@ -24,8 +19,10 @@ function onResolveDependencies(Backbone, Marionette, _, PatientSearchResultTempl
         },
 
         selectPatient: function(e) {
+            e.preventDefault();
+            e.stopPropigation();
             var patient = this.model;
-            ADK.Messaging.trigger('patient:selected', patient);
+            Messaging.trigger('patient:selected', patient);
             $("a.active").removeClass('active');
             $(event.currentTarget).addClass('active');
         }
@@ -65,7 +62,7 @@ function onResolveDependencies(Backbone, Marionette, _, PatientSearchResultTempl
                 },
                 parse: function(response) {
 
-                    //response.ageYears = ADK.utils.getAge(response.birthDate);
+                    //response.ageYears = Utils.getAge(response.birthDate);
 
                     return response;
                 }
@@ -74,7 +71,7 @@ function onResolveDependencies(Backbone, Marionette, _, PatientSearchResultTempl
             searchOptions.resourceTitle = 'patient-search-full-name';
             searchOptions.viewModel = viewModel;
             searchOptions.criteria = criteria;
-            var patients = ADK.ResourceService.fetchCollection(searchOptions);
+            var patients = ResourceService.fetchCollection(searchOptions);
 
             var patientsView = new PatientSearchResultsView({
                 collection: patients
@@ -84,4 +81,4 @@ function onResolveDependencies(Backbone, Marionette, _, PatientSearchResultTempl
     });
 
     return AppletLayoutView;
-}
+});

@@ -1,12 +1,8 @@
-var dependencies = [
+define([
     'backbone',
     'backgrid',
     "main/backgrid/extensions/headerCell"
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone, Backgrid, HeaderCell) {
+], function(Backbone, Backgrid, HeaderCell) {
 
     _.each(["groupable"], function (key) {
         Backgrid.Column.prototype[key] = function () {
@@ -54,4 +50,4 @@ function onResolveDependencies(Backbone, Backgrid, HeaderCell) {
 
     return GroupByHeader;
 
-}
+});

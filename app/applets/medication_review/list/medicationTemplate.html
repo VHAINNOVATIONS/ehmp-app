@@ -12,7 +12,7 @@
                         <span id="summary_{{detailId}}" class="capitalize" tabindex="">{{name}}</span>
                         &nbsp;
                         <span class="scheduleStyleColor">
-                            {{dose}} {{dosagesUnits}} {{routeName}} {{scheduleName}}
+                            {{#if dose}}{{dose}} {{dosagesUnits}} {{else}} {{instructions}} {{/if}} {{routeName}} {{scheduleName}}
                         </span>
                         {{#if activeCount}}
                         <span class="activeMedCount">&nbsp;&nbsp; {{activeCount}} Active Orders</span>{{/if}} {{#if pendingCount}}

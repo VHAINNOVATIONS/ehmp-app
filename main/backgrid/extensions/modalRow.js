@@ -1,11 +1,7 @@
-var dependencies = [
+define([
     'backbone',
     'backgrid'
-];
-
-define(dependencies, onResolveDependencies);
-
-function onResolveDependencies(Backbone) {
+], function(Backbone) {
     'use strict';
     var ModelRow = Backgrid.Row.extend({
         className: "selectable",
@@ -30,4 +26,4 @@ function onResolveDependencies(Backbone) {
         }
     });
     return ModelRow;
-}
+});
